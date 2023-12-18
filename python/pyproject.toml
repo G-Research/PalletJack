@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=55.0", "Cython>=3", "pyarrow>=6"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "palletjack"
+version = "0.0.5"
+authors = [
+  { name="Marcin Krystianc", email="marcin.krystianc@gmail.com" },
+]
+description = "Faster parquet metadata reading"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "pyarrow>=6"
+]
+
+[tool.setuptools.packages.find]
+include = ['palletjack*']
+
+[tool.setuptools.package-data]
+"*" = ["*.pxd", "*.h", "*.pyx"]
+
+[project.urls]
+Homepage = "https://github.com/marcin-krystianc/PalletJack"
+Issues = "https://github.com/marcin-krystianc/PalletJack/issues"
