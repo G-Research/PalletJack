@@ -4,52 +4,52 @@
 {
     "distutils": {
         "depends": [
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/numpy/core/include/numpy/halffloat.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/api.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/array/concatenate.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/builder.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/c/abi.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/c/bridge.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/compute/api.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/compute/expression.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/config.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/csv/api.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/extension/fixed_shape_tensor.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/extension_type.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/io/api.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/ipc/api.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/json/options.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/json/reader.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/api.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/arrow_to_pandas.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/async.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/benchmark.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/common.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/csv.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/extension_type.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/gdb.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/inference.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/init.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/ipc.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/platform.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/pyarrow.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/python/udf.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/result.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/byte_size.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/cancel.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/compression.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/decimal.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/future.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/io_util.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/iterator.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/key_value_metadata.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/thread_pool.h",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include/arrow/util/value_parsing.h"
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/numpy/core/include/numpy/halffloat.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/api.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/array/concatenate.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/builder.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/c/abi.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/c/bridge.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/compute/api.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/compute/expression.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/config.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/csv/api.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/extension/fixed_shape_tensor.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/extension_type.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/io/api.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/ipc/api.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/json/options.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/json/reader.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/api.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/arrow_to_pandas.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/async.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/benchmark.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/common.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/csv.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/extension_type.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/gdb.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/inference.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/init.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/ipc.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/platform.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/pyarrow.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/python/udf.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/result.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/byte_size.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/cancel.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/compression.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/decimal.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/future.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/io_util.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/iterator.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/key_value_metadata.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/thread_pool.h",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include/arrow/util/value_parsing.h"
         ],
         "include_dirs": [
             ".",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow/include",
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/numpy/core/include"
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow/include",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/numpy/core/include"
         ],
         "language": "c++",
         "libraries": [
@@ -57,7 +57,7 @@
             "parquet"
         ],
         "library_dirs": [
-            "/tmp/build-env-ysslzkho/lib/python3.10/site-packages/pyarrow",
+            "/tmp/build-env-popksx62/lib/python3.10/site-packages/pyarrow",
             "/usr/local/lib"
         ],
         "name": "palletjack.palletjack_cython",
@@ -3145,11 +3145,11 @@ struct __pyx_obj_7pyarrow_3lib_CompressedOutputStream {
  * 
  * cdef class _CRecordBatchWriter(_Weakrefable):             # <<<<<<<<<<<<<<
  *     cdef:
- *         shared_ptr[CRecordBatchWriter] writer
+ *         SharedPtrNoGIL[CRecordBatchWriter] writer
  */
 struct __pyx_obj_7pyarrow_3lib__CRecordBatchWriter {
   struct __pyx_obj_7pyarrow_3lib__Weakrefable __pyx_base;
-  std::shared_ptr< arrow::ipc::RecordBatchWriter>  writer;
+  arrow::py::SharedPtrNoGIL< arrow::ipc::RecordBatchWriter>  writer;
 };
 
 
@@ -3158,11 +3158,11 @@ struct __pyx_obj_7pyarrow_3lib__CRecordBatchWriter {
  * 
  * cdef class RecordBatchReader(_Weakrefable):             # <<<<<<<<<<<<<<
  *     cdef:
- *         shared_ptr[CRecordBatchReader] reader
+ *         SharedPtrNoGIL[CRecordBatchReader] reader
  */
 struct __pyx_obj_7pyarrow_3lib_RecordBatchReader {
   struct __pyx_obj_7pyarrow_3lib__Weakrefable __pyx_base;
-  std::shared_ptr< arrow::RecordBatchReader>  reader;
+  arrow::py::SharedPtrNoGIL< arrow::RecordBatchReader>  reader;
 };
 
 
