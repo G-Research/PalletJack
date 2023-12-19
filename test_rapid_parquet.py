@@ -13,7 +13,7 @@ table = pl.DataFrame(
     data=np.random.randn(rows, columns),
     schema=[f"c{i}" for i in range(columns)]).to_arrow()
 
-pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False)
+pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
 
 # Reading using original metadata
 pr = pq.ParquetReader()
