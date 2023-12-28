@@ -122,7 +122,7 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupMetadata(const char *index_fi
     row_groups = FROM_FILE_ENDIANESS(row_groups);
     if (row_group >= row_groups)
     {
-        auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only " + std::to_string(row_groups) + " are available!";
+        auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(row_groups-1) + " are available!";
         throw std::runtime_error(msg);
     }
 
