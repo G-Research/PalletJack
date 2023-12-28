@@ -5,16 +5,7 @@ import pyarrow.parquet as pq
 from cython.cimports.palletjack import cpalletjack
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr
-
 from libc.stdint cimport uint32_t
-
-# from cython.operator cimport dereference as deref
-# from pyarrow.includes.common cimport *
-# from pyarrow.includes.libarrow cimport *
-# from pyarrow.includes.libarrow_python cimport *
-# from pyarrow.lib cimport Buffer, _Weakrefable
-# from pyarrow.includes.common cimport *
-
 from pyarrow._parquet cimport *
 
 def generate_metadata_index(parquet_path, index_file_path):
