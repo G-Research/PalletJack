@@ -6,5 +6,4 @@ from pyarrow._parquet cimport *
 
 cdef extern from "palletjack.h":
     cdef void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path) nogil except +
-    cdef vector[char] ReadRowGroupMetadata(const char *index_file_path, int row_group) nogil except +
-    cdef shared_ptr[CFileMetaData] ReadRowGroupFileMetadata(const char *index_file_path, uint32_t row_group) nogil except +
+    cdef shared_ptr[CFileMetaData] ReadRowGroupMetadata(const char *index_file_path, uint32_t row_group) nogil except +
