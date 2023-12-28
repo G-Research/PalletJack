@@ -103,7 +103,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     }
 }
 
-std::vector<char> ReadRowGroupMetadata(const std::string& index_file_path, uint32_t row_group)
+std::shared_ptr<parquet::FileMetaData> ReadRowGroupMetadata(const char *index_file_path, uint32_t row_group)
 {
     std::ifstream fs(index_file_path, std::ios::binary);
     fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -141,5 +141,6 @@ std::vector<char> ReadRowGroupMetadata(const std::string& index_file_path, uint3
     fs.seekg(offset, std::ios_base::beg);
     fs.read(&buffer[0], length);
 
-    return buffer;
+    return parquet::FileMetaData::Make(&buffer[0], &length);
 }
+
