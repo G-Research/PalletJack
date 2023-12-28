@@ -12,8 +12,8 @@ def generate_metadata_index(parquet_path, index_file_path):
     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
 
 cpdef read_row_group_metadata(index_file_path, row_group):
-    cdef:
-        shared_ptr[CFileMetaData] c_metadata
+
+    cdef shared_ptr[CFileMetaData] c_metadata
     cdef string encoded_path = index_file_path.encode('utf8')
     cdef uint32_t crow_group = row_group
     with nogil:
