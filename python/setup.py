@@ -75,7 +75,7 @@ setup(
     package_dir={"": "."},
     zip_safe=False,
     ext_modules=extensions,
-    test_suite = 'tests',    
+    test_suite = 'test',
     project_urls={
         "Documentation": "https://github.com/marcin-krystianc/PalletJack",
         "Source": "https://github.com/marcin-krystianc/PalletJack",
