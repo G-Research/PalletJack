@@ -38,7 +38,7 @@ def worker_indexed_metadata():
 
     for r in range(0, rows):
         metadata = pj.read_row_group_metadata(index_path, r)
-     
+
 def worker_org_metadata():
     
     for r in range(0, rows):
