@@ -42,3 +42,5 @@ jobs:
       run: |
         python3 setup.py develop
         pytest
+      env:
+        CYTHONIZE: 1
