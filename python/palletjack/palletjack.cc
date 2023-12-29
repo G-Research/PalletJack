@@ -15,7 +15,7 @@ using arrow::Status;
 
 #define TO_FILE_ENDIANESS(x) (x)
 #define FROM_FILE_ENDIANESS(x) (x)
-const char* HEADER_V1 = "PQT1";
+const char* HEADER_V1 = "PJ_1";
 
 /* File format: (Thrift-encoded metadata stored separately for each row group)
 --------------------------
@@ -50,21 +50,17 @@ const char* HEADER_V1 = "PQT1";
 |   Row group [n-1]      | Thrift data
 --------------------------
 */
-
-
-
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
 {
     std::shared_ptr<arrow::io::ReadableFile> infile;
     PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(parquet_path)));
     auto metadata = parquet::ReadMetaData(infile);
+    uint32_t row_groups = (metadata->num_row_groups());
 
     std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);
+    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
     fs.write(&HEADER_V1[0], strlen(HEADER_V1));
-
-    uint32_t row_groups = (metadata->num_row_groups());
     fs.write((char *)&TO_FILE_ENDIANESS(row_groups), sizeof(row_groups));
-
     auto offset0 = fs.tellp();
 
     // Write placeholders for offset and length
