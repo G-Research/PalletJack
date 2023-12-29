@@ -33,7 +33,6 @@ jobs:
         working-directory: ./python
         run: python -m build
       - name: Build wheels
-        working-directory: ./python
         run: python -m cibuildwheel --output-dir wheelhouse
         # to supply options, put them in 'env', like:
         # env:
