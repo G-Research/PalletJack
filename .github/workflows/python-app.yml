@@ -38,4 +38,4 @@ jobs:
       working-directory: ./python
       run: |
         python3 setup.py develop
-        python3 -m unittest
+        pytest
