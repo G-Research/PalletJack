@@ -46,3 +46,12 @@ jobs:
         pytest
       env:
         CYTHONIZE: 1
+        
+    - name: Build sdist
+      run: |
+        python setup.py build_ext sdist
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: sdist
+        path: ./python/dist/*
