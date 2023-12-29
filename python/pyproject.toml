@@ -1,16 +1,16 @@
 [build-system]
-requires = ["setuptools>=55.0", "Cython>=3", "pyarrow>=6"]
+requires = ["setuptools>=55.0", "Cython>=3", "pyarrow>=12"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "palletjack"
-version = "0.0.6"
+version = "0.0.7"
 authors = [
   { name="Marcin Krystianc", email="marcin.krystianc@gmail.com" },
 ]
 description = "Faster parquet metadata reading"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
