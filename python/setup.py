@@ -56,6 +56,7 @@ extensions = [
         library_dirs = pyarrow.get_library_dirs(),
         libraries=["arrow", "parquet"], 
         language = "c++",
+        extra_compile_args=["-std=c++17"],
     )
 ]
 
@@ -76,7 +77,6 @@ setup(
     zip_safe=False,
     ext_modules=extensions,
     test_suite = 'test',
-    extra_compile_args=["-std=c++17"],
     project_urls={
         "Documentation": "https://github.com/marcin-krystianc/PalletJack",
         "Source": "https://github.com/marcin-krystianc/PalletJack",
