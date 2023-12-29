@@ -32,7 +32,6 @@ jobs:
           pip install -r requirements.txt
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
-        package-dir: ./Python
 
       - name: Build wheels
         working-directory: ./python
