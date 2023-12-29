@@ -11,7 +11,7 @@ chunk_size = 1 # A row group per
 
 class TestPalletJack(unittest.TestCase):
 
-    def test_reading_with_index(self):
+    def test_reading(self):
         
         path = "my.parquet"
         table = pl.DataFrame(
@@ -37,7 +37,7 @@ class TestPalletJack(unittest.TestCase):
             res_data_index = pr.read_row_groups([0], use_threads=False)
             self.assertEqual(res_data_org, res_data_index, f"Row={r}")
 
-    def test_reading_with_invalid_row_group(self):
+    def test_reading_invalid_row_group(self):
         path = "my.parquet"
         table = pl.DataFrame(
             data=np.random.randn(rows, columns),
@@ -53,7 +53,7 @@ class TestPalletJack(unittest.TestCase):
 
         self.assertTrue(f"Requested row_group={rows}, but only 0-{rows-1} are available!" in str(context.exception), context.exception)
 
-    def test_reading_with_invalid_index_file(self):
+    def test_reading_invalid_index_file(self):
         path = "my.parquet"
         table = pl.DataFrame(
             data=np.random.randn(rows, columns),
@@ -66,6 +66,22 @@ class TestPalletJack(unittest.TestCase):
 
         self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
 
+    def test_index_file_binary_compatible(self):
+        path = 'test/data/sample.parquet'
+        expected_index_path = 'test/data/sample.parquet.index'
+        index_path = 'my.parquet.index'
+        pj.generate_metadata_index(path, index_path)
+
+        # Read the expected output
+        with open(expected_index_path, 'rb') as file:
+            expected_output = file.read()
+
+        # Read the expected output
+        with open(index_path, 'rb') as file:
+            actual_output = file.read()
+
+        # Compare the actual output to the expected output
+        self.assertEqual(actual_output, expected_output)
 
 if __name__ == '__main__':
     unittest.main()
