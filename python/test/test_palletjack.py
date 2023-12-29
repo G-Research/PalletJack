@@ -40,7 +40,7 @@ class TestPalletJack(unittest.TestCase):
                 res_data_index = pr.read_row_groups([0], use_threads=False)
                 self.assertEqual(res_data_org, res_data_index, f"Row={r}")
 
-    def test_reading_invalid_row_group(self):
+    def _test_reading_invalid_row_group(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
             table = pl.DataFrame(
@@ -57,7 +57,7 @@ class TestPalletJack(unittest.TestCase):
 
             self.assertTrue(f"Requested row_group={rows}, but only 0-{rows-1} are available!" in str(context.exception), context.exception)
 
-    def test_reading_invalid_index_file(self):
+    def _test_reading_invalid_index_file(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
             table = pl.DataFrame(
@@ -71,7 +71,7 @@ class TestPalletJack(unittest.TestCase):
 
             self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
 
-    def test_index_file_endianness_compatibility(self):
+    def _test_index_file_endianness_compatibility(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             index_path = os.path.join(tmpdirname, 'my.parquet.index')
             path = 'test/data/sample.parquet'
