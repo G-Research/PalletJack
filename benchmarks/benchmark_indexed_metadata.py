@@ -22,20 +22,23 @@ def worker_indexed():
         metadata = pj.read_row_group_metadata(index_path, r)
         pr = pq.ParquetReader()
         pr.open(path, metadata=metadata)
-        
         res_data = pr.read_row_groups([0], column_indices=[0,1,2], use_threads=False)
     
 def worker_pickle():
-    
+
+    pr = pq.ParquetReader()
+    pr.open(path)
+    metadata = pr.metadata
+
     for r in range(0, rows):
         m = pickle.loads(pickle.dumps(metadata))
         {}
     
 def worker_indexed_metadata():
-    
+
     for r in range(0, rows):
         metadata = pj.read_row_group_metadata(index_path, r)
-     
+
 def worker_org_metadata():
     
     for r in range(0, rows):
