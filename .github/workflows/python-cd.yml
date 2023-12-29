@@ -30,7 +30,23 @@ jobs:
           pip install build
           pip install -r requirements.txt
           python setup.py build_ext sdist
-        
+          
+      - name: Validate tag and package version
+        working-directory: ./python
+        shell: pwsh
+        run: |
+
+          if ("${{ github.ref }}" -like "refs/tags/v*") {
+              $tag = "${{ github.ref }}".SubString(11)
+              $expectedFile = "dist/palletjack-.$tag.tar.gz"
+
+              # Check whether the tag and the package version match together
+              if (-not (Test-Path -Path $expectedFile)) {
+                  echo "::error ::Expected file $expectedFile doesn't exist"
+                  exit 1
+              }
+          }  
+
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
         with:
