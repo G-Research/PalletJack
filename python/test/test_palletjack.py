@@ -15,7 +15,7 @@ class TestPalletJack(unittest.TestCase):
 
     def test_reading(self):
         
-        with tempfile.TemporaryDirectory(delete=False) as tmpdirname:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
             table = pl.DataFrame(
                 data=np.random.randn(rows, columns),
