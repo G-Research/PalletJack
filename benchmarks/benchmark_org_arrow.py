@@ -16,6 +16,10 @@ path = "my.parquet"
 
 def worker_pickle():
     
+    pr = pq.ParquetReader()
+    pr.open(path)
+    metadata = pr.metadata
+
     for r in range(0, rows):
         m = pickle.loads(pickle.dumps(metadata))
         {}
