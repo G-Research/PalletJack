@@ -48,6 +48,7 @@ jobs:
         CYTHONIZE: 1
         
     - name: Build sdist
+      working-directory: ./python
       run: |
         python setup.py build_ext sdist
 
