@@ -27,7 +27,7 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.x'
-        cache: 'python-ci'
+        cache: 'pip'
     - run: |
         pip install -r requirements.txt
         pip install flake8 pytest
