@@ -56,6 +56,7 @@ extensions = [
         library_dirs = pyarrow.get_library_dirs(),
         libraries=["arrow", "parquet"], 
         language = "c++",
+        extra_compile_args = ['/std:c++20'] if sys.platform.startswith('win') else ['-std=c++20']
     )
 ]
 
