@@ -38,7 +38,7 @@ jobs:
 
           if ("${{ github.ref }}" -like "refs/tags/v*") {
               $tag = "${{ github.ref }}".SubString(11)
-              $expectedFile = "dist/palletjack-.$tag.tar.gz"
+              $expectedFile = "dist/palletjack-$tag.tar.gz"
 
               # Check whether the tag and the package version match together
               if (-not (Test-Path -Path $expectedFile)) {
