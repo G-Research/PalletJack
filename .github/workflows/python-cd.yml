@@ -30,21 +30,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install build
           pip install -r requirements.txt
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
-        with:
-          package-dir: ./python
-
-      - name: Build wheels
-        working-directory: ./python
+          python setup.py build_ext sdist
+      
+      - name: Build sdist
         run: |
-          python -m build
-          python -m cibuildwheel --output-dir wheelhouse
-        # to supply options, put them in 'env', like:
-        # env:
-        #   CIBW_SOME_OPTION: value
-
-      - uses: actions/upload-artifact@v4
+          python setup.py build_ext sdist  
+        
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
         with:
-          name: cibw-wheels
-          path: ./wheelhouse/*.whl
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: python/dist		  
