@@ -16,8 +16,6 @@ work_items = 200
 path = "my.parquet"
 index_path = path + '.index'
 
-metadata = pj.read_row_group_metadata(index_path, 0)
-
 def worker_indexed():
     
     for r in range(0, rows):

@@ -3,7 +3,7 @@ import os
 import sys
 from codecs import open
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from distutils.extension import Extension
 from setuptools.command.test import test as TestCommand
 from Cython.Build import cythonize
@@ -74,7 +74,8 @@ setup(
     packages=["palletjack"],
     package_dir={"": "."},
     zip_safe=False,
-    ext_modules=extensions,    
+    ext_modules=extensions,
+    test_suite = 'tests',    
     project_urls={
         "Documentation": "https://github.com/marcin-krystianc/PalletJack",
         "Source": "https://github.com/marcin-krystianc/PalletJack",
