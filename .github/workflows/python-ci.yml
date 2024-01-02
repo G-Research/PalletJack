@@ -36,7 +36,13 @@ jobs:
         pip install -r requirements.txt
         pip install cibuildwheel
      
-   
+    - name: Build wheels
+      working-directory: ./python
+      run: python -m cibuildwheel --output-dir wheelhouse
+      # to supply options, put them in 'env', like:
+      # env:
+      #   CIBW_SOME_OPTION: value
+        
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
