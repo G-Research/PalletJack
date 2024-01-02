@@ -34,3 +34,6 @@ include = ['palletjack*']
 [project.urls]
 Homepage = "https://github.com/marcin-krystianc/PalletJack"
 Issues = "https://github.com/marcin-krystianc/PalletJack/issues"
+
+[tool.cibuildwheel.linux]
+repair-wheel-command = "auditwheel repair --exclude libparquet -w {dest_dir} {wheel}"
