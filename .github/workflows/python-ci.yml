@@ -35,13 +35,13 @@ jobs:
         pip install flake8 pytest
         pip install -r requirements.txt
         pip install cibuildwheel
-     
+
     - name: Build wheels
       working-directory: ./python
       run: python -m cibuildwheel --output-dir wheelhouse
       # to supply options, put them in 'env', like:
-        env:
-          CIBW_BUILD : cp39-manylinux_x86_64
+      env:
+        CIBW_BUILD : cp39-manylinux_x86_64
         
     - name: Lint with flake8
       run: |
