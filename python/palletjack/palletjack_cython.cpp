@@ -71,9 +71,6 @@
             "/usr/local/lib/python3.11/dist-packages/pyarrow"
         ],
         "name": "palletjack.palletjack_cython",
-        "runtime_library_dirs": [
-            "/usr/local/lib/python3.11/dist-packages/pyarrow"
-        ],
         "sources": [
             "palletjack/palletjack_cython.pyx",
             "palletjack/palletjack.cc"
