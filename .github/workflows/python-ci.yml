@@ -37,6 +37,7 @@ jobs:
         pip install cibuildwheel
 
     - name: Build wheels
+      if: runner.os == 'Linux'
       working-directory: ./python
       run: python -m cibuildwheel --output-dir wheelhouse
       # to supply options, put them in 'env', like:
