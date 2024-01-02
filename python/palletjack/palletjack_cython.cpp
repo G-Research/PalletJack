@@ -54,6 +54,9 @@
             "/usr/local/lib/python3.11/dist-packages/pyarrow/include/parquet/encryption/encryption.h",
             "/usr/local/lib/python3.11/dist-packages/pyarrow/include/parquet/properties.h"
         ],
+        "extra_compile_args": [
+            "-std=c++17"
+        ],
         "include_dirs": [
             ".",
             "/usr/local/lib/python3.11/dist-packages/pyarrow/include",
