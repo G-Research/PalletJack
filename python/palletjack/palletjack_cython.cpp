@@ -54,6 +54,9 @@
             "/usr/local/lib/python3.11/dist-packages/pyarrow/include/parquet/encryption/encryption.h",
             "/usr/local/lib/python3.11/dist-packages/pyarrow/include/parquet/properties.h"
         ],
+        "extra_compile_args": [
+            "-std=c++17"
+        ],
         "include_dirs": [
             ".",
             "/usr/local/lib/python3.11/dist-packages/pyarrow/include",
@@ -68,6 +71,9 @@
             "/usr/local/lib/python3.11/dist-packages/pyarrow"
         ],
         "name": "palletjack.palletjack_cython",
+        "runtime_library_dirs": [
+            "/usr/local/lib/python3.11/dist-packages/pyarrow"
+        ],
         "sources": [
             "palletjack/palletjack_cython.pyx",
             "palletjack/palletjack.cc"
