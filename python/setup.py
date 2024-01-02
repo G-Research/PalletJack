@@ -54,7 +54,7 @@ extensions = [
     Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc"],
         include_dirs = [pyarrow.get_include(), numpy.get_include()],  
         library_dirs = pyarrow.get_library_dirs(),
-        runtime_library_dirs = pyarrow.get_library_dirs(),
+        # runtime_library_dirs = pyarrow.get_library_dirs(), # doesn't work on Windows
         libraries=["arrow", "parquet"], 
         language = "c++",
         extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
