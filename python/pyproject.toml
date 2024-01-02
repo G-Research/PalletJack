@@ -2,7 +2,7 @@
 requires = [
   "setuptools>=55.0",
   "Cython>=3",
-  "pyarrow>=10,<14",
+  "pyarrow==14.0.2",
 ]
 
 build-backend = "setuptools.build_meta"
