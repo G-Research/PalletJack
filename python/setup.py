@@ -61,7 +61,6 @@ extensions = [
 ]
 
 CYTHONIZE = bool(int(os.getenv("CYTHONIZE", 0))) and cythonize is not None
-CYTHONIZE = 1
 
 if CYTHONIZE:
     compiler_directives = {"language_level": 3, "embedsignature": True}
