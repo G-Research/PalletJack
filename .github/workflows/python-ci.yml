@@ -45,8 +45,6 @@ jobs:
       run: |
         python3 setup.py develop
         pytest
-      env:
-        CYTHONIZE: 1
         
     - name: Build sdist
       working-directory: ./python
