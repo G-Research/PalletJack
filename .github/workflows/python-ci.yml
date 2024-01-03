@@ -62,7 +62,7 @@ jobs:
         CIBW_ENVIRONMENT: CYTHONIZE=1
         CIBW_BUILD_VERBOSITY: 1
         # Disable unsupported builds
-        CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32" 
+        CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32 *macosx_x86_64" 
         # CIBW_BUILD: "cp3*-manylinux_x86_64"
 
     - uses: actions/upload-artifact@v4
