@@ -10,51 +10,88 @@
 name: Python-cd
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
-  deploy:
+  build:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      working-directory: ./python
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        pip install -r requirements.txt
+        pip install cibuildwheel
+
+    - name: Build sdist
+      working-directory: ./python
+      run: |
+        python setup.py build_ext sdist
+
+    - name: Build wheels
+      working-directory: ./python
+      run: python -m cibuildwheel --output-dir dist
+      # to supply options, put them in 'env', like:
+      env:
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
+        CIBW_ENVIRONMENT: CYTHONIZE=1
+        CIBW_BUILD_VERBOSITY: 1
+        # Disable unsupported builds
+        CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32" 
+        # CIBW_BUILD: "cp3*-manylinux_x86_64"
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: dist-${{ matrix.os }}
+        path: ./python/dist/*
+
+  publish:
+    if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-          cache: 'pip'
-      - name: Build sdist
-        working-directory: ./python
-        run: |
-          python -m pip install --upgrade pip
-          pip install build cibuildwheel
-          pip install -r requirements.txt
-          python setup.py build_ext sdist
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD : cp39-manylinux_x86_64
-          CIBW_REPAIR_WHEEL_COMMAND: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
-          CIBW_ENVIRONMENT: CYTHONIZE=1
-          CIBW_BUILD_VERBOSITY: 1
-          
-      - name: Validate tag and package version
+      - name: Validate tag
         working-directory: ./python
         shell: pwsh
         run: |
+          $tag = "${{ github.ref }}".SubString(11)
+          $expectedFile = "dist/palletjack-$tag.tar.gz"
 
-          if ("${{ github.ref }}" -like "refs/tags/v*") {
-              $tag = "${{ github.ref }}".SubString(11)
-              $expectedFile = "dist/palletjack-$tag.tar.gz"
+          # Check whether the tag and the package version match together
+          if (-not (Test-Path -Path $expectedFile)) {
+              echo "::error ::Expected file $expectedFile doesn't exist"
+              exit 1
+          }
 
-              # Check whether the tag and the package version match together
-              if (-not (Test-Path -Path $expectedFile)) {
-                  echo "::error ::Expected file $expectedFile doesn't exist"
-                  exit 1
-              }
-          }  
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+      - name: Display structure of downloaded files
+        run: ls -R dist
 
-      - name: Publish package
+     - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: python/dist		  
+          packages-dir: dist	
