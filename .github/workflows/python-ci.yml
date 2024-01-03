@@ -62,8 +62,10 @@ jobs:
         CIBW_REPAIR_WHEEL_COMMAND: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: CYTHONIZE=1
         CIBW_BUILD_VERBOSITY: 1
+        # Disable building PyPy wheels on all platforms
+        CIBW_SKIP: pp*
 
     - uses: actions/upload-artifact@v4
       with:
-        name: sdist-${{ matrix.os }}
+        name: dist-${{ matrix.os }}
         path: ./python/dist/*
