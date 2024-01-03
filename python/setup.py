@@ -64,7 +64,7 @@ def is_cxx11_abi():
     return True
 
 def get_extension_modules():
-     extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17']
+    extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17']
     if not sys.platform.startswith('win') and not is_cxx11_abi():
         extra_compile_args.append("-D_GLIBCXX_USE_CXX11_ABI=0")
 
