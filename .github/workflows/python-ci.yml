@@ -54,7 +54,7 @@ jobs:
         python setup.py build_ext sdist
 
     - name: Build wheels
-      if: runner.os <> 'macos'
+      if: runner.os -= 'macos'
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
