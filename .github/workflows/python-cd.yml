@@ -78,7 +78,6 @@ jobs:
         run: ls -R dist
 
       - name: Validate tag
-        working-directory: ./python
         shell: pwsh
         run: |
           $tag = "${{ github.ref }}".SubString(11)
