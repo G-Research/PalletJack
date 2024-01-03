@@ -54,7 +54,7 @@ jobs:
         python setup.py build_ext sdist
 
     - name: Build wheels
-      if: runner.os == 'Linux'
+      # if: runner.os == 'Linux'
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
@@ -62,8 +62,8 @@ jobs:
         CIBW_REPAIR_WHEEL_COMMAND: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: CYTHONIZE=1
         CIBW_BUILD_VERBOSITY: 1
-        # Disable building PyPy wheels on all platforms, skip 32-bit builds
-        CIBW_SKIP: "pp* *-manylinux_i686"
+        # CIBW_SKIP: "pp* *-manylinux_i686 *-musllinux_*" # Disable building PyPy wheels on all platforms, skip 32-bit builds
+        CIBW_BUILD: "cp3*-manylinux_x86_64"
 
     - uses: actions/upload-artifact@v4
       with:
