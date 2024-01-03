@@ -54,6 +54,7 @@ jobs:
         python setup.py build_ext sdist
 
     - name: Build wheels
+      if: runner.os <> 'macos'
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
@@ -62,7 +63,7 @@ jobs:
         CIBW_ENVIRONMENT: CYTHONIZE=1
         CIBW_BUILD_VERBOSITY: 1
         # Disable unsupported builds
-        CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32 *macosx_x86_64" 
+        CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32" 
         # CIBW_BUILD: "cp3*-manylinux_x86_64"
 
     - uses: actions/upload-artifact@v4
