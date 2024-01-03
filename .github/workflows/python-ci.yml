@@ -34,7 +34,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install -r requirements.txt
-        pip install cibuildwheel
+        pip install cibuildwheel auditwheel
 
     - name: Lint with flake8
       run: |
