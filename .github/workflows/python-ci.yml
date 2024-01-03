@@ -56,7 +56,7 @@ jobs:
     - name: Build wheels
       if: runner.os == 'Linux'
       working-directory: ./python
-      run: python -m cibuildwheel --output-dir dist --print-build-identifiers
+      run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
       env:
         CIBW_REPAIR_WHEEL_COMMAND: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
