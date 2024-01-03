@@ -62,7 +62,7 @@ jobs:
         name: dist-${{ matrix.os }}
         path: ./python/dist/*
 
-  deploy:
+  publish:
     if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
     needs: build
     runs-on: ubuntu-latest
@@ -89,7 +89,7 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R dist
 
-     - name: Publish to PyPi
+      - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
