@@ -66,6 +66,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+
+      - name: Display structure of downloaded files
+        run: ls -R dist
+
       - name: Validate tag
         working-directory: ./python
         shell: pwsh
@@ -78,15 +89,6 @@ jobs:
               echo "::error ::Expected file $expectedFile doesn't exist"
               exit 1
           }
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: dist-*
-          path: dist
-          merge-multiple: true
-      - name: Display structure of downloaded files
-        run: ls -R dist
 
       - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
