@@ -58,7 +58,7 @@ jobs:
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
       env:
-        CIBW_REPAIR_WHEEL_COMMAND: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: CYTHONIZE=1
         CIBW_BUILD_VERBOSITY: 1
         # Disable unsupported builds
