@@ -62,7 +62,7 @@ jobs:
         name: dist-${{ matrix.os }}
         path: ./python/dist/*
 
-  publish:
+  deploy:
     if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
     needs: build
     runs-on: ubuntu-latest
