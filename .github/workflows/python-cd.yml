@@ -41,7 +41,8 @@ jobs:
         pip install -r requirements.txt
         pip install cibuildwheel
 
-    - name: Build sdist
+    - name: Build sdist (on Linux)
+      if: runner.os == 'linux'
       working-directory: ./python
       run: |
         python setup.py build_ext sdist
