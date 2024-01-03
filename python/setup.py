@@ -75,7 +75,7 @@ def get_extension_modules():
             library_dirs = pyarrow.get_library_dirs(),
             libraries=["arrow", "parquet"], 
             language = "c++",
-            extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
+            extra_compile_args = extra_compile_args,
         )
     ]
 
