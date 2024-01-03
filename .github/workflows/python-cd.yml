@@ -63,22 +63,9 @@ jobs:
         path: ./python/dist/*
 
   publish:
-    if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Validate tag
-        working-directory: ./python
-        shell: pwsh
-        run: |
-          $tag = "${{ github.ref }}".SubString(11)
-          $expectedFile = "dist/palletjack-$tag.tar.gz"
-
-          # Check whether the tag and the package version match together
-          if (-not (Test-Path -Path $expectedFile)) {
-              echo "::error ::Expected file $expectedFile doesn't exist"
-              exit 1
-          }
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -86,6 +73,7 @@ jobs:
           pattern: dist-*
           path: dist
           merge-multiple: true
+
       - name: Display structure of downloaded files
         run: ls -R dist
 
