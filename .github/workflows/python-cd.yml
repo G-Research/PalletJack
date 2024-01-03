@@ -41,7 +41,8 @@ jobs:
         pip install -r requirements.txt
         pip install cibuildwheel
 
-    - name: Build sdist
+    - name: Build sdist (on Linux)
+      if: runner.os == 'linux'
       working-directory: ./python
       run: |
         python setup.py build_ext sdist
@@ -56,7 +57,6 @@ jobs:
         CIBW_BUILD_VERBOSITY: 1
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32" 
-        # CIBW_BUILD: "cp3*-manylinux_x86_64"
 
     - uses: actions/upload-artifact@v4
       with:
@@ -82,7 +82,7 @@ jobs:
           }
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           pattern: dist-*
           path: dist
@@ -90,7 +90,7 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R dist
 
-     - name: Publish to PyPi
+      - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
