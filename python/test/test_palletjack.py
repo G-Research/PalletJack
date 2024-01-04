@@ -76,7 +76,7 @@ class TestPalletJack(unittest.TestCase):
 
             with self.assertRaises(Exception) as context:
                 metadata = pj.read_row_group_metadata(path, rows)
-    
+
             self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
 
     def test_index_file_endianness_compatibility(self):
