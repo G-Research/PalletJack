@@ -11,11 +11,10 @@ name: Python-cd
 
 on:
   push:
-  pull_request:
 
 jobs:
   build:
-
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
