@@ -28,7 +28,7 @@ jobs:
           lscpu | grep Endian &&
           apt-get -y update &&
           DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata &&
-          apt-get -y install python3-pip git cmake &&
+          apt-get -y install python3-pip git cmake libarrow-dev &&
           python3 --version &&
           python3 -c 'import sys; print(sys.byteorder)' &&
           mkdir PalletJack &&
