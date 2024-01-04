@@ -49,44 +49,18 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-def is_cxx11_abi():
-    import pathlib
-
-    import pyarrow.lib
-
-    binary_so = pathlib.Path(pyarrow.lib.__file__).read_bytes()
-
-    # Check for an old CXXABI symbol in the main library. This one is quite stable across all Arrow releases.
-    # arrow::Status::ToString() -> std::string
-    if b"_ZNK5arrow6Status8ToStringEv" in binary_so:
-        return False
-    # Here we can add other symbols to check for if future releases would come with a different API.
-    return True
-
-def get_extension_modules():
-    extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17']
-    if not sys.platform.startswith('win'):
-        if is_cxx11_abi():
-            extra_compile_args.append("-D_GLIBCXX_USE_CXX11_ABI=1")
-        else:
-            extra_compile_args.append("-D_GLIBCXX_USE_CXX11_ABI=0")
-
-    # Define your extension
-    extensions = [
-        Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc"],
-            include_dirs = [pyarrow.get_include(), numpy.get_include()],  
-            library_dirs = pyarrow.get_library_dirs(),
-            libraries=["arrow", "parquet"], 
-            language = "c++",
-            extra_compile_args = extra_compile_args,
-        )
-    ]
-
-    return extensions
+# Define your extension
+extensions = [
+    Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc"],
+        include_dirs = [pyarrow.get_include(), numpy.get_include()],  
+        library_dirs = pyarrow.get_library_dirs(),
+        libraries=["arrow", "parquet"], 
+        language = "c++",
+        extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
+    )
+]
 
 CYTHONIZE = bool(int(os.getenv("CYTHONIZE", 0))) and cythonize is not None
-
-extensions = get_extension_modules()
 
 if CYTHONIZE:
     compiler_directives = {"language_level": 3, "embedsignature": True}
