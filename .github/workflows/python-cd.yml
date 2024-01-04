@@ -53,6 +53,7 @@ jobs:
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.1400 --exclude libparquet.so.1400 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: CYTHONIZE=1
         CIBW_BUILD_VERBOSITY: 3
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32" 
 
