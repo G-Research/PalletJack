@@ -77,7 +77,7 @@ def get_extension_modules():
             include_dirs = [pyarrow.get_include(), numpy.get_include()],  
             library_dirs = pyarrow.get_library_dirs(),
             libraries=["arrow", "parquet"], 
-            language = "c",
+            language = "c++",
             extra_compile_args = extra_compile_args,
         )
     ]
