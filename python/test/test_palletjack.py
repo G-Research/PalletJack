@@ -3,13 +3,27 @@ import tempfile
 
 import palletjack as pj
 import pyarrow.parquet as pq
-import polars as pl
 import numpy as np
+import pyarrow as pa
 import os
 
 rows = 5
 columns = 10
 chunk_size = 1 # A row group per
+
+def get_table():
+    # Generate a random 2D array of floats using NumPy
+    # Each column in the array represents a column in the final table
+    data = np.random.rand(rows, columns)
+
+    # Convert the NumPy array to a list of PyArrow Arrays, one for each column
+    pa_arrays = [pa.array(data[:, i]) for i in range(columns)]
+
+    # Optionally, create column names
+    column_names = [f'column_{i}' for i in range(columns)]
+
+    # Create a PyArrow Table from the Arrays
+    return pa.Table.from_arrays(pa_arrays, names=column_names)
 
 class TestPalletJack(unittest.TestCase):
 
@@ -17,9 +31,7 @@ class TestPalletJack(unittest.TestCase):
         
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
-            table = pl.DataFrame(
-                data=np.random.randn(rows, columns),
-                schema=[f"c{i}" for i in range(columns)]).to_arrow()
+            table = get_table()
 
             pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
 
@@ -43,9 +55,7 @@ class TestPalletJack(unittest.TestCase):
     def test_reading_invalid_row_group(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
-            table = pl.DataFrame(
-                data=np.random.randn(rows, columns),
-                schema=[f"c{i}" for i in range(columns)]).to_arrow()
+            table = get_table()
 
             pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
 
@@ -60,15 +70,13 @@ class TestPalletJack(unittest.TestCase):
     def test_reading_invalid_index_file(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
-            table = pl.DataFrame(
-                data=np.random.randn(rows, columns),
-                schema=[f"c{i}" for i in range(columns)]).to_arrow()
+            table = get_table()
 
             pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
 
             with self.assertRaises(Exception) as context:
                 metadata = pj.read_row_group_metadata(path, rows)
-
+    
             self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
 
     def test_index_file_endianness_compatibility(self):
