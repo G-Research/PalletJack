@@ -69,7 +69,7 @@ def get_extension_modules():
         if is_cxx11_abi():
             extra_compile_args.append("-D_GLIBCXX_USE_CXX11_ABI=1")
         else:
-            extra_compile_args.append("-D_GLIBCXX_USE_CXX11_ABI=1")
+            extra_compile_args.append("-D_GLIBCXX_USE_CXX11_ABI=0")
 
     # Define your extension
     extensions = [
