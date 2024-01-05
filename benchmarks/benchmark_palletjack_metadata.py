@@ -81,5 +81,5 @@ genrate_data(table, False)
 
 print(f"Reading single threaded using arrow {measure_reading(1, worker_arrow):.2f} seconds")
 print(f"Reading single threaded using palletjack {measure_reading(1, worker_palletjack):.2f} seconds")
-print(f"Reading multithreaded using arrow {measure_reading(1, worker_arrow):.2f} seconds")
-print(f"Reading multithreaded using palletjack {measure_reading(1, worker_palletjack):.2f} seconds")
+print(f"Reading multithreaded using arrow {measure_reading(2, worker_arrow):.2f} seconds")
+print(f"Reading multithreaded using palletjack {measure_reading(2, worker_palletjack):.2f} seconds")
