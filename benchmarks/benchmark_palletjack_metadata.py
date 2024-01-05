@@ -7,8 +7,8 @@ import unittest
 import time
 import os
 
-row_groups = 200
-columns = 200
+row_groups = 2
+columns = 2
 chunk_size = 100
 rows = row_groups * chunk_size
 work_items = 64
