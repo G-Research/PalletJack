@@ -158,6 +158,24 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
     fs.read((char *)&max_row_groups, sizeof(max_row_groups));
     max_row_groups = FROM_FILE_ENDIANESS(max_row_groups);
 
+    std::vector<uint32_t> offset_vector;
+    std::vector<uint32_t> length_vector;
+    offset_vector.reserve(max_row_groups);
+    length_vector.reserve(max_row_groups);
+
+    for(uint32_t row_group = 0; row_group < max_row_groups; row_group++)
+    {
+        uint32_t offset;
+        fs.read((char *)&offset, sizeof(offset));
+        offset = FROM_FILE_ENDIANESS(offset);
+        offset_vector.push_back(offset);
+
+        uint32_t length;
+        fs.read((char *)&length, sizeof(length));
+        length = FROM_FILE_ENDIANESS(length);
+        length_vector.push_back(length);
+    }
+
     std::shared_ptr<parquet::FileMetaData> result = nullptr;
     for(auto row_group : row_groups)
     {
@@ -166,18 +184,9 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
             auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(max_row_groups-1) + " are available!";
             throw std::runtime_error(msg);
         }
-
-        // Seek to the offset and length
-        fs.seekg(2 * row_group * sizeof(uint32_t), std::ios_base::cur);
-
-        uint32_t offset;
-        fs.read((char *)&offset, sizeof(offset));
-        offset = FROM_FILE_ENDIANESS(offset);
-
-        uint32_t length;
-        fs.read((char *)&length, sizeof(length));
-        length = FROM_FILE_ENDIANESS(length);
-
+        
+        uint32_t offset = offset_vector[row_group];
+        uint32_t length = length_vector[row_group];
         std::vector<char> buffer(length);
         fs.seekg(offset, std::ios_base::beg);
         fs.read(&buffer[0], length);
