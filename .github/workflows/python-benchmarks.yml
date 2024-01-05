@@ -32,6 +32,8 @@ jobs:
         pip install -r requirements.txt
 
     - name: Test with pytest
-      run: |
-        python3 benchmarks/benchmark_palletjack_metadata.py
+      working-directory: ./python
+      run: |      
+        python3 setup.py develop
+        python3 ../benchmarks/benchmark_palletjack_metadata.py
 
