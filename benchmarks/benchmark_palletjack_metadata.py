@@ -9,7 +9,7 @@ import os
 
 row_groups = 200
 columns = 200
-chunk_size = 100
+chunk_size = 1000
 rows = row_groups * chunk_size
 work_items = 64
 
@@ -82,4 +82,4 @@ genrate_data(table, False)
 print(f"Reading single threaded using arrow {measure_reading(1, worker_arrow):.2f} seconds")
 print(f"Reading single threaded using palletjack {measure_reading(1, worker_palletjack):.2f} seconds")
 print(f"Reading multithreaded using arrow {measure_reading(1, worker_arrow):.2f} seconds")
-print(f"Reading multithreaded using palletjack {measure_reading(1, worker_palletjack):.2f}seconds")
+print(f"Reading multithreaded using palletjack {measure_reading(1, worker_palletjack):.2f} seconds")
