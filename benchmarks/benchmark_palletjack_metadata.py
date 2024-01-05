@@ -63,7 +63,7 @@ def genrate_data(table, store_schema):
     index_size = os.stat(index_path).st_size
     index_size_percentage = 100 * index_size / parquet_size
     print(f"Parquet size={parquet_size}, store_schema={store_schema}, index size={index_size}({index_size_percentage:.2f}%)")
-    print()
+    print("")
 
 def measure_reading(max_workers, worker):
 
