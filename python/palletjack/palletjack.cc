@@ -144,14 +144,6 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
 {
     std::ifstream fs(index_file_path, std::ios::binary);
     fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    /*
-    // New buffer size 8 MiB
-    constexpr auto buildFileStreamBufferSize = 8 * 1024 * 1024;
-    // Enlarge the internal buffer of the `BuildFileStream`
-    this->BuildFileStream->rdbuf()->pubsetbuf(this->BuildFileStreamBuffer.get(),
-                                            buildFileStreamBufferSize);
-    */
-
 
     std::vector<char> header(strlen(HEADER_V1));
     fs.read(&header[0], header.size());
