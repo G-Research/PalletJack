@@ -9,7 +9,9 @@
 #include "palletjack.h"
 
 #include <iostream>
+#include <cstdio>
 #include <fstream>
+#include <memory>
 
 using arrow::Status;
 
@@ -50,6 +52,8 @@ const char* HEADER_V1 = "PJ_1";
 |   Row group [n-1]      | Thrift data
 --------------------------
 */
+
+
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
 {
     std::shared_ptr<arrow::io::ReadableFile> infile;
@@ -57,23 +61,22 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     auto metadata = parquet::ReadMetaData(infile);
     uint32_t row_groups = (metadata->num_row_groups());
 
-    std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);
-    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-    fs.write(&HEADER_V1[0], strlen(HEADER_V1));
-    fs.write((char *)&TO_FILE_ENDIANESS(row_groups), sizeof(row_groups));
-    auto offset0 = fs.tellp();
+    std::unique_ptr<std::FILE, decltype(&fclose)> fp(std::fopen(index_file_path, "wb"), &fclose);
+    fwrite (&HEADER_V1[0], 1, strlen(HEADER_V1), fp.get());
+    fwrite((char *)&TO_FILE_ENDIANESS(row_groups), 1, sizeof(row_groups), fp.get());
+    auto offset0 = ftell(fp.get());
 
     // Write placeholders for offset and length
     for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
         uint32_t zero = 0;
-        fs.write((char *)&TO_FILE_ENDIANESS(zero), sizeof(zero));
-        fs.write((char *)&TO_FILE_ENDIANESS(zero), sizeof(zero));
+        fwrite((char *)&TO_FILE_ENDIANESS(zero), 1, sizeof(zero), fp.get());
+        fwrite((char *)&TO_FILE_ENDIANESS(zero), 1, sizeof(zero), fp.get());
     }
 
     std::vector<uint32_t> offsets;
     std::vector<uint32_t> lengths;
-    uint32_t offset = fs.tellp();
+    uint32_t offset = ftell(fp.get());
     for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
         std::vector<int> rows_groups_subset = {(int)row_group};
@@ -84,18 +87,18 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         std::shared_ptr<arrow::Buffer> thrift_buffer;
         PARQUET_ASSIGN_OR_THROW(thrift_buffer, stream.get()->Finish());
         uint32_t length = thrift_buffer.get()->size();
-        fs.write((const char *)thrift_buffer.get()->data(), length);
+        fwrite((const char *)thrift_buffer.get()->data(), 1, length, fp.get());
         offsets.push_back(offset);
         lengths.push_back(length);
         offset += length;
     }
 
     // Now move the file poitner back and write offsets and lengths
-    fs.seekp(offset0, std::ios_base::beg);
+    fseek(fp.get(), offset0, SEEK_SET);
     for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
-        fs.write((char *)&TO_FILE_ENDIANESS(offsets[row_group]), sizeof(offsets[row_group]));
-        fs.write((char *)&TO_FILE_ENDIANESS(lengths[row_group]), sizeof(lengths[row_group]));
+        fwrite((char *)&TO_FILE_ENDIANESS(offsets[row_group]), 1, sizeof(offsets[row_group]), fp.get());
+        fwrite((char *)&TO_FILE_ENDIANESS(lengths[row_group]), 1, sizeof(lengths[row_group]), fp.get());
     }
 }
 
