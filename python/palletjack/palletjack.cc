@@ -140,3 +140,67 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupMetadata(const char *index_fi
     return parquet::FileMetaData::Make(&buffer[0], &length);
 }
 
+std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_file_path, const std::vector<uint32_t>& row_groups)
+{
+    std::ifstream fs(index_file_path, std::ios::binary);
+    fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+    std::vector<char> header(strlen(HEADER_V1));
+    fs.read(&header[0], header.size());
+
+    if (memcmp(&HEADER_V1[0], &header[0], strlen(HEADER_V1)) != 0)
+    {
+        auto msg = std::string("File '") + index_file_path + "' has unexpected format!";
+        throw std::runtime_error(msg);
+    }
+    
+    uint32_t max_row_groups;
+    fs.read((char *)&max_row_groups, sizeof(max_row_groups));
+    max_row_groups = FROM_FILE_ENDIANESS(max_row_groups);
+
+    std::vector<uint32_t> offset_vector;
+    std::vector<uint32_t> length_vector;
+    offset_vector.reserve(max_row_groups);
+    length_vector.reserve(max_row_groups);
+
+    for(uint32_t row_group = 0; row_group < max_row_groups; row_group++)
+    {
+        uint32_t offset;
+        fs.read((char *)&offset, sizeof(offset));
+        offset = FROM_FILE_ENDIANESS(offset);
+        offset_vector.push_back(offset);
+
+        uint32_t length;
+        fs.read((char *)&length, sizeof(length));
+        length = FROM_FILE_ENDIANESS(length);
+        length_vector.push_back(length);
+    }
+
+    std::shared_ptr<parquet::FileMetaData> result = nullptr;
+    for(auto row_group : row_groups)
+    {
+        if (row_group >= max_row_groups)
+        {
+            auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(max_row_groups-1) + " are available!";
+            throw std::runtime_error(msg);
+        }
+        
+        uint32_t offset = offset_vector[row_group];
+        uint32_t length = length_vector[row_group];
+        std::vector<char> buffer(length);
+        fs.seekg(offset, std::ios_base::beg);
+        fs.read(&buffer[0], length);
+
+        std::shared_ptr<parquet::FileMetaData> metadata = parquet::FileMetaData::Make(&buffer[0], &length);
+        if (!result)
+        {
+            result = metadata;
+        }
+        else
+        {
+            result->AppendRowGroups(*metadata);
+        }
+    }
+
+    return result;
+}

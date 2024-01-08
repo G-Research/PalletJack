@@ -4,3 +4,4 @@
 
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path);
 std::shared_ptr<parquet::FileMetaData> ReadRowGroupMetadata(const char *index_file_path, uint32_t row_group);
+std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_file_path, const std::vector<uint32_t>& row_groups);

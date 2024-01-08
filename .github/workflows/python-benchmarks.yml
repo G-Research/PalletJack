@@ -31,7 +31,7 @@ jobs:
         pip install flake8 pytest
         pip install -r requirements.txt
 
-    - name: Test with pytest
+    - name: Run benchmarks
       working-directory: ./python
       run: |      
         python3 setup.py develop
