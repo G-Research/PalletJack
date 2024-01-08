@@ -50,6 +50,21 @@ const char* HEADER_V1 = "PJ_1";
 |   Row group [n-1]      | Thrift data
 --------------------------
 */
+/*  Notes (https://en.cppreference.com/w/cpp/io/basic_filebuf/setbuf):
+    
+    The conditions when this function may be used and the way in which the provided buffer is used is implementation-defined.
+
+    GCC 4.6 libstdc++
+    setbuf() may only be called when the std::basic_filebuf is not associated with a file (has no effect otherwise). With a user-provided buffer, reading from file reads n-1 bytes at a time.
+
+    Clang++3.0 libc++
+    setbuf() may be called after opening the file, but before any I/O (may crash otherwise). With a user-provided buffer, reading from file reads largest multiples of 4096 that fit in the buffer.
+
+    Visual Studio 2010
+    setbuf() may be called at any time, even after some I/O took place. Current contents of the buffer, if any, are lost.
+    The standard does not define any behavior for this function except that setbuf(0, 0) called before any I/O has taken place is required to set unbuffered output.
+    */
+
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
 {
     std::shared_ptr<arrow::io::ReadableFile> infile;
@@ -60,6 +75,8 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     std::vector<char> buf(4 * 1024 * 1024);  // 4 MiB
     std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);    
     fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+    fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
+
     fs.write(&HEADER_V1[0], strlen(HEADER_V1));
     fs.write((char *)&TO_FILE_ENDIANESS(row_groups), sizeof(row_groups));
     auto offset0 = fs.tellp();
