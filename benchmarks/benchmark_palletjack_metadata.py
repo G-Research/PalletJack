@@ -7,11 +7,11 @@ import unittest
 import time
 import os
 
-row_groups = 200
-columns = 200
+row_groups = 20
+columns = 2000
 chunk_size = 1000
 rows = row_groups * chunk_size
-work_items = 64
+work_items = 1# 
 
 parquet_path = "my.parquet"
 index_path = parquet_path + '.index'
@@ -43,7 +43,7 @@ def worker_arrow():
     for r in range(0, row_groups):
         pr = pq.ParquetReader()
         pr.open(parquet_path)        
-        res_data = pr.read_row_groups([0], column_indices=[0,1,2], use_threads=False)
+        res_data = pr.read_row_groups([r], column_indices=[0,1,2], use_threads=False)
 
 def genrate_data(table, store_schema):
 
@@ -75,11 +75,15 @@ def measure_reading(max_workers, worker):
     pool.shutdown(wait=True)
     return time.time() - t
 
-table = get_table()
-genrate_data(table, True)
-genrate_data(table, False)
+# table = get_table()
+# genrate_data(table, True)
+# genrate_data(table, False)
 
-print(f"Reading single threaded using arrow {measure_reading(1, worker_arrow):.2f} seconds")
-print(f"Reading single threaded using palletjack {measure_reading(1, worker_palletjack):.2f} seconds")
-print(f"Reading multithreaded using arrow {measure_reading(2, worker_arrow):.2f} seconds")
-print(f"Reading multithreaded using palletjack {measure_reading(2, worker_palletjack):.2f} seconds")
+pj.generate_metadata_index(parquet_path, index_path)
+
+# print(f"Reading single threaded using arrow {measure_reading(1, worker_arrow):.2f} seconds")
+# print(f"Reading single threaded using palletjack {measure_reading(1, worker_palletjack):.2f} seconds")
+# print(f"Reading multithreaded using arrow {measure_reading(2, worker_arrow):.2f} seconds")
+# print(f"Reading multithreaded using palletjack {measure_reading(2, worker_palletjack):.2f} seconds")
+
+worker_palletjack()
