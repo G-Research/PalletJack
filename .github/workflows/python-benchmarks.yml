@@ -15,7 +15,11 @@ permissions:
 jobs:
   benchmarks:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
