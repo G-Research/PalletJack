@@ -9,10 +9,6 @@ PalletJack reduces the amount of metadata bytes that need to be read and decoded
 - Reading parquet metadata for a single row group
 - Reading parquet metadata for multiple row groups
 
-## Getting Started
-
-To get started with PalletJack, clone the repository and build the project according to the instructions in the build section.
-
 ## Required:
 
 - pyarrow  >= 14
