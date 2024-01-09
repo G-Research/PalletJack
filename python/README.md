@@ -15,15 +15,15 @@ To get started with PalletJack, clone the repository and build the project accor
 
 ## Required:
 
- - pyarrow  >= 14
+- pyarrow  >= 14
  
 alletJack operates on top of pyarrow, making it an essential requirement for both building and using PalletJack. While our source package is compatible with recent versions of pyarrow, the binary distribution package specifically requires the latest major version of pyarrow.
 
 ##  Installation
 
-- pip install palletjack
-
-------------
+```
+pip install palletjack
+```
 
 ## How to use:
 
