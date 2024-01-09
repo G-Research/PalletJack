@@ -17,7 +17,7 @@ To get started with PalletJack, clone the repository and build the project accor
 
 - pyarrow  >= 14
  
-alletJack operates on top of pyarrow, making it an essential requirement for both building and using PalletJack. While our source package is compatible with recent versions of pyarrow, the binary distribution package specifically requires the latest major version of pyarrow.
+PalletJack operates on top of pyarrow, making it an essential requirement for both building and using PalletJack. While our source package is compatible with recent versions of pyarrow, the binary distribution package specifically requires the latest major version of pyarrow.
 
 ##  Installation
 
