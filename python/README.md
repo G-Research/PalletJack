@@ -24,7 +24,7 @@ pip install palletjack
 ## How to use:
 
 
-### Generate an example parquet file
+### Generate an example parquet file:
 ```
 import palletjack as pj
 import pyarrow.parquet as pq
@@ -42,16 +42,15 @@ pa_arrays = [pa.array(data[:, i]) for i in range(columns)]
 column_names = [f'column_{i}' for i in range(columns)]
 table = pa.Table.from_arrays(pa_arrays, names=column_names)
 pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
-
 ```
 
-### Generate the indexed metadata file
+### Generate the indexed metadata file:
 ```
 index_path = path + '.index'
 pj.generate_metadata_index(path, index_path)
 ```
 
-### Reading a row group using the indexed metadata
+### Reading a row group using the indexed metadata:
 ```
 row_group = 5
 metadata = pj.read_row_group_metadata(index_path, row_group)
@@ -61,7 +60,7 @@ pr.open(path, metadata=metadata)
 data = pr.read_row_groups([0])
 ```
 
-### Reading multiple row groups using the indexed metadata
+### Reading multiple row groups using the indexed metadata:
 ```
 metadata = pj.read_row_groups_metadata(index_path, [5, 7])
 pr = pq.ParquetReader()
