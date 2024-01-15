@@ -73,7 +73,7 @@ def genrate_data(table, store_schema):
     print(f"writing parquet file, columns={columns}, row_groups={row_groups}, rows={rows}")
     pq.write_table(table, parquet_path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=store_schema, compression=None)
     dt = time.time() - t
-    print(f"finsihed writing parquet file in {dt:.2f} seconds")
+    print(f"finished writing parquet file in {dt:.2f} seconds")
 
     t = time.time()
     print("Generating metadata index")
