@@ -39,6 +39,16 @@ def worker_palletjack():
         pr.open(parquet_path, metadata=metadata)
         res_data = pr.read_row_groups([0], column_indices=[0,1,2], use_threads=False)
 
+def worker_palletjack_row_group_metadata():
+    
+    for r in range(0, row_groups):
+        metadata = pj.read_row_group_metadata(index_path, r)
+
+def worker_palletjack_row_groups_metadata():
+    
+    for r in range(0, row_groups):
+        metadata = pj.read_row_groups_metadata(index_path, [r])
+
 def worker_palletjack_rowgroups():
     
     all_row_groups = list(range(0, row_groups))
@@ -100,12 +110,15 @@ def measure_reading(max_workers, worker):
 table = get_table()
 genrate_data(table, True)
 genrate_data(table, False)
-print(f"Reading single row group using arrow (single-threaded) {measure_reading(1, worker_arrow):.2f} seconds")
-print(f"Reading single row group using palletjack (single-threaded) {measure_reading(1, worker_palletjack):.2f} seconds")
-print(f"Reading single row group using arrow (multi-threaded) {measure_reading(8, worker_arrow):.2f} seconds")
-print(f"Reading single row group using palletjack (multi-threaded) {measure_reading(8, worker_palletjack):.2f} seconds")
+print(f"Reading a single row group using arrow (single-threaded) {measure_reading(1, worker_arrow):.2f} seconds")
+print(f"Reading a single row group using palletjack (single-threaded) {measure_reading(1, worker_palletjack):.2f} seconds")
+print(f"Reading a single row group using arrow (multi-threaded) {measure_reading(8, worker_arrow):.2f} seconds")
+print(f"Reading a single row group using palletjack (multi-threaded) {measure_reading(8, worker_palletjack):.2f} seconds")
 
 print(f"Reading multiple row groups using arrow (single-threaded) {measure_reading(1, worker_arrow_rowgroups):.2f} seconds")
 print(f"Reading multiple row groups using palletjack (single-threaded) {measure_reading(1, worker_palletjack_rowgroups):.2f} seconds")
 print(f"Reading multiple row groups using arrow (multi-threaded) {measure_reading(8, worker_arrow_rowgroups):.3f} seconds")
 print(f"Reading multiple row groups using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_rowgroups):.3f} seconds")
+
+print(f"Reading a row group metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_metadata):.3f} seconds")
+print(f"Reading a row groups metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_groups_metadata):.3f} seconds")
