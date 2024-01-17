@@ -5,15 +5,13 @@ name: Python-ci
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 permissions:
   contents: read
 
 jobs:
   pytest:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
 
     strategy:
       matrix:
