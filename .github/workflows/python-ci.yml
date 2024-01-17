@@ -44,5 +44,5 @@ jobs:
     - name: Test with pytest
       working-directory: ./python
       run: |
-        pip install . --break-system-packages
+        pip install . -e
         pytest
