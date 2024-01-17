@@ -104,7 +104,7 @@ class TestPalletJack(unittest.TestCase):
 
             self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
 
-    def test_index_file_endianness_compatibility(self):
+    def test_index_file_golden_master(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             index_path = os.path.join(tmpdirname, 'my.parquet.index')
             path = os.path.join(current_dir, 'data/sample.parquet')
