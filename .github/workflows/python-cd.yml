@@ -42,7 +42,7 @@ jobs:
       if: runner.os == 'linux'
       working-directory: ./python
       run: |
-        python setup.py build_ext sdist
+        python -m build --sdist 
 
     - name: Build wheels
       working-directory: ./python
