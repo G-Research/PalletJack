@@ -39,6 +39,6 @@ jobs:
     - name: Run benchmarks
       working-directory: ./python
       run: |      
-        python3 setup.py develop
+        pip install .
         python3 ../benchmarks/benchmark_palletjack_metadata.py
 
