@@ -89,7 +89,7 @@ class TestPalletJack(unittest.TestCase):
             
             with self.assertRaises(RuntimeError) as context:
                 metadata = pj.read_row_group_metadata(index_path, rows)
-            
+
             self.assertTrue(f"Requested row_group={rows}, but only 0-{rows-1} are available!" in str(context.exception), context.exception)
 
     def test_reading_invalid_index_file(self):
