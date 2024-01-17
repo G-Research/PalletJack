@@ -10,6 +10,7 @@ import os
 rows = 5
 columns = 10
 chunk_size = 1 # A row group per
+current_dir = os.path.dirname(os.path.realpath(__file__))
 
 def get_table():
     # Generate a random 2D array of floats using NumPy
@@ -86,9 +87,9 @@ class TestPalletJack(unittest.TestCase):
             index_path = path + '.index'
             pj.generate_metadata_index(path, index_path)
             
-            with self.assertRaises(Exception) as context:
+            with self.assertRaises(RuntimeError) as context:
                 metadata = pj.read_row_group_metadata(index_path, rows)
-
+            
             self.assertTrue(f"Requested row_group={rows}, but only 0-{rows-1} are available!" in str(context.exception), context.exception)
 
     def test_reading_invalid_index_file(self):
@@ -106,8 +107,8 @@ class TestPalletJack(unittest.TestCase):
     def test_index_file_endianness_compatibility(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             index_path = os.path.join(tmpdirname, 'my.parquet.index')
-            path = 'test/data/sample.parquet'
-            expected_index_path = 'test/data/sample.parquet.index'
+            path = os.path.join(current_dir, 'data/sample.parquet')
+            expected_index_path = os.path.join(current_dir, 'data/sample.parquet.index')
             pj.generate_metadata_index(path, index_path)
 
             # Read the expected output
