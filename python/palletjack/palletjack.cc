@@ -15,8 +15,8 @@ using arrow::Status;
 
 #define TO_FILE_ENDIANESS(x) (x)
 #define FROM_FILE_ENDIANESS(x) (x)
-static constexpr int const HEADER_V1_LENGTH = 4;
-static const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '1'};
+const int HEADER_V1_LENGTH = 4;
+const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '1'};
 
 struct DataHeader {
   char header[HEADER_V1_LENGTH];
