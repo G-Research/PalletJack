@@ -15,11 +15,22 @@ using arrow::Status;
 
 #define TO_FILE_ENDIANESS(x) (x)
 #define FROM_FILE_ENDIANESS(x) (x)
-const char* HEADER_V1 = "PJ_1";
+static constexpr int const HEADER_V1_LENGTH = 4;
+static const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '1'};
+
+struct DataHeader {
+  char header[HEADER_V1_LENGTH];
+  uint32_t rowGroups;
+};
+
+struct DataItem {
+  uint32_t offset;
+  uint32_t length;
+};
 
 /* File format: (Thrift-encoded metadata stored separately for each row group)
 --------------------------
-| 0 - 3 | PQT1           | File header in ASCI
+| 0 - 3 | PJ_1           | File header in ASCI
 |------------------------|
 | 4 - 7 | Row groups (n) | (uint32)
 |------------------------|
@@ -77,7 +88,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
     fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
 
-    fs.write(&HEADER_V1[0], strlen(HEADER_V1));
+    fs.write(&HEADER_V1[0], HEADER_V1_LENGTH);
     fs.write((char *)&TO_FILE_ENDIANESS(row_groups), sizeof(row_groups));
     auto offset0 = fs.tellp();
 
@@ -124,25 +135,23 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
     fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
 
-    std::vector<char> header(strlen(HEADER_V1));
-    fs.read(&header[0], header.size());
+    DataHeader dataHeader;
+    fs.read((char *)&dataHeader, sizeof(dataHeader));
 
-    if (memcmp(&HEADER_V1[0], &header[0], strlen(HEADER_V1)) != 0)
+    if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
     {
         auto msg = std::string("File '") + index_file_path + "' has unexpected format!";
-        throw std::runtime_error(msg);
+        throw std::logic_error(msg);
     }
     
-    uint32_t max_row_groups;
-    fs.read((char *)&max_row_groups, sizeof(max_row_groups));
-    max_row_groups = FROM_FILE_ENDIANESS(max_row_groups);
+    dataHeader.rowGroups = FROM_FILE_ENDIANESS(dataHeader.rowGroups);
 
     std::vector<uint32_t> offset_vector;
     std::vector<uint32_t> length_vector;
-    offset_vector.reserve(max_row_groups);
-    length_vector.reserve(max_row_groups);
+    offset_vector.reserve(dataHeader.rowGroups);
+    length_vector.reserve(dataHeader.rowGroups);
 
-    for(uint32_t row_group = 0; row_group < max_row_groups; row_group++)
+    for(uint32_t row_group = 0; row_group < dataHeader.rowGroups; row_group++)
     {
         uint32_t offset;
         fs.read((char *)&offset, sizeof(offset));
@@ -158,10 +167,10 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
     std::shared_ptr<parquet::FileMetaData> result = nullptr;
     for(auto row_group : row_groups)
     {
-        if (row_group >= max_row_groups)
+        if (row_group >= dataHeader.rowGroups)
         {
-            auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(max_row_groups-1) + " are available!";
-            throw std::runtime_error(msg);
+            auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(dataHeader.rowGroups-1) + " are available!";
+            throw std::logic_error(msg);
         }
         
         uint32_t offset = offset_vector[row_group];
