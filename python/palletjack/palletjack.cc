@@ -145,7 +145,7 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
     }
     
     dataHeader.rowGroups = FROM_FILE_ENDIANESS(dataHeader.rowGroups);
-    std::vector<DataItem> dataItems (dataHeader.rowGroups);
+    std::vector<DataItem> dataItems;
     fs.read((char *)&dataItems[0], sizeof(DataItem) * dataHeader.rowGroups);
     
     std::shared_ptr<parquet::FileMetaData> result = nullptr;
