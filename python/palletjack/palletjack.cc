@@ -145,25 +145,9 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
     }
     
     dataHeader.rowGroups = FROM_FILE_ENDIANESS(dataHeader.rowGroups);
-
-    std::vector<uint32_t> offset_vector;
-    std::vector<uint32_t> length_vector;
-    offset_vector.reserve(dataHeader.rowGroups);
-    length_vector.reserve(dataHeader.rowGroups);
-
-    for(uint32_t row_group = 0; row_group < dataHeader.rowGroups; row_group++)
-    {
-        uint32_t offset;
-        fs.read((char *)&offset, sizeof(offset));
-        offset = FROM_FILE_ENDIANESS(offset);
-        offset_vector.push_back(offset);
-
-        uint32_t length;
-        fs.read((char *)&length, sizeof(length));
-        length = FROM_FILE_ENDIANESS(length);
-        length_vector.push_back(length);
-    }
-
+    std::vector<DataItem> dataItems (dataHeader.rowGroups);
+    fs.read((char *)&dataItems[0], sizeof(DataItem) * dataHeader.rowGroups);
+    
     std::shared_ptr<parquet::FileMetaData> result = nullptr;
     for(auto row_group : row_groups)
     {
@@ -173,8 +157,8 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
             throw std::logic_error(msg);
         }
         
-        uint32_t offset = offset_vector[row_group];
-        uint32_t length = length_vector[row_group];
+        uint32_t offset = FROM_FILE_ENDIANESS(dataItems[row_group].offset);
+        uint32_t length = FROM_FILE_ENDIANESS(dataItems[row_group].length);
         std::vector<char> buffer(length);
         fs.seekg(offset, std::ios_base::beg);
         fs.read(&buffer[0], length);
