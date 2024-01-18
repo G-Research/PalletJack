@@ -144,16 +144,16 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
         throw std::logic_error(msg);
     }
     
-    dataHeader.rowGroups = FROM_FILE_ENDIANESS(dataHeader.rowGroups);
-    std::vector<DataItem> dataItems (dataHeader.rowGroups);
-    fs.read((char *)&dataItems[0], sizeof(DataItem) * dataHeader.rowGroups);
+    uint32_t max_row_groups = FROM_FILE_ENDIANESS(dataHeader.rowGroups);
+    std::vector<DataItem> dataItems (max_row_groups);
+    fs.read((char *)&dataItems[0], sizeof(DataItem) * max_row_groups);
     
     std::shared_ptr<parquet::FileMetaData> result = nullptr;
     for(auto row_group : row_groups)
     {
-        if (row_group >= dataHeader.rowGroups)
+        if (row_group >= max_row_groups)
         {
-            auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(dataHeader.rowGroups-1) + " are available!";
+            auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(max_row_groups-1) + " are available!";
             throw std::logic_error(msg);
         }
         
