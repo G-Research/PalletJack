@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "palletjack"
-version = "0.2.3"
+version = "0.2.4"
 authors = [
   { name="Marcin Krystianc", email="marcin.krystianc@gmail.com" },
 ]
