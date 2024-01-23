@@ -2,14 +2,14 @@
 requires = [
   "setuptools>=55.0",
   "Cython>=3",
-  "pyarrow>=10",
+  "pyarrow~=15.0",
 ]
 
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "palletjack"
-version = "0.2.4"
+version = "1.0.0"
 authors = [
   { name="Marcin Krystianc", email="marcin.krystianc@gmail.com" },
 ]
@@ -22,7 +22,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyarrow>=10",
+  "pyarrow~=15.0",
 ]
 
 [tool.setuptools.packages.find]
