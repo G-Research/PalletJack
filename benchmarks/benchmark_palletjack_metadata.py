@@ -67,6 +67,13 @@ def worker_arrow():
         pr.open(parquet_path)        
         res_data = pr.read_row_groups([0], column_indices=[0,1,2], use_threads=False)
 
+def worker_arrow_metadata():
+    
+    for r in range(0, row_groups):
+        pr = pq.ParquetReader()
+        pr.open(parquet_path)
+        metadata = pr.metadata
+
 def worker_arrow_rowgroups():
      
     all_row_groups = list(range(0, row_groups))
@@ -122,3 +129,4 @@ print(f"Reading multiple row groups using palletjack (multi-threaded) {measure_r
 
 print(f"Reading a row group metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_metadata):.3f} seconds")
 print(f"Reading a row groups metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_groups_metadata):.3f} seconds")
+print(f"Reading a metadata using arrow (single-threaded) {measure_reading(1, worker_arrow_metadata):.3f} seconds")
