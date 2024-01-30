@@ -7,11 +7,11 @@ import unittest
 import time
 import os
 
-row_groups = 200
-columns = 200
+row_groups = 100
+columns = 2000
 chunk_size = 1000
 rows = row_groups * chunk_size
-work_items = 64
+work_items = 4
 batch_size = 10
 
 parquet_path = "my.parquet"
