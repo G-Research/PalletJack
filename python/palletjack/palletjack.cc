@@ -20,21 +20,31 @@ const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '1'};
 
 struct DataHeader {
   char header[HEADER_V1_LENGTH];
-  uint32_t rowGroups;
+  uint32_t row_groups;
+  uint32_t columns;
+  uint64_t base_offset;
+  uint32_t schema_list_offset;
+  uint32_t schema_list_length;
+  uint32_t row_groups_list_offset;
+  uint32_t row_groups_list_length;
+  uint32_t column_orders_list_offset;
+  uint32_t column_orders_list_length;
 };
 
-struct DataItem {
-  uint32_t offset;
-  uint32_t length;
-};
+uint32_t schema_elements[c+1];
+uint32_t column_ordes[c+1];
+uint32_t row_groups[rg+1];
+uint32_t column_chunks[rg * (c+1)];
 
 /* File format: (Thrift-encoded metadata stored separately for each row group)
 --------------------------
-| 0 - 3 | PJ_1           | File header in ASCI
+| 0 - 3 | PJ_2           | File header in ASCI
 |------------------------|
-| 4 - 7 | Row groups (n) | (uint32)
+| 4 - 7 | Row groups     | (uint32) - Number of row groups
 |------------------------|
-| 8 - 11| Offset [0]     | (uint32)
+| 8 - 11| Columns        | (uint32) - Number of columns
+|------------------------|
+|11 - 19| Base offset    | (uint64)
 |------------------------|
 |12 - 15| Length [0]     | (uint32)
 |------------------------|
