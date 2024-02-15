@@ -16,60 +16,44 @@ using arrow::Status;
 #define TO_FILE_ENDIANESS(x) (x)
 #define FROM_FILE_ENDIANESS(x) (x)
 const int HEADER_V1_LENGTH = 4;
-const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '1'};
+const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
 
 struct DataHeader {
   char header[HEADER_V1_LENGTH];
   uint32_t row_groups;
   uint32_t columns;
-  uint64_t base_offset;
-  uint32_t schema_list_offset;
-  uint32_t schema_list_length;
-  uint32_t row_groups_list_offset;
-  uint32_t row_groups_list_length;
-  uint32_t column_orders_list_offset;
-  uint32_t column_orders_list_length;
+  uint32_t metadata_length;
+  const uint32_t* base_ptr;
+  const uint32_t* get_row_numbers(); // rg
+  const uint32_t* get_schema_offsets(); // 1 + c + 1
+  const uint32_t* get_row_groups_offsets(); // 1 + rg + 1
+  const uint32_t* get_column_chunks_offsets(); // rg * (1 + c + 1)
+  const uint32_t* get_column_orders_offsets(); // 1 + c + 1
+  
+  uint32_t get_metadata_offset(); // metadata length
 };
 
-uint32_t schema_elements[c+1];
-uint32_t column_ordes[c+1];
-uint32_t row_groups[rg+1];
-uint32_t column_chunks[rg * (c+1)];
-
 /* File format: (Thrift-encoded metadata stored separately for each row group)
---------------------------
-| 0 - 3 | PJ_2           | File header in ASCI
-|------------------------|
-| 4 - 7 | Row groups     | (uint32) - Number of row groups
-|------------------------|
-| 8 - 11| Columns        | (uint32) - Number of columns
-|------------------------|
-|11 - 19| Base offset    | (uint64)
-|------------------------|
-|12 - 15| Length [0]     | (uint32)
-|------------------------|
-|16 - 19| Offset [1]     | (uint32)
-|------------------------|
-|20 - 23| Length [1]     | (uint32)
-|------------------------|
+-----------------------------
+| 0 - 3 | PJ_2              | (char[4]) - File header in ASCI
+|---------------------------|
+| 4 - 7 | Row groups        | (uint32) - Number of row groups
+|---------------------------|
+| 8 - 11| Columns           | (uint32) - Number of columns
+|---------------------------|
+|12 - 15| Metadata length   | (uint32) - Metadata length
+|---------------------------|
+|16 -   | Row numbers       | (uint32*) - number of rows per row group
+|---------------------------|
+| . . . | Schema offsets    | (uint32*) - offsets of schema element (1 + c + 1)
+|---------------------------|
+| . . . | Row group offsets | (uint32*) - offsets of row grpups (1 + rg + 1)
+|---------------------------|
+| . . . | Chunks offsets    | (uint32*) - offsets of column chunks rg * (1 + c + 1)
+|---------------------------|
+| . . . | Metadata          | (uint8*) - Original metadata (thrift compact protocol)
+-----------------------------
 
-         .   .   .
-
-|------------------------|
-|.. - ..| Offset [n-1]   | (uint32)
-|------------------------|
-|.. - ..| Length [n-1]   | (uint32)
-|------------------------|
-|    Row group [0]       | Thrift data
-|------------------------|
-|    Row group [1]       | Thrift data
-|------------------------|
-
-         .   .   .
-
-|------------------------|
-|   Row group [n-1]      | Thrift data
---------------------------
 */
 /*  Notes (https://en.cppreference.com/w/cpp/io/basic_filebuf/setbuf):
     
