@@ -8,8 +8,20 @@
 
 #include "palletjack.h"
 
+// TCompactProtocol requires some #defines to work right.
+#define SIGNED_RIGHT_SHIFT_IS 1
+#define ARITHMETIC_RIGHT_SHIFT 1
+
+#include <thrift/TApplicationException.h>
+#include <thrift/protocol/TCompactProtocol.h>
+#include <thrift/transport/TBufferTransports.h>
+#include "parquet/exception.h"
+
+#include "parquet_types.h"
+
 #include <iostream>
 #include <fstream>
+
 
 using arrow::Status;
 
@@ -19,11 +31,10 @@ const int HEADER_V1_LENGTH = 4;
 const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
 
 struct DataHeader {
-  char header[HEADER_V1_LENGTH];
-  uint32_t row_groups;
-  uint32_t columns;
-  uint32_t metadata_length;
-  const uint32_t* base_ptr;
+  char header[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
+  uint32_t row_groups = 0;
+  uint32_t columns = 0;
+  uint32_t metadata_length = 0;
   const uint32_t* get_row_numbers(); // rg
   const uint32_t* get_schema_offsets(); // 1 + c + 1
   const uint32_t* get_row_groups_offsets(); // 1 + rg + 1
@@ -53,8 +64,52 @@ struct DataHeader {
 |---------------------------|
 | . . . | Metadata          | (uint8*) - Original metadata (thrift compact protocol)
 -----------------------------
-
 */
+
+
+constexpr int32_t kDefaultThriftStringSizeLimit = 100 * 1000 * 1000;
+constexpr int32_t kDefaultThriftContainerSizeLimit = 1000 * 1000;
+
+using ThriftBuffer = apache::thrift::transport::TMemoryBuffer;
+
+std::shared_ptr<ThriftBuffer> CreateReadOnlyMemoryBuffer(uint8_t* buf, uint32_t len) {
+#if PARQUET_THRIFT_VERSION_MAJOR > 0 || PARQUET_THRIFT_VERSION_MINOR >= 14
+    auto conf = std::make_shared<apache::thrift::TConfiguration>();
+    conf->setMaxMessageSize(std::numeric_limits<int>::max());
+    return std::make_shared<ThriftBuffer>(buf, len, ThriftBuffer::OBSERVE, conf);
+#else
+    return std::make_shared<ThriftBuffer>(buf, len);
+#endif
+  }
+
+template <class T>
+void DeserializeUnencryptedMessage(const uint8_t* buf, uint32_t* len,
+                                     T* deserialized_msg) {
+    // Deserialize msg bytes into c++ thrift msg using memory transport.
+    auto tmem_transport = CreateReadOnlyMemoryBuffer(const_cast<uint8_t*>(buf), *len);
+    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
+    // Protect against CPU and memory bombs
+    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
+    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
+    auto tproto = tproto_factory.getProtocol(tmem_transport);
+    try {
+      deserialized_msg->read(tproto.get());
+    } catch (std::exception& e) {
+      std::stringstream ss;
+      ss << "Couldn't deserialize thrift: " << e.what() << "\n";
+      throw parquet::ParquetException(ss.str());
+    }
+    uint32_t bytes_left = tmem_transport->available_read();
+    *len = *len - bytes_left;
+  }
+
+palletjack::parquet::FileMetaData DeserializeFileMetadata(const void* buf, uint32_t len)
+{
+    palletjack::parquet::FileMetaData fileMetaData;
+    DeserializeUnencryptedMessage ((const uint8_t*)buf, &len, &fileMetaData);
+    return fileMetaData;
+}
+
 /*  Notes (https://en.cppreference.com/w/cpp/io/basic_filebuf/setbuf):
     
     The conditions when this function may be used and the way in which the provided buffer is used is implementation-defined.
@@ -72,58 +127,46 @@ struct DataHeader {
 
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
 {
-    std::shared_ptr<arrow::io::ReadableFile> infile;
-    PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(parquet_path)));
-    auto metadata = parquet::ReadMetaData(infile);
-    uint32_t row_groups = (metadata->num_row_groups());
+    std::shared_ptr<arrow::Buffer> thrift_buffer;
+    DataHeader data_header;
 
-    std::vector<char> buf(4 * 1024 * 1024);  // 4 MiB
-    std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);    
-    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-    fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
-
-    fs.write(&HEADER_V1[0], HEADER_V1_LENGTH);
-    fs.write((char *)&TO_FILE_ENDIANESS(row_groups), sizeof(row_groups));
-    auto offset0 = fs.tellp();
-
-    // Write placeholders for offset and length
-    for (uint32_t row_group = 0; row_group < row_groups; row_group++)
     {
-        uint32_t zero = 0;
-        fs.write((char *)&TO_FILE_ENDIANESS(zero), sizeof(zero));
-        fs.write((char *)&TO_FILE_ENDIANESS(zero), sizeof(zero));
+        std::shared_ptr<arrow::io::ReadableFile> infile;
+        PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(parquet_path)));
+        auto metadata = parquet::ReadMetaData(infile);
+
+        std::shared_ptr<arrow::io::BufferOutputStream> metadata_stream;
+        PARQUET_ASSIGN_OR_THROW(metadata_stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
+        metadata.get()->WriteTo(metadata_stream.get());
+        PARQUET_ASSIGN_OR_THROW(thrift_buffer, metadata_stream.get()->Finish());
+        data_header.row_groups = metadata->num_row_groups();
+        data_header.columns = metadata->num_columns();
+        data_header.metadata_length = thrift_buffer.get()->size();
     }
 
-    std::vector<uint32_t> offsets;
-    std::vector<uint32_t> lengths;
-    uint32_t offset = fs.tellp();
-    for (uint32_t row_group = 0; row_group < row_groups; row_group++)
+    auto metadata = DeserializeFileMetadata(thrift_buffer.get()->data(), thrift_buffer.get()->size());
+    
     {
-        std::vector<int> rows_groups_subset = {(int)row_group};
-        auto metadata_subset = metadata->Subset(rows_groups_subset);
-        std::shared_ptr<arrow::io::BufferOutputStream> stream;
-        PARQUET_ASSIGN_OR_THROW(stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
-        metadata_subset.get()->WriteTo(stream.get());
-        std::shared_ptr<arrow::Buffer> thrift_buffer;
-        PARQUET_ASSIGN_OR_THROW(thrift_buffer, stream.get()->Finish());
-        uint32_t length = thrift_buffer.get()->size();
-        fs.write((const char *)thrift_buffer.get()->data(), length);
-        offsets.push_back(offset);
-        lengths.push_back(length);
-        offset += length;
-    }
+        std::vector<char> buf(4 * 1024 * 1024);  // 4 MiB
+        std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);    
+        fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+        fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
+        fs.write((const char *)&data_header, sizeof(data_header));
+        fs.write((const char *)&metadata.row_numbers, sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
+        fs.write((const char *)&metadata.schema_offsets, sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
+        fs.write((const char *)&metadata.column_orders_offsets, sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
+        for (auto row_group: metadata.row_groups)
+        {            
+            fs.write((const char *)&row_group.column_chunks_offsets, sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
+        }
 
-    // Now move the file poitner back and write offsets and lengths
-    fs.seekp(offset0, std::ios_base::beg);
-    for (uint32_t row_group = 0; row_group < row_groups; row_group++)
-    {
-        fs.write((char *)&TO_FILE_ENDIANESS(offsets[row_group]), sizeof(offsets[row_group]));
-        fs.write((char *)&TO_FILE_ENDIANESS(lengths[row_group]), sizeof(lengths[row_group]));
+        fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
     }
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_file_path, const std::vector<uint32_t>& row_groups)
 {
+    /*    
     std::vector<char> buf(4 * 1024 * 1024);  // 4 MiB
     std::ifstream fs(index_file_path, std::ios::binary);
     fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -169,4 +212,6 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
     }
 
     return result;
+    */
+   return nullptr;
 }
