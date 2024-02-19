@@ -51,7 +51,7 @@ class PyTest(TestCommand):
 
 # Define your extension
 extensions = [
-    Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc", "palletjack/parquet_types.cpp"],
+    Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc", "palletjack/parquet_types_palletjack.cpp"],
         include_dirs = [pyarrow.get_include(), numpy.get_include()],  
         library_dirs = pyarrow.get_library_dirs(),
         libraries=["arrow", "parquet"], 

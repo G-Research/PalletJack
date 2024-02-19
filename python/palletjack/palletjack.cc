@@ -17,11 +17,10 @@
 #include <thrift/transport/TBufferTransports.h>
 #include "parquet/exception.h"
 
-#include "parquet_types.h"
+#include "parquet_types_palletjack.h"
 
 #include <iostream>
 #include <fstream>
-
 
 using arrow::Status;
 
@@ -146,6 +145,59 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
 
     auto metadata = DeserializeFileMetadata(thrift_buffer.get()->data(), thrift_buffer.get()->size());
     
+    // Validate data
+    {
+        if (data_header.row_groups == 0) throw new std::logic_error("Number of row groups is not set!");
+        if (data_header.columns == 0) throw new std::logic_error("Number of columns is not set!");
+        if (data_header.metadata_length == 0) throw new std::logic_error("Number of metadata length is not set!");
+        if (data_header.row_groups != metadata.row_numbers.size())
+        {
+            auto msg = std::string("Row numbers information is invalid ") 
+                + std::to_string(data_header.row_groups)
+                + " != "
+                + std::to_string(metadata.row_numbers.size())
+                + " !";
+
+             throw new std::logic_error(msg);
+        }
+
+        if (data_header.columns + 3 != metadata.schema_offsets.size())
+        {
+            auto msg = std::string("Schema offsets information is invalid, columns=") 
+                + std::to_string(data_header.columns)
+                + ", schema_offsets="
+                + std::to_string(metadata.schema_offsets.size())
+                + " !";
+
+             throw new std::logic_error(msg);
+        }
+
+        if (data_header.columns + 2 != metadata.column_orders_offsets.size())
+        {
+            auto msg = std::string("Column orders offsets information is invalid, columns=") 
+                + std::to_string(data_header.columns)
+                + ", schema_offsets="
+                + std::to_string(metadata.column_orders_offsets.size())
+                + " !";
+
+             throw new std::logic_error(msg);
+        }
+
+        for (const auto& row_group: metadata.row_groups)
+        {
+            if (data_header.columns + 2 != row_group.column_chunks_offsets.size())
+            {
+                auto msg = std::string("Column chunk offsets information is invalid, columns=") 
+                    + std::to_string(data_header.columns)
+                    + ", column_chunks_offsets="
+                    + std::to_string(row_group.column_chunks_offsets.size())
+                    + " !";
+
+                throw new std::logic_error(msg);
+            }
+        }
+    }
+
     {
         std::vector<char> buf(4 * 1024 * 1024);  // 4 MiB
         std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);    
@@ -155,7 +207,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         fs.write((const char *)&metadata.row_numbers, sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
         fs.write((const char *)&metadata.schema_offsets, sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
         fs.write((const char *)&metadata.column_orders_offsets, sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
-        for (auto row_group: metadata.row_groups)
+        for (const auto& row_group: metadata.row_groups)
         {            
             fs.write((const char *)&row_group.column_chunks_offsets, sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
         }

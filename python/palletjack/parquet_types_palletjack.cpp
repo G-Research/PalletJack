@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-#include "parquet_types.h"
+#include "parquet_types_palletjack.h"
 
 #include <algorithm>
 #include <ostream>
@@ -5759,6 +5759,7 @@ RowGroup::RowGroup(const RowGroup& other152) {
   total_compressed_size = other152.total_compressed_size;
   ordinal = other152.ordinal;
   __isset = other152.__isset;
+  column_chunks_offsets = other152.column_chunks_offsets;
 }
 RowGroup& RowGroup::operator=(const RowGroup& other153) {
   columns = other153.columns;
