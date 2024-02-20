@@ -29,18 +29,26 @@ using arrow::Status;
 const int HEADER_V1_LENGTH = 4;
 const char HEADER_V1[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
 
-struct DataHeader {
-  char header[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
-  uint32_t row_groups = 0;
-  uint32_t columns = 0;
-  uint32_t metadata_length = 0;
-  const uint32_t* get_row_numbers(); // rg
-  const uint32_t* get_schema_offsets(); // 1 + c + 1
-  const uint32_t* get_row_groups_offsets(); // 1 + rg + 1
-  const uint32_t* get_column_chunks_offsets(); // rg * (1 + c + 1)
-  const uint32_t* get_column_orders_offsets(); // 1 + c + 1
-  
-  uint32_t get_metadata_offset(); // metadata length
+struct DataHeader
+{
+    char header[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
+    uint32_t row_groups = 0;
+    uint32_t columns = 0;
+    uint32_t metadata_length = 0;
+    uint32_t get_row_numbers_size() { return row_groups; }                               // rg
+    uint32_t get_schema_offsets_size() { return 1 + 1 + columns + 1; }                   // 1 + 1 + c + 1
+    uint32_t get_row_groups_size() { return 1 + row_groups + 1; }                        // 1 + rg + 1
+    uint32_t get_column_orders_offsets_size() { return 1 + columns + 1; }                // 1 + c + 1
+    uint32_t get_column_chunks_offsets_size() { return row_groups * (1 + columns + 1); } // rg * (1 + c + 1)
+    uint32_t get_body_byte_size()
+    {
+        return get_row_numbers_size() * sizeof(uint32_t) +
+               get_schema_offsets_size() * sizeof(uint32_t) +
+               get_row_groups_size() * sizeof(uint32_t) +
+               get_column_orders_offsets_size() * sizeof(uint32_t) +
+               get_column_chunks_offsets_size() * sizeof(uint32_t) +
+               metadata_length;
+    }
 };
 
 /* File format: (Thrift-encoded metadata stored separately for each row group)
@@ -55,7 +63,7 @@ struct DataHeader {
 |---------------------------|
 |16 -   | Row numbers       | (uint32*) - number of rows per row group
 |---------------------------|
-| . . . | Schema offsets    | (uint32*) - offsets of schema element (1 + c + 1)
+| . . . | Schema offsets    | (uint32*) - offsets of schema element (1 + 1 + c + 1)
 |---------------------------|
 | . . . | Row group offsets | (uint32*) - offsets of row grpups (1 + rg + 1)
 |---------------------------|
@@ -65,13 +73,13 @@ struct DataHeader {
 -----------------------------
 */
 
-
 constexpr int32_t kDefaultThriftStringSizeLimit = 100 * 1000 * 1000;
 constexpr int32_t kDefaultThriftContainerSizeLimit = 1000 * 1000;
 
 using ThriftBuffer = apache::thrift::transport::TMemoryBuffer;
 
-std::shared_ptr<ThriftBuffer> CreateReadOnlyMemoryBuffer(uint8_t* buf, uint32_t len) {
+std::shared_ptr<ThriftBuffer> CreateReadOnlyMemoryBuffer(uint8_t *buf, uint32_t len)
+{
 #if PARQUET_THRIFT_VERSION_MAJOR > 0 || PARQUET_THRIFT_VERSION_MINOR >= 14
     auto conf = std::make_shared<apache::thrift::TConfiguration>();
     conf->setMaxMessageSize(std::numeric_limits<int>::max());
@@ -79,38 +87,42 @@ std::shared_ptr<ThriftBuffer> CreateReadOnlyMemoryBuffer(uint8_t* buf, uint32_t 
 #else
     return std::make_shared<ThriftBuffer>(buf, len);
 #endif
-  }
+}
 
 template <class T>
-void DeserializeUnencryptedMessage(const uint8_t* buf, uint32_t* len,
-                                     T* deserialized_msg) {
+void DeserializeUnencryptedMessage(const uint8_t *buf, uint32_t *len,
+                                   T *deserialized_msg)
+{
     // Deserialize msg bytes into c++ thrift msg using memory transport.
-    auto tmem_transport = CreateReadOnlyMemoryBuffer(const_cast<uint8_t*>(buf), *len);
+    auto tmem_transport = CreateReadOnlyMemoryBuffer(const_cast<uint8_t *>(buf), *len);
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
     // Protect against CPU and memory bombs
     tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
     tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
     auto tproto = tproto_factory.getProtocol(tmem_transport);
-    try {
-      deserialized_msg->read(tproto.get());
-    } catch (std::exception& e) {
-      std::stringstream ss;
-      ss << "Couldn't deserialize thrift: " << e.what() << "\n";
-      throw parquet::ParquetException(ss.str());
+    try
+    {
+        deserialized_msg->read(tproto.get());
+    }
+    catch (std::exception &e)
+    {
+        std::stringstream ss;
+        ss << "Couldn't deserialize thrift: " << e.what() << "\n";
+        throw parquet::ParquetException(ss.str());
     }
     uint32_t bytes_left = tmem_transport->available_read();
     *len = *len - bytes_left;
-  }
+}
 
-palletjack::parquet::FileMetaData DeserializeFileMetadata(const void* buf, uint32_t len)
+palletjack::parquet::FileMetaData DeserializeFileMetadata(const void *buf, uint32_t len)
 {
     palletjack::parquet::FileMetaData fileMetaData;
-    DeserializeUnencryptedMessage ((const uint8_t*)buf, &len, &fileMetaData);
+    DeserializeUnencryptedMessage((const uint8_t *)buf, &len, &fileMetaData);
     return fileMetaData;
 }
 
 /*  Notes (https://en.cppreference.com/w/cpp/io/basic_filebuf/setbuf):
-    
+
     The conditions when this function may be used and the way in which the provided buffer is used is implementation-defined.
 
     GCC 4.6 libstdc++
@@ -144,54 +156,41 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     }
 
     auto metadata = DeserializeFileMetadata(thrift_buffer.get()->data(), thrift_buffer.get()->size());
-    
+
     // Validate data
     {
-        if (data_header.row_groups == 0) throw new std::logic_error("Number of row groups is not set!");
-        if (data_header.columns == 0) throw new std::logic_error("Number of columns is not set!");
-        if (data_header.metadata_length == 0) throw new std::logic_error("Number of metadata length is not set!");
+        if (data_header.row_groups == 0)
+            throw new std::logic_error("Number of row groups is not set!");
+        if (data_header.columns == 0)
+            throw new std::logic_error("Number of columns is not set!");
+        if (data_header.metadata_length == 0)
+            throw new std::logic_error("Number of metadata length is not set!");
         if (data_header.row_groups != metadata.row_numbers.size())
         {
-            auto msg = std::string("Row numbers information is invalid ") 
-                + std::to_string(data_header.row_groups)
-                + " != "
-                + std::to_string(metadata.row_numbers.size())
-                + " !";
+            auto msg = std::string("Row numbers information is invalid ") + std::to_string(data_header.row_groups) + " != " + std::to_string(metadata.row_numbers.size()) + " !";
 
-             throw new std::logic_error(msg);
+            throw new std::logic_error(msg);
         }
 
-        if (data_header.columns + 3 != metadata.schema_offsets.size())
+        if (data_header.get_schema_offsets_size() != metadata.schema_offsets.size())
         {
-            auto msg = std::string("Schema offsets information is invalid, columns=") 
-                + std::to_string(data_header.columns)
-                + ", schema_offsets="
-                + std::to_string(metadata.schema_offsets.size())
-                + " !";
+            auto msg = std::string("Schema offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", schema_offsets=" + std::to_string(metadata.schema_offsets.size()) + " !";
 
-             throw new std::logic_error(msg);
+            throw new std::logic_error(msg);
         }
 
-        if (data_header.columns + 2 != metadata.column_orders_offsets.size())
+        if (data_header.get_column_orders_offsets_size() != metadata.column_orders_offsets.size())
         {
-            auto msg = std::string("Column orders offsets information is invalid, columns=") 
-                + std::to_string(data_header.columns)
-                + ", schema_offsets="
-                + std::to_string(metadata.column_orders_offsets.size())
-                + " !";
+            auto msg = std::string("Column orders offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", schema_offsets=" + std::to_string(metadata.column_orders_offsets.size()) + " !";
 
-             throw new std::logic_error(msg);
+            throw new std::logic_error(msg);
         }
 
-        for (const auto& row_group: metadata.row_groups)
+        for (const auto &row_group : metadata.row_groups)
         {
-            if (data_header.columns + 2 != row_group.column_chunks_offsets.size())
+            if (data_header.get_column_chunks_offsets_size() / metadata.row_groups.size() != row_group.column_chunks_offsets.size())
             {
-                auto msg = std::string("Column chunk offsets information is invalid, columns=") 
-                    + std::to_string(data_header.columns)
-                    + ", column_chunks_offsets="
-                    + std::to_string(row_group.column_chunks_offsets.size())
-                    + " !";
+                auto msg = std::string("Column chunk offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", column_chunks_offsets=" + std::to_string(row_group.column_chunks_offsets.size()) + " !";
 
                 throw new std::logic_error(msg);
             }
@@ -199,16 +198,16 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     }
 
     {
-        std::vector<char> buf(4 * 1024 * 1024);  // 4 MiB
-        std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);    
+        std::vector<char> buf(4 * 1024 * 1024); // 4 MiB
+        std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
         fs.write((const char *)&data_header, sizeof(data_header));
         fs.write((const char *)&metadata.row_numbers, sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
         fs.write((const char *)&metadata.schema_offsets, sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
         fs.write((const char *)&metadata.column_orders_offsets, sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
-        for (const auto& row_group: metadata.row_groups)
-        {            
+        for (const auto &row_group : metadata.row_groups)
+        {
             fs.write((const char *)&row_group.column_chunks_offsets, sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
         }
 
@@ -216,10 +215,9 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     }
 }
 
-std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_file_path, const std::vector<uint32_t>& row_groups)
+std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
 {
-    /*    
-    std::vector<char> buf(4 * 1024 * 1024);  // 4 MiB
+    std::vector<char> buf(4 * 1024 * 1024); // 4 MiB
     std::ifstream fs(index_file_path, std::ios::binary);
     fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
@@ -232,38 +230,18 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
         auto msg = std::string("File '") + index_file_path + "' has unexpected format!";
         throw std::logic_error(msg);
     }
-    
-    uint32_t max_row_groups = FROM_FILE_ENDIANESS(dataHeader.rowGroups);
-    std::vector<DataItem> dataItems (max_row_groups);
-    fs.read((char *)&dataItems[0], sizeof(DataItem) * max_row_groups);
-    
-    std::shared_ptr<parquet::FileMetaData> result = nullptr;
-    for(auto row_group : row_groups)
-    {
-        if (row_group >= max_row_groups)
-        {
-            auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(max_row_groups-1) + " are available!";
-            throw std::logic_error(msg);
-        }
-        
-        uint32_t offset = FROM_FILE_ENDIANESS(dataItems[row_group].offset);
-        uint32_t length = FROM_FILE_ENDIANESS(dataItems[row_group].length);
-        std::vector<char> buffer(length);
-        fs.seekg(offset, std::ios_base::beg);
-        fs.read(&buffer[0], length);
 
-        std::shared_ptr<parquet::FileMetaData> metadata = parquet::FileMetaData::Make(&buffer[0], &length);
-        if (!result)
-        {
-            result = metadata;
-        }
-        else
-        {
-            result->AppendRowGroups(*metadata);
-        }
-    }
+    auto body_size = dataHeader.get_body_byte_size();
+    std::vector<uint8_t> data_body(body_size);
+    fs.read((char *)&data_body[0], data_body.size());
 
-    return result;
-    */
-   return nullptr;
+    auto row_numbers = (uint32_t *)&data_body[0];
+    auto schema_offsets = (uint32_t *)&row_numbers[dataHeader.row_groups];
+    auto row_group_offsets = (uint32_t *)&schema_offsets[1 + 1 + dataHeader.columns + 1];
+    auto column_orders_offsets = (uint32_t *)&row_group_offsets[1 + dataHeader.row_groups + 1];
+    auto column_chunks_offsets = (uint32_t *)&column_orders_offsets[1 + dataHeader.columns + 1];
+    auto metadata_ptr_src = (uint8_t *)&column_orders_offsets[dataHeader.row_groups * (1 + dataHeader.columns + 1)];
+    auto metadata_ptr_dst = metadata_ptr_src;
+
+    return nullptr;
 }
