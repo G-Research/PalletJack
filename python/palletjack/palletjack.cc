@@ -40,7 +40,7 @@ struct DataHeader
     uint32_t get_row_groups_size() { return 1 + row_groups + 1; }                        // 1 + rg + 1
     uint32_t get_column_orders_offsets_size() { return 1 + columns + 1; }                // 1 + c + 1
     uint32_t get_column_chunks_offsets_size() { return row_groups * (1 + columns + 1); } // rg * (1 + c + 1)
-    uint32_t get_body_byte_size()
+    uint32_t get_body_size()
     {
         return get_row_numbers_size() * sizeof(uint32_t) +
                get_schema_offsets_size() * sizeof(uint32_t) +
@@ -203,19 +203,20 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
         fs.write((const char *)&data_header, sizeof(data_header));
-        fs.write((const char *)&metadata.row_numbers, sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
-        fs.write((const char *)&metadata.schema_offsets, sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
-        fs.write((const char *)&metadata.column_orders_offsets, sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
+        fs.write((const char *)&metadata.row_numbers[0], sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
+        fs.write((const char *)&metadata.schema_offsets[0], sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
+        fs.write((const char *)&metadata.row_groups_offsets[0], sizeof(metadata.row_groups_offsets[0]) * metadata.row_groups_offsets.size());
+        fs.write((const char *)&metadata.column_orders_offsets[0], sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
         for (const auto &row_group : metadata.row_groups)
         {
-            fs.write((const char *)&row_group.column_chunks_offsets, sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
+            fs.write((const char *)&row_group.column_chunks_offsets[0], sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
         }
 
         fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
     }
 }
 
-std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
+std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
 {
     std::vector<char> buf(4 * 1024 * 1024); // 4 MiB
     std::ifstream fs(index_file_path, std::ios::binary);
@@ -231,7 +232,7 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
         throw std::logic_error(msg);
     }
 
-    auto body_size = dataHeader.get_body_byte_size();
+    auto body_size = dataHeader.get_body_size();
     std::vector<uint8_t> data_body(body_size);
     fs.read((char *)&data_body[0], data_body.size());
 
@@ -243,5 +244,7 @@ std::shared_ptr<parquet::FileMetaData> ReadRowGroupsMetadata(const char *index_f
     auto metadata_ptr_src = (uint8_t *)&column_orders_offsets[dataHeader.row_groups * (1 + dataHeader.columns + 1)];
     auto metadata_ptr_dst = metadata_ptr_src;
 
-    return nullptr;
+    uint32_t length = dataHeader.metadata_length;
+    std::shared_ptr<parquet::FileMetaData> metadata = parquet::FileMetaData::Make(&metadata_ptr_src[0], &length);
+    return metadata;
 }
