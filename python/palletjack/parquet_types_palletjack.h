@@ -1307,6 +1307,7 @@ class SchemaElement : public virtual ::apache::thrift::TBase {
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot) override;
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const override;
 
+  std::vector<uint32_t> num_children_offsets; // (1 + 1)
 };
 
 void swap(SchemaElement &a, SchemaElement &b);

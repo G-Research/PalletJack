@@ -2598,7 +2598,9 @@ uint32_t SchemaElement::read(::apache::thrift::protocol::TProtocol* iprot) {
         break;
       case 5:
         if (ftype == ::apache::thrift::protocol::T_I32) {
+          num_children_offsets.push_back(xfer);
           xfer += iprot->readI32(this->num_children);
+          num_children_offsets.push_back(xfer);
           this->__isset.num_children = true;
         } else {
           xfer += iprot->skip(ftype);
