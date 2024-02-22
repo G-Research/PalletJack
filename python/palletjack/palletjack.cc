@@ -323,6 +323,18 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         throw std::logic_error(msg);
     }
 
+    if (row_groups.size() > 0)
+    {
+        for(auto row_group : row_groups)
+        {
+            if (row_group >= dataHeader.row_groups)
+            {
+                auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(dataHeader.row_groups-1) + " are available!";
+                throw std::logic_error(msg);
+            }
+        }
+    }    
+
     auto body_size = dataHeader.get_body_size();
     std::vector<uint8_t> data_body(body_size);
     std::vector<uint8_t> data_body_dst(dataHeader.metadata_length);
