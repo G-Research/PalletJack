@@ -352,28 +352,85 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src = schema_elements[dataHeader.columns];
     }
 
-    for (auto row_group = 0; row_group < dataHeader.row_groups; row_group++)
+    auto row_group_filtering = row_groups.size() > 0;
+    if (row_group_filtering)
     {
-        auto row_group_offset = row_groups_offsets[1 + row_group];
-        auto chunks_list = &column_chunks_offsets[(1 + dataHeader.columns + 1) * row_group];
-        auto chunks = &chunks_list[1];
-
-        // START HERE
-        toCopy = row_group_offset + chunks_list[0] - index_src;
+        auto row_groups_list = &row_groups_offsets[0];
+        toCopy = row_groups_list[0] - index_src;
         memcpy(&dst[index_dst], &src[index_src], toCopy);
+        index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size());
+        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, row_groups.size());
+        index_src = row_groups_list[1]; 
+    }
+    else
+    {
+        // copy, including the list
+        auto row_groups_list = &row_groups_offsets[0];
+        toCopy = row_groups_list[1] - index_src;
+        memcpy(&dst[index_dst], &src[index_src], toCopy);
+        index_src += toCopy;
+        index_dst += toCopy;
+    }
+    
+    for (auto idx = 0;;idx++)
+    {
+        size_t row_group_idx = 0;
 
-        for (auto column_to_copy : columns)
+        if (row_group_filtering)
         {
-            toCopy = chunks[column_to_copy + 1] - chunks[column_to_copy];
-            memcpy(&dst[index_dst], &src[row_group_offset + chunks[column_to_copy]], toCopy);
+            if (idx >= row_groups.size())
+                break;
+
+            row_group_idx = row_groups[idx];
+        }
+        else
+        {
+            if (idx >= dataHeader.row_groups)
+                break;
+            
+            row_group_idx = idx;
+        }                
+    
+        auto row_group_offset = row_groups_offsets[1 + row_group_idx];
+        index_src = row_groups_offsets[1 + row_group_idx];
+        if (columns.size () > 0)
+        {
+            auto chunks_list = &column_chunks_offsets[(1 + dataHeader.columns + 1) * row_group_idx];
+            auto chunks = &chunks_list[1];
+
+            // START HERE
+            toCopy = row_group_offset + chunks_list[0] - index_src;
+            memcpy(&dst[index_dst], &src[index_src], toCopy);
             index_dst += toCopy;
+
+            index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size());
+
+            for (auto column_to_copy : columns)
+            {
+                toCopy = chunks[column_to_copy + 1] - chunks[column_to_copy];
+                memcpy(&dst[index_dst], &src[row_group_offset + chunks[column_to_copy]], toCopy);
+                index_dst += toCopy;
+            }
+
+            index_src = row_group_offset + chunks[dataHeader.columns];
+            toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
+            memcpy(&dst[index_dst], &src[index_src], toCopy);
+            index_dst += toCopy;
+            index_src += toCopy;
+        }
+        else
+        {
+             // START HERE
+            toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
+            memcpy(&dst[index_dst], &src[index_src], toCopy);
+            index_dst += toCopy;
+            index_src += toCopy;
         }
 
-        index_src = row_group_offset + chunks[dataHeader.columns];
     }
+    index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size() - 1];
 
     if (columns.size () > 0)
     {
@@ -395,7 +452,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
         index_src = column_orders[dataHeader.columns];
     }
-    
+
     // Copy leftovers
     toCopy = dataHeader.metadata_length - index_src;
     memcpy(&dst[index_dst], &src[index_src], toCopy);
@@ -407,6 +464,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
 
     uint32_t length = index_dst;
-    // DeserializeFileMetadata(&dst[0], length);
+    DeserializeFileMetadata(&dst[0], length);
     return parquet::FileMetaData::Make(&dst[0], &length);
 }
