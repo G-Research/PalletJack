@@ -2963,6 +2963,7 @@ class FileMetaData : public virtual ::apache::thrift::TBase {
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot) override;
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const override;
 
+  std::vector<uint32_t> num_rows_offsets; //2
   std::vector<uint32_t> row_numbers; // rg
   std::vector<uint32_t> schema_offsets; // 1 + 1 + c + 1
   std::vector<uint32_t> row_groups_offsets; // 1 + rg + 1

@@ -35,6 +35,7 @@ struct DataHeader
     uint32_t row_groups = 0;
     uint32_t columns = 0;
     uint32_t metadata_length = 0;
+    uint32_t get_num_rows_offsets_size() { return 2; }                                   // 2   
     uint32_t get_row_numbers_size() { return row_groups; }                               // rg
     uint32_t get_schema_offsets_size() { return 1 + 1 + columns + 1; }                   // 1 + 1 + c + 1
     uint32_t get_schema_num_children_offsets_size() { return (columns + 1) * (1 + 1); }  // (c + 1) * (1 + 1) 
@@ -43,7 +44,8 @@ struct DataHeader
     uint32_t get_column_chunks_offsets_size() { return row_groups * (1 + columns + 1); } // rg * (1 + c + 1)
     uint32_t get_body_size()
     {
-        return get_row_numbers_size() * sizeof(uint32_t) +
+        return get_num_rows_offsets_size() * sizeof(uint32_t) +
+               get_row_numbers_size() * sizeof(uint32_t) +
                get_schema_offsets_size() * sizeof(uint32_t) +
                get_schema_num_children_offsets_size() * sizeof(uint32_t) +
                get_row_groups_offsets_size() * sizeof(uint32_t) +
@@ -140,7 +142,7 @@ size_t WriteListBegin(void *dst, const ::apache::thrift::protocol::TType elemTyp
     return len;
 }
 
-size_t WriteI32(void *dst, uint32_t value)
+size_t WriteI32(void *dst, int32_t value)
 {
     std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
@@ -150,6 +152,23 @@ size_t WriteI32(void *dst, uint32_t value)
     auto tproto = tproto_factory.getProtocol(mem_buffer);
     mem_buffer->resetBuffer();
     tproto->writeI32(value);
+    uint8_t *ptr;
+    uint32_t len;
+    mem_buffer->getBuffer(&ptr, &len);
+    memcpy(dst, ptr, len);
+    return len;
+}
+
+size_t WriteI64(void *dst, int64_t value)
+{
+    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
+    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
+    // Protect against CPU and memory bombs
+    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
+    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
+    auto tproto = tproto_factory.getProtocol(mem_buffer);
+    mem_buffer->resetBuffer();
+    tproto->writeI64(value);
     uint8_t *ptr;
     uint32_t len;
     mem_buffer->getBuffer(&ptr, &len);
@@ -201,17 +220,22 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             throw new std::logic_error("Number of columns is not set!");
         if (data_header.metadata_length == 0)
             throw new std::logic_error("Number of metadata length is not set!");
+        
+        if (data_header.get_num_rows_offsets_size() != metadata.num_rows_offsets.size())
+        {
+            auto msg = std::string("Number of rows offset information is invalid ") + std::to_string(data_header.get_num_rows_offsets_size()) + " != " + std::to_string(metadata.num_rows_offsets.size()) + " !";
+            throw new std::logic_error(msg); 
+        }
+        
         if (data_header.row_groups != metadata.row_numbers.size())
         {
             auto msg = std::string("Row numbers information is invalid ") + std::to_string(data_header.row_groups) + " != " + std::to_string(metadata.row_numbers.size()) + " !";
-
             throw new std::logic_error(msg);
         }
 
         if (data_header.get_schema_offsets_size() != metadata.schema_offsets.size())
         {
             auto msg = std::string("Schema offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", schema_offsets=" + std::to_string(metadata.schema_offsets.size()) + " !";
-
             throw new std::logic_error(msg);
         }
 
@@ -261,6 +285,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
         fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
         fs.write((const char *)&data_header, sizeof(data_header));
+        fs.write((const char *)&metadata.num_rows_offsets[0], sizeof(metadata.num_rows_offsets[0]) * metadata.num_rows_offsets.size());
         fs.write((const char *)&metadata.row_numbers[0], sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
         fs.write((const char *)&metadata.schema_offsets[0], sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
         for (const auto &schema_element : metadata.schema)
@@ -303,7 +328,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     std::vector<uint8_t> data_body_dst(dataHeader.metadata_length);
     fs.read((char *)&data_body[0], data_body.size());
 
-    auto row_numbers = (uint32_t *)&data_body[0];
+    auto num_row_offsets = (uint32_t *)&data_body[0];
+    auto row_numbers = (uint32_t *)&num_row_offsets[dataHeader.get_num_rows_offsets_size()];
     auto schema_offsets = (uint32_t *)&row_numbers[dataHeader.get_row_numbers_size()];
     auto schema_num_children_offsets = (uint32_t *)&schema_offsets[dataHeader.get_schema_offsets_size()];
     auto row_groups_offsets = (uint32_t *)&schema_num_children_offsets[dataHeader.get_schema_num_children_offsets_size()];
@@ -350,6 +376,23 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
 
         index_src = schema_elements[dataHeader.columns];
+    }
+
+    if (row_groups.size() > 0)
+    {
+        int64_t num_rows = 0;
+        for (auto row_group: row_groups)
+        {
+            num_rows += row_numbers[row_group];
+        }
+
+        toCopy = num_row_offsets[0] - index_src;
+        memcpy(&dst[index_dst], &src[index_src], toCopy);
+        index_src += toCopy;
+        index_dst += toCopy;
+
+        index_dst += WriteI64(&dst[index_dst], num_rows);
+        index_src = num_row_offsets[1];
     }
 
     auto row_group_filtering = row_groups.size() > 0;
@@ -428,8 +471,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
             index_dst += toCopy;
             index_src += toCopy;
         }
-
     }
+
     index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size() - 1];
 
     if (columns.size () > 0)

@@ -6961,8 +6961,10 @@ uint32_t FileMetaData::read(::apache::thrift::protocol::TProtocol* iprot) {
         }
         break;
       case 3:
-        if (ftype == ::apache::thrift::protocol::T_I64) {
+        if (ftype == ::apache::thrift::protocol::T_I64) {        
+          this->num_rows_offsets.push_back(xfer);
           xfer += iprot->readI64(this->num_rows);
+          this->num_rows_offsets.push_back(xfer);
           isset_num_rows = true;
         } else {
           xfer += iprot->skip(ftype);
