@@ -92,6 +92,21 @@ class TestPalletJack(unittest.TestCase):
 
             self.assertTrue(f"Requested row_group={rows}, but only 0-{rows-1} are available!" in str(context.exception), context.exception)
 
+    def test_reading_invalid_column(self):
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                path = os.path.join(tmpdirname, "my.parquet")
+                table = get_table()
+
+                pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+                index_path = path + '.index'
+                pj.generate_metadata_index(path, index_path)
+                
+                with self.assertRaises(RuntimeError) as context:
+                    metadata = pj.read_metadata(index_path, row_groups=[], columns=[columns])
+
+                self.assertTrue(f"Requested column={columns}, but only 0-{columns-1} are available!" in str(context.exception), context.exception)
+
     def test_reading_invalid_index_file(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")

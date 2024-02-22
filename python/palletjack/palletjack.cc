@@ -333,7 +333,19 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
                 throw std::logic_error(msg);
             }
         }
-    }    
+    }  
+     
+    if (columns.size() > 0)
+    {
+        for(auto column : columns)
+        {
+            if (column >= dataHeader.columns)
+            {
+                auto msg = std::string("Requested column=") + std::to_string(column) + ", but only 0-" + std::to_string(dataHeader.columns-1) + " are available!";
+                throw std::logic_error(msg);
+            }
+        }
+    }  
 
     auto body_size = dataHeader.get_body_size();
     std::vector<uint8_t> data_body(body_size);
