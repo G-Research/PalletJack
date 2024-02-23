@@ -27,7 +27,7 @@ jobs:
         python-version: "3.10"
     - name: Install thrift
       run: |
-        sudo apt-get install -y libthrift-dev
+        sudo apt-get install -y libthrift-dev libboost-all-dev
 
     - name: Install dependencies
       working-directory: ./python
