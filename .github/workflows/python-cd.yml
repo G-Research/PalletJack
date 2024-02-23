@@ -38,6 +38,11 @@ jobs:
         pip install -r requirements.txt
         pip install cibuildwheel
 
+    - name: Install thrift
+      if: runner.os == 'linux'
+      run: |
+        sudo apt-get install -y libthrift-dev libboost-all-dev
+
     - name: Build sdist (on Linux)
       if: runner.os == 'linux'
       working-directory: ./python
