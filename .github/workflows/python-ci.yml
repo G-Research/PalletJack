@@ -32,7 +32,7 @@ jobs:
         chmod +x bootstrap.sh
         sudo ./bootstrap.sh
         ls -al
-        sudo configure
+        sudo ./configure
         make
 
     - name: Install dependencies
