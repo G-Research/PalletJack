@@ -33,7 +33,7 @@ jobs:
     - name: Install thrift (macOS)
       if: runner.os == 'macos'
       run: |
-        brew "thrift"
+        brew install thrift
 
     - name: Install dependencies
       working-directory: ./python
