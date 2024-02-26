@@ -38,17 +38,6 @@ jobs:
         pip install -r requirements.txt
         pip install cibuildwheel
 
-    - name: Install thrift
-      if: runner.os == 'linux'
-      run: |
-        sudo apt-get install -y libthrift-dev libboost-all-dev
-
-    - name: Build sdist (on Linux)
-      if: runner.os == 'linux'
-      working-directory: ./python
-      run: |
-        python -m build --sdist 
-
     - name: Build wheels
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
@@ -63,6 +52,17 @@ jobs:
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32"
         CIBW_BEFORE_ALL_LINUX: chmod +x ci-script.sh && ./ci-script.sh
+
+    - name: Install thrift
+      if: runner.os == 'linux'
+      run: |
+        sudo apt-get install -y libthrift-dev libboost-all-dev
+
+    - name: Build sdist (on Linux)
+      if: runner.os == 'linux'
+      working-directory: ./python
+      run: |
+        python -m build --sdist 
 
     - uses: actions/upload-artifact@v4
       with:
