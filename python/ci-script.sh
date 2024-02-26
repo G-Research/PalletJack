@@ -4,6 +4,6 @@ git clone https://github.com/apache/thrift.git
 cd thrift
 ./bootstrap.sh
 cat configure
-./configure --with-qt5=no
+./configure --without-qt5
 make
 make install
