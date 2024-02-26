@@ -31,9 +31,8 @@ jobs:
       run: |
         chmod +x bootstrap.sh
         sudo ./bootstrap.sh
-        ls -al
         sudo ./configure
-        make
+        sudo make
 
     - name: Install dependencies
       working-directory: ./python
