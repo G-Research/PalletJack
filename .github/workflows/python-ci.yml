@@ -29,8 +29,8 @@ jobs:
       if: runner.os == 'linux'
       working-directory: ./submodules/thrift
       run: |
-        sudo ls -al
-        sudo bootstrap.sh
+        chmod +x bootstrap.sh
+        sudo ./bootstrap.sh
         sudo configure
         make
 
