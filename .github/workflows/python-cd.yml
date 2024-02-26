@@ -62,7 +62,7 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32"
-        CIBW_BEFORE_ALL_LINUX: yum -y install libevent-devel zlib-devel openssl-devel && git clone https://github.com/apache/thrift.git && cd thrift && ./bootstrap.sh && ./configure --with-lua=no && make && make install
+        CIBW_BEFORE_ALL_LINUX: yum -y install libevent-devel zlib-devel openssl-devel pkg-config && git clone https://github.com/apache/thrift.git && cd thrift && ./bootstrap.sh && ./configure --with-lua=no && make && make install
 
     - uses: actions/upload-artifact@v4
       with:
