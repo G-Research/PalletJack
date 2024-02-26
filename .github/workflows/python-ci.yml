@@ -25,14 +25,15 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
-    - name: Install thrift
+    - name: Install thrift (Linux)
       if: runner.os == 'linux'
-      working-directory: ./submodules/thrift
       run: |
-        chmod +x bootstrap.sh
-        sudo ./bootstrap.sh
-        sudo ./configure
-        sudo make
+        sudo apt-get install -y libthrift-dev libboost-all-dev
+
+    - name: Install thrift (macOS)
+      if: runner.os == 'macos'
+      run: |
+        brew "thrift"
 
     - name: Install dependencies
       working-directory: ./python
@@ -43,7 +44,6 @@ jobs:
         pip install -r requirements.txt
 
     - name: Lint with flake8
-      working-directory: ./python
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
