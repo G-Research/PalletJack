@@ -29,8 +29,8 @@ jobs:
       if: runner.os == 'linux'
       working-directory: ./submodules/thrift
       run: |
-        .bootstrap.sh
-        .configure
+        ./bootstrap.sh
+        ./configure
         make
 
     - name: Install dependencies
