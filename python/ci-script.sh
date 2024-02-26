@@ -1,8 +1,8 @@
 
-yum -y install libevent-devel zlib-devel openssl-devel
+yum -y install libevent-devel zlib-devel openssl-devel pkgconf
 git clone https://github.com/apache/thrift.git
 cd thrift
-./bootstrap.sh  --without-qt5
-./configure
+./bootstrap.sh
+./configure --without-qt5
 make
 make install
