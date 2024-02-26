@@ -8,6 +8,7 @@ cd boost_1_56_0
 git clone https://github.com/apache/thrift.git
 cd thrift
 ./bootstrap.sh
+cat configure
 ./configure --with-lua=no --with-qt5=no
 make
 make install
