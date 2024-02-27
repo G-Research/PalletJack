@@ -13,7 +13,7 @@ git clone https://github.com/apache/thrift.git
 cd thrift
 cp /usr/share/aclocal/pkg.m4 aclocal
 ./bootstrap.sh
-./configure --without-qt5
+./configure -enable-libs=no --with-cpp=yes
 make
 make install
 find /usr -depth -name "*thrift*"
