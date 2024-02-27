@@ -7,9 +7,8 @@ yum -y update
 yum -y groupinstall "Development Tools"
 
 yum -y install libevent-devel zlib-devel openssl-devel 
-yum -y install pkg-conf
 yum -y install flex
-yum -y install libboost-all-dev
+yum -y install boost boost-thread boost-devel
 git clone https://github.com/apache/thrift.git
 cd thrift
 cp /usr/share/aclocal/pkg.m4 aclocal
