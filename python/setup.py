@@ -54,9 +54,9 @@ vcpkg_root = os.getenv('VCPKG_ROOT', 'C:/path/to/vcpkg')
 include_dirs = [os.path.join(vcpkg_root, 'installed/x64-windows/include')]
 library_dirs = [os.path.join(vcpkg_root, 'installed/x64-windows/lib')]
 
-print "VCPKG_ROOT=" + vcpkg_root
-print "include_dirs=" + include_dirs
-print "library_dirs=" + library_dirs
+print ("VCPKG_ROOT=", vcpkg_root)
+print ("include_dirs=", include_dirs)
+print ("library_dirs=", library_dirs)
 
 # Define your extension
 extensions = [
