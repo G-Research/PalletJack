@@ -1,3 +1,8 @@
+cat /etc/os-release
+lsb_release -a
+cat /etc/issue
+uname -a
+
 yum -y update
 yum -y groupinstall "Development Tools"
 
