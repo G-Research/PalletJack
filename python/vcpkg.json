@@ -2,20 +2,7 @@
   "name": "arrow",
   "version-string": "16.0.0-SNAPSHOT",
   "dependencies": [
-    "boost-filesystem",
-    "boost-multiprecision",
-    "boost-process",
-    "boost-system",
-    "boost-crc",
-    "lz4",
-    "openssl",
-    "re2",
-    "snappy",
-    "thrift",
-    "utf8proc",
-    "xsimd",
-    "zlib",
-    "zstd"
+    "thrift"
   ],
   "builtin-baseline": "3d8f78171a2a37d461077bf8d063256b63e25a4f"
 }
