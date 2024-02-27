@@ -16,3 +16,4 @@ cp /usr/share/aclocal/pkg.m4 aclocal
 ./configure --without-qt5
 make
 make install
+find /usr -depth -name "*thrift*"
