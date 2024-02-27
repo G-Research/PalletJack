@@ -30,12 +30,7 @@ jobs:
       working-directory: ./python
       if: runner.os == 'windows'
       run: |
-        vcpkg install ^
-        --triplet x64-windows ^
-        --x-manifest-root cpp  ^
-        --feature-flags=versions ^
-        --clean-after-build ^
-        || exit /B 1
+        vcpkg install --triplet x64-windows --x-manifest-root cpp --feature-flags=versions --clean-after-build || exit /B 1
 
     - name: Install thrift (Linux)
       if: runner.os == 'linux'
