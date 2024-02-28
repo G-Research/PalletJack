@@ -65,7 +65,7 @@ extensions = [
     Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc", "palletjack/parquet_types_palletjack.cpp"],
         include_dirs = include_dirs,  
         library_dirs = library_dirs,
-        libraries=["arrow", "parquet", "thriftmd" if sys.platform.startswith('win') else "thrift"], 
+        libraries=["arrow", "parquet", "thriftmt" if sys.platform.startswith('win') else "thrift"], 
         language = "c++",
         extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
         # extra_objects=["libthrift.a"],) ?
