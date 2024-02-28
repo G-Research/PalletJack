@@ -26,11 +26,27 @@ jobs:
       with:
         python-version: "3.10"
 
+    - name: Before Install thrift (Windows)
+      working-directory: ./python
+      if: runner.os == 'windows'
+      shell: bash
+      run: |
+        env
+        printenv
+
     - name: Install thrift (Windows)
       working-directory: ./python
       if: runner.os == 'windows'
       run: |
-        vcpkg install --triplet x64-windows --x-manifest-root . --feature-flags=versions --clean-after-build
+        vcpkg install --triplet x64-windows --x-manifest-root . --feature-flags=versions
+
+    - name: After Install thrift (Windows)
+      working-directory: ./python
+      if: runner.os == 'windows'
+      shell: bash
+      run: |
+        env
+        printenv
 
     - name: Install thrift (Linux)
       if: runner.os == 'linux'
