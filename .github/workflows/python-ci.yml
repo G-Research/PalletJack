@@ -121,5 +121,4 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32"
-        VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
-        CIBW_BEFORE_ALL_LINUX: yum -y install tree && tree .
+        CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
