@@ -39,6 +39,7 @@ jobs:
       if: runner.os == 'windows'
       run: |
         vcpkg install --triplet x64-windows --x-manifest-root . --feature-flags=versions
+        vcpkg integrate install
 
     - name: After Install thrift (Windows)
       working-directory: ./python
