@@ -83,7 +83,8 @@ jobs:
         vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
       env:
         VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/cache/vcpkg,readwrite
-
+        VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
+        
     - name: Install dependencies
       working-directory: ./python
       shell: bash
@@ -103,3 +104,5 @@ jobs:
       run: |
         pip install --editable . -v
         pytest
+      env:
+        VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
