@@ -33,6 +33,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install -r requirements.txt
+        pip install cibuildwheel
 
     - name: Lint with flake8
       run: |
@@ -96,6 +97,21 @@ jobs:
       env:
         VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/cache/vcpkg,readwrite
         VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
+
+    - name: Build wheels
+      working-directory: ./python
+      run: python -m cibuildwheel --output-dir dist
+      # to supply options, put them in 'env', like:
+      env:
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.1500 --exclude libparquet.so.1500 -w {dest_dir} {wheel}
+        CIBW_ENVIRONMENT: CYTHONIZE=1
+        CIBW_BUILD_VERBOSITY: 1
+        # We use manylinux_2_28 for ABI compatibility with pyarrow
+        # With the default image we were getting "undefined symbol: _ZNK5arrow6Status8ToStringEv" error (e.g https://github.com/ray-project/ray/issues/24566) 
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
+        # Disable unsupported builds
+        CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32"
+        CIBW_BEFORE_ALL_LINUX: chmod +x ci-script.sh && ./ci-script.sh
 
     - name: Test with pytest
       working-directory: ./python
