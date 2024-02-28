@@ -1,6 +1,6 @@
 {
-  "name": "arrow",
-  "version-string": "16.0.0-SNAPSHOT",
+  "name": "PalletJack",
+  "version": "1.0.0",
   "dependencies": [
     "thrift"
   ],
