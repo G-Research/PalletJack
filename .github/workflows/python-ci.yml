@@ -88,13 +88,6 @@ jobs:
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install bison
-      
-    # Ensure vcpkg builtin registry is up-to-date
-    - name: Update vcpkg builtin registry
-      working-directory: ${{ steps.vcpkg-info.outputs.root }}
-      run: |
-        git reset --hard
-        git pull
 
     - name: Install thrift
       working-directory: ./python
