@@ -49,10 +49,10 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-# Example paths, adjust as necessary
-vcpkg_root = os.getenv('VCPKG_ROOT', 'C:/path/to/vcpkg')
-include_dirs = [os.path.join(vcpkg_root, 'installed/x64-windows/include')]
-library_dirs = [os.path.join(vcpkg_root, 'installed/x64-windows/lib')]
+# 
+vcpkg_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed/x64-linux')
+include_dirs = [os.path.join(vcpkg_root, 'include'), pyarrow.get_include(), numpy.get_include()]
+library_dirs = [os.path.join(vcpkg_root, 'lib')] + pyarrow.get_library_dirs()
 
 print ("VCPKG_ROOT=", vcpkg_root)
 print ("include_dirs=", include_dirs)
@@ -61,11 +61,12 @@ print ("library_dirs=", library_dirs)
 # Define your extension
 extensions = [
     Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc", "palletjack/parquet_types_palletjack.cpp"],
-        include_dirs = [pyarrow.get_include(), numpy.get_include()],  
-        library_dirs = pyarrow.get_library_dirs(),
+        include_dirs = include_dirs,  
+        library_dirs = library_dirs,
         libraries=["arrow", "parquet", "thrift"], 
         language = "c++",
         extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
+        # extra_objects=["libthrift.a"],) ?
     )
 ]
 
