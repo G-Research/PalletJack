@@ -122,4 +122,4 @@ jobs:
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32"
         VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
-        CIBW_BEFORE_ALL_LINUX: tree .
+        CIBW_BEFORE_ALL_LINUX: yum -y install tree && tree .
