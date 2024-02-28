@@ -98,6 +98,16 @@ jobs:
         VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/cache/vcpkg,readwrite
         VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
 
+    - name: Test with pytest
+      working-directory: ./python
+      shell: bash
+      run: |
+        find . -depth -name "*thrift*" 
+        pip install --editable . -v
+        pytest
+      env:
+        VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
+
     - name: Build wheels
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
@@ -111,13 +121,4 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32"
-
-    - name: Test with pytest
-      working-directory: ./python
-      shell: bash
-      run: |
-        find . -depth -name "*thrift*" 
-        pip install --editable . -v
-        pytest
-      env:
         VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
