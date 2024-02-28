@@ -18,12 +18,7 @@
 #include <functional>
 #include <memory>
 
-// OPTIONAL fix-up on Windows
-#ifdef _WIN32
-#ifdef OPTIONAL
-#undef OPTIONAL
-#endif
-#endif // _WIN32
+#include "windows_fixup.h"
 
 namespace palletjack
 {
