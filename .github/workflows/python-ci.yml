@@ -50,9 +50,9 @@ jobs:
 
     # Check for cached vcpkg dependencies (use these if we can).
     - name: Get cached vcpkg dependencies
-      working-directory: ./python
       id: get-cached-vcpkg
       uses: actions/cache@v3
+      working-directory: ./python
       with:
         path: cache/vcpkg
         # https://vcpkg.readthedocs.io/en/stable/users/binarycaching/
