@@ -84,6 +84,11 @@ jobs:
           vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}
           vcpkg-${{ steps.vcpkg-info.outputs.triplet }}
 
+    # Install vcpkg dependencies
+    - name: Install vcpkg build dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: brew install bison
+      
     # Ensure vcpkg builtin registry is up-to-date
     - name: Update vcpkg builtin registry
       working-directory: ${{ steps.vcpkg-info.outputs.root }}
