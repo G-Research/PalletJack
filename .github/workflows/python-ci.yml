@@ -25,6 +25,21 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+        
+    - name: Install dependencies
+      working-directory: ./python
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        pip install -r requirements.txt
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
    # Compute vcpkg triplet and root
     - name: Compute vcpkg triplet and root
@@ -52,7 +67,6 @@ jobs:
     - name: Get cached vcpkg dependencies
       id: get-cached-vcpkg
       uses: actions/cache@v3
-      working-directory: ./python
       with:
         path: cache/vcpkg
         # https://vcpkg.readthedocs.io/en/stable/users/binarycaching/
@@ -64,9 +78,9 @@ jobs:
         # - & more... (subject to change without notice)
         #
         # We use Vcpkg and C/C++ compilers which are preinstalled on the runner, so we include the runner's image identity as part of the hash key.
-        key: vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}-vcpkg_json:${{ hashFiles('vcpkg*.json') }}-runner:${{ steps.vcpkg-info.outputs.runner_info }}
+        key: vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}-vcpkg_json:${{ hashFiles('**/vcpkg*.json') }}-runner:${{ steps.vcpkg-info.outputs.runner_info }}
         restore-keys: |
-          vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}-vcpkg_json:${{ hashFiles('vcpkg*.json') }}
+          vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}-vcpkg_json:${{ hashFiles('**/vcpkg*.json') }}
           vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}
           vcpkg-${{ steps.vcpkg-info.outputs.triplet }}
 
@@ -84,21 +98,7 @@ jobs:
       env:
         VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/cache/vcpkg,readwrite
         VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
-        
-    - name: Install dependencies
-      working-directory: ./python
-      shell: bash
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        pip install -r requirements.txt
 
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       working-directory: ./python
       run: |
