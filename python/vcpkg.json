@@ -1,5 +1,5 @@
 {
-  "name": "PalletJack",
+  "name": "pallet-jack",
   "version": "1.0.0",
   "dependencies": [
     "thrift"
