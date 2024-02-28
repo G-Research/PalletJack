@@ -52,11 +52,11 @@ class PyTest(TestCommand):
 # 
 
 
-vcpkg_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed', os.environ.get('VCPKG_TARGET_TRIPLET', ""))
-include_dirs = [os.path.join(vcpkg_root, 'include'), pyarrow.get_include(), numpy.get_include()]
-library_dirs = [os.path.join(vcpkg_root, 'lib')] + pyarrow.get_library_dirs()
+vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed', os.getenv('VCPKG_TARGET_TRIPLET', ''))
+include_dirs = [os.path.join(vcpkg_installed, 'include'), pyarrow.get_include(), numpy.get_include()]
+library_dirs = [os.path.join(vcpkg_installed, 'lib')] + pyarrow.get_library_dirs()
 
-print ("VCPKG_ROOT=", vcpkg_root)
+print ("VCPKG_ROOT=", vcpkg_installed)
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)
 
