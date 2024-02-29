@@ -11,7 +11,7 @@ permissions:
 
 jobs:
 
-  build:
+  build-me:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
 
     strategy:
