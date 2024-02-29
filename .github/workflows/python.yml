@@ -11,8 +11,40 @@ permissions:
 
 jobs:
 
-  build:
+  test:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+        
+    - name: Install dependencies
+      working-directory: ./python
+      shell: bash
+      run: |
+        sudo apt-get install -y libthrift-dev libboost-all-dev
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 pytest cibuildwheel build pytest
 
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest
+      working-directory: ./python
+      run: |
+        pip install --editable . 
+        pytest
+
+  build:
+    needs: test
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     strategy:
       matrix:
@@ -35,13 +67,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install flake8 pytest cibuildwheel build
-
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     # Compute vcpkg triplet and root
     - name: Compute vcpkg triplet and root
@@ -126,7 +151,7 @@ jobs:
         name: dist-${{ matrix.os }}
         path: ./python/dist/*
 
-  test:
+  test-binary:
     needs: build
     strategy:
       matrix:
@@ -151,7 +176,9 @@ jobs:
           
     - name: Test with pytest
       run: |
-        tree .
+        tree ./dist
+        python -m pip install --upgrade pip
+        pip install pytest
         pip install PalletJack --find-links ./dist
         pytest
 
