@@ -16,6 +16,7 @@ jobs:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     strategy:
       matrix:
+        #os: [ubuntu-latest, windows-latest, macos-latest]
         os: [ubuntu-latest]
       fail-fast: false
 
@@ -129,6 +130,7 @@ jobs:
     needs: build
     strategy:
       matrix:
+        #os: [ubuntu-latest, windows-latest, macos-latest]
         os: [ubuntu-latest]
       fail-fast: false
 
@@ -148,8 +150,8 @@ jobs:
         merge-multiple: true
           
     - name: Test with pytest
-      working-directory: ./python
       run: |
+        tree .
         pip install PalletJack --no-index --find-links ./dist
         pytest
 
