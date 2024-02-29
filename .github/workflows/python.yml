@@ -152,7 +152,7 @@ jobs:
     - name: Test with pytest
       run: |
         tree .
-        pip install PalletJack --no-index --find-links ./dist
+        pip install PalletJack --find-links ./dist
         pytest
 
   benchmarks:
