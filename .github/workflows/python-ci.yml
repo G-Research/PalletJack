@@ -55,7 +55,7 @@ jobs:
             triplet+="osx"
             ;;
           Windows)
-            triplet+="windows-static"
+            triplet+="windows"
             ;;
         esac
         echo "triplet=$triplet" >> $GITHUB_OUTPUT
