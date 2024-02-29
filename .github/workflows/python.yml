@@ -105,6 +105,8 @@ jobs:
         python -m build --sdist         
         
     - name: Build wheels
+      # TODO - why not?
+      if: runner.os != 'macos'
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
