@@ -12,8 +12,8 @@ permissions:
 jobs:
 
   build:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
 
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -43,7 +43,7 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-   # Compute vcpkg triplet and root
+    # Compute vcpkg triplet and root
     - name: Compute vcpkg triplet and root
       id: vcpkg-info
       run: |
@@ -115,7 +115,7 @@ jobs:
       run: |
         python -m build --sdist         
         
-   - name: Build wheels
+    - name: Build wheels
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
@@ -133,3 +133,97 @@ jobs:
       with:
         name: dist-${{ matrix.os }}
         path: ./python/dist/*
+
+  test:
+    needs: build
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: dist-*
+        path: dist
+        merge-multiple: true
+          
+    - name: Test with pytest
+      working-directory: ./python
+      run: |
+        pip install --editable dist 
+        pytest
+
+  benchmarks:
+    needs: build
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: dist-*
+        path: dist
+        merge-multiple: true
+          
+    - name: Test with pytest
+      run: |
+        pip install dist 
+        pytest
+        
+    - name: Run benchmarks
+      run: |      
+        pip install dist
+        python3 ./benchmarks/benchmark_palletjack_metadata.py
+
+  publish:
+    if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
+    needs: build,test,benchmarks
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: dist-*
+        path: dist
+        merge-multiple: true
+    
+    - name: Display structure of downloaded files
+      run: ls -R dist
+    
+    - name: Validate tag
+      shell: pwsh
+      run: |
+        $tag = "${{ github.ref }}".SubString(11)
+        $expectedFile = "dist/palletjack-$tag.tar.gz"
+    
+        # Check whether the tag and the package version match together
+        if (-not (Test-Path -Path $expectedFile)) {
+            echo "::error ::Expected file $expectedFile doesn't exist"
+            exit 1
+        }
+    
+    - name: Publish to PyPi
+      uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        packages-dir: dist	
+    
