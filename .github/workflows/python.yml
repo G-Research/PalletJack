@@ -27,7 +27,7 @@ jobs:
         # tree ./dist
         pip3 install pytest
         pip3 install PalletJack
-        pip3 python3 test/test_palletjack.py
+        python3 test/test_palletjack.py
         pytest
 
   test:
