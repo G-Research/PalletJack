@@ -26,7 +26,7 @@ jobs:
       run: |
         pip3 install pytest
         pip3 install PalletJack
-        pytest
+        python3 -m pytest
 
   test:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
