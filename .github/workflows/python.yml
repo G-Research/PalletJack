@@ -175,6 +175,7 @@ jobs:
         merge-multiple: true
           
     - name: Test with pytest
+      working-directory: ./python
       run: |
         # tree ./dist
         python -m pip install --upgrade pip
