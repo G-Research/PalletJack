@@ -21,11 +21,15 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Test with pytest
+    - name: Test with pytest1
       working-directory: ./python
       run: |
         pip3 install pytest
         pip3 install PalletJack
+        
+    - name: Test with pytest2
+      working-directory: ./python
+      run: |
         python3 -m pytest
 
   test:
