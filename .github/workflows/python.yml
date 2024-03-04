@@ -179,7 +179,8 @@ jobs:
         tree ./dist
         python -m pip install --upgrade pip
         pip install pytest
-        pip install PalletJack --pre --find-links ./dist
+        pip install PalletJack
+        # pip install PalletJack --pre --find-links ./dist
         pytest
 
   benchmarks:
