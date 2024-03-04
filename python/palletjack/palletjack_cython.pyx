@@ -19,7 +19,7 @@ cpdef read_row_groups_metadata(index_file_path, row_groups):
 
     return read_metadata(index_file_path, row_groups, [])
 
-cpdef read_metadata(index_file_path, row_groups, columns):
+cpdef read_metadata(index_file_path, row_groups = [], columns = []):
 
     cdef shared_ptr[CFileMetaData] c_metadata
     cdef string encoded_path = index_file_path.encode('utf8')
