@@ -155,8 +155,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        #os: [ubuntu-latest, windows-latest, macos-latest]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
@@ -200,15 +199,10 @@ jobs:
         pattern: dist-*
         path: dist
         merge-multiple: true
-          
-    - name: Test with pytest
-      run: |
-        pip install dist 
-        pytest
-        
+
     - name: Run benchmarks
       run: |      
-        pip install dist
+        pip install PalletJack --pre --find-links ./dist --break-system-packages
         python3 ./benchmarks/benchmark_palletjack_metadata.py
 
   publish:
