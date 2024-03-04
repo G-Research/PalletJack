@@ -21,17 +21,14 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Test with pytest1
+    - name: Test with pytes
       working-directory: ./python
       run: |
         pip3 install pytest
         pip3 install PalletJack
-        
-    - name: Test with pytest2
-      working-directory: ./python
-      run: |
+        pip3 install Cython
         python3 -m pytest
-
+        
   test:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     runs-on: ubuntu-latest
