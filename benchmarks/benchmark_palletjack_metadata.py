@@ -47,7 +47,7 @@ def worker_palletjack_row_group():
         metadata = pj.read_metadata(index_path, row_groups = [r])
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata = metadata)
-        pr.read_row_groups([0], column_indices = [0,1,2], use_threads=False)
+        pr.read_row_groups([0], column_indices = all_columns, use_threads=False)
 
 def worker_arrow_column():
     
@@ -65,12 +65,12 @@ def worker_palletjack_column():
         pr.read_row_groups(all_row_groups, column_indices=[0], use_threads=False)
 
 def worker_arrow_row_groups():
-    row_groups_batches = [all_row_groups[i:i+batch_size] for i in range(0, len(all_row_groups), batch_size)]
 
+    row_groups_batches = [all_row_groups[i:i+batch_size] for i in range(0, len(all_row_groups), batch_size)]
     for row_groups_batch in row_groups_batches:
         pr = pq.ParquetReader()
         pr.open(parquet_path)        
-        pr.read_row_groups(row_groups_batch, column_indices=[0,1,2], use_threads=False)
+        pr.read_row_groups(row_groups_batch, use_threads=False)
 
 def worker_palletjack_rowgroups():
     
@@ -79,7 +79,7 @@ def worker_palletjack_rowgroups():
         metadata = pj.read_metadata(index_path, row_groups = row_groups_batch)
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata=metadata)
-        pr.read_row_groups(range(0, len(row_groups_batch)), column_indices=[0,1,2], use_threads=False)
+        pr.read_row_groups(range(0, len(row_groups_batch)), use_threads=False)
 
 def worker_arrow_columns():
 
