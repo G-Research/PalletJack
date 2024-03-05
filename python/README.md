@@ -6,8 +6,7 @@ PalletJack reduces the amount of metadata bytes that need to be read and decoded
 ## Features
 
 - Storing parquet metadata in an indexed format
-- Reading parquet metadata for a single row group
-- Reading parquet metadata for multiple row groups
+- Reading parquet metadata for a subset of row groups and columns
 
 ## Required:
 
@@ -50,21 +49,29 @@ index_path = path + '.index'
 pj.generate_metadata_index(path, index_path)
 ```
 
-### Reading a row group using the indexed metadata:
-```
-row_group = 5
-metadata = pj.read_metadata(index_path, [row_group])
-pr = pq.ParquetReader()
-pr.open(path, metadata=metadata)
-
-data = pr.read_row_groups([0])
-```
-
-### Reading multiple row groups using the indexed metadata:
+### Reading some row groups using the indexed metadata:
 ```
 metadata = pj.read_metadata(index_path, row_groups = [5, 7])
 pr = pq.ParquetReader()
 pr.open(path, metadata=metadata)
 
-data = pr.read_row_groups([0, 1])
+data = pr.read_all()
+```
+
+### Reading some columns using the indexed metadata:
+```
+metadata = pj.read_metadata(index_path, columns = [1, 3])
+pr = pq.ParquetReader()
+pr.open(path, metadata=metadata)
+
+data = pr.read_all()
+```
+
+### Reading some row groups and some columns using the indexed metadata:
+```
+metadata = pj.read_metadata(index_path, row_groups = [5, 7], columns = [1, 3])
+pr = pq.ParquetReader()
+pr.open(path, metadata=metadata)
+
+data = pr.read_all()
 ```
