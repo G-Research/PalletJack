@@ -204,7 +204,7 @@ jobs:
 
   publish:
     if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
-    needs: [build, test, benchmarks]
+    needs: [test-binary]
     runs-on: ubuntu-latest
     steps:
 
