@@ -301,7 +301,9 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         }
 
         uint32_t offset = fs.tellp();
-        std::cerr << " Writing thrift offset: " << offset << std::endl;
+        #ifdef DEBUG
+            std::cerr << " Writing thrift offset: " << offset << std::endl;
+        #endif
 
         fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
     }
@@ -525,10 +527,11 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     memcpy(&dst[index_dst], &src[index_src], toCopy);
     index_dst += toCopy;
 
-    // TODO - remove this
-    std::cerr << " Reading body_size: " << body_size << std::endl;
-    std::cerr << " Reading thrift offset: " << src - &data_body[0] << std::endl;
-    std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
+    #ifdef DEBUG
+        std::cerr << " Reading body_size: " << body_size << std::endl;
+        std::cerr << " Reading thrift offset: " << src - &data_body[0] << std::endl;
+        std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
+    #endif
 
     uint32_t length = index_dst;
     DeserializeFileMetadata(&dst[0], length);
