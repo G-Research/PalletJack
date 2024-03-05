@@ -38,7 +38,7 @@ def worker_arrow_row_group():
     
     for r in range(0, row_groups):
         pr = pq.ParquetReader()
-        pr.open(parquet_path)        
+        pr.open(parquet_path)
         pr.read_row_groups([r], use_threads=False)
 
 def worker_palletjack_row_group():
