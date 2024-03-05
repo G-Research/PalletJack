@@ -12,18 +12,15 @@ from pyarrow._parquet cimport *
 def generate_metadata_index(parquet_path, index_file_path):
     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
 
-cpdef read_row_group_metadata(index_file_path, row_group):
-    return read_row_groups_metadata(index_file_path, [row_group])
-
-cpdef read_row_groups_metadata(index_file_path, row_groups):
+cpdef read_metadata(index_file_path, row_groups = [], columns = []):
 
     cdef shared_ptr[CFileMetaData] c_metadata
     cdef string encoded_path = index_file_path.encode('utf8')
     cdef vector[uint32_t] crow_groups = row_groups
+    cdef vector[uint32_t] ccolumns = columns
     with nogil:
-        c_metadata = cpalletjack.ReadRowGroupsMetadata(encoded_path.c_str(), crow_groups)
+        c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumns)
 
-    # Can we jsut create our own copy of file metadata ? It is a python, so no one cares if we reurn another type of object 
     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
     m.init(c_metadata)
     return m

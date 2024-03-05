@@ -49,14 +49,24 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
+vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed', os.getenv('VCPKG_TARGET_TRIPLET', ''))
+include_dirs = [os.path.join(vcpkg_installed, 'include'), pyarrow.get_include(), numpy.get_include()]
+library_dirs = [os.path.join(vcpkg_installed, 'lib')] + pyarrow.get_library_dirs()
+
+print ("VCPKG_ROOT=", vcpkg_installed)
+print ("include_dirs=", include_dirs)
+print ("library_dirs=", library_dirs)
+
+extra_compile_args = [] # ['-DDEBUG']
+
 # Define your extension
 extensions = [
-    Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc"],
-        include_dirs = [pyarrow.get_include(), numpy.get_include()],  
-        library_dirs = pyarrow.get_library_dirs(),
-        libraries=["arrow", "parquet"], 
+    Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc", "palletjack/parquet_types_palletjack.cpp"],
+        include_dirs = include_dirs,  
+        library_dirs = library_dirs,
+        libraries=["arrow", "parquet", "thriftmd" if sys.platform.startswith('win') else "thrift"], 
         language = "c++",
-        extra_compile_args = ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
+        extra_compile_args = extra_compile_args + ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
     )
 ]
 
@@ -64,7 +74,7 @@ CYTHONIZE = bool(int(os.getenv("CYTHONIZE", 0))) and cythonize is not None
 
 if CYTHONIZE:
     compiler_directives = {"language_level": 3, "embedsignature": True}
-    extensions = cythonize(extensions, compiler_directives=compiler_directives)
+    extensions = cythonize(extensions, compiler_directives=compiler_directives, )
 else:
     extensions = no_cythonize(extensions)
 

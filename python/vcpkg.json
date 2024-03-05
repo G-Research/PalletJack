@@ -1,0 +1,8 @@
+{
+  "name": "pallet-jack",
+  "version": "1.0.0",
+  "dependencies": [
+    "thrift"
+  ],
+  "builtin-baseline": "3d8f78171a2a37d461077bf8d063256b63e25a4f"
+}
