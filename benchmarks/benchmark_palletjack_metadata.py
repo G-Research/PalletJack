@@ -11,7 +11,7 @@ row_groups = 200
 columns = 200
 chunk_size = 1000
 rows = row_groups * chunk_size
-work_items = 64
+work_items = 32
 batch_size = 10
 
 all_columns = list(range(0, columns))
@@ -146,7 +146,7 @@ def measure_reading(max_workers, worker):
     return time.time() - t
 
 table = get_table()
-genrate_data(table, True)
+genrate_data(table)
 
 print(f"Reading a single row group using arrow (single-threaded) {measure_reading(1, worker_arrow_row_group):.2f} seconds")
 print(f"Reading a single row group using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group):.2f} seconds")
