@@ -34,7 +34,7 @@ def get_table():
 def worker_palletjack():
     
     for r in range(0, row_groups):
-        metadata = pj.read_row_group_metadata(index_path, r)
+        metadata = pj.read_metadata(index_path, row_groups[r])
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata=metadata)
         res_data = pr.read_row_groups([0], column_indices=[0,1,2], use_threads=False)
@@ -42,12 +42,12 @@ def worker_palletjack():
 def worker_palletjack_row_group_metadata():
     
     for r in range(0, row_groups):
-        metadata = pj.read_row_group_metadata(index_path, r)
+        metadata = pj.read_metadata(index_path, [r])
 
 def worker_palletjack_row_groups_metadata():
     
     for r in range(0, row_groups):
-        metadata = pj.read_row_groups_metadata(index_path, [r])
+        metadata = pj.read_metadata(index_path, row_groups = [r])
 
 def worker_palletjack_rowgroups():
     

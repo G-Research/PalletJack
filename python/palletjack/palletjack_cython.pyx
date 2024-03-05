@@ -12,13 +12,6 @@ from pyarrow._parquet cimport *
 def generate_metadata_index(parquet_path, index_file_path):
     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
 
-cpdef read_row_group_metadata(index_file_path, row_group):
-    return read_row_groups_metadata(index_file_path, [row_group])
-
-cpdef read_row_groups_metadata(index_file_path, row_groups):
-
-    return read_metadata(index_file_path, row_groups, [])
-
 cpdef read_metadata(index_file_path, row_groups = [], columns = []):
 
     cdef shared_ptr[CFileMetaData] c_metadata

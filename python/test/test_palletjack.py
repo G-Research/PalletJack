@@ -81,7 +81,7 @@ class TestPalletJack(unittest.TestCase):
                 res_data_org = pr.read_row_groups([r], use_threads=False)
 
                 # Reading using the indexed metadata
-                metadata = pj.read_row_group_metadata(index_path, r)
+                metadata = pj.read_metadata(index_path, row_groups = [r])
                 pr = pq.ParquetReader()
                 pr.open(path, metadata=metadata)
 
@@ -105,7 +105,7 @@ class TestPalletJack(unittest.TestCase):
             res_data_org = pr.read_row_groups([2, 3, 4], use_threads=False)
             
             # Reading using the indexed metadata
-            metadata = pj.read_row_groups_metadata(index_path, [2, 3, 4])
+            metadata = pj.read_metadata(index_path, row_groups = [2, 3, 4])
             pr = pq.ParquetReader()
             pr.open(path, metadata=metadata)
 
@@ -123,7 +123,7 @@ class TestPalletJack(unittest.TestCase):
             pj.generate_metadata_index(path, index_path)
             
             with self.assertRaises(RuntimeError) as context:
-                metadata = pj.read_row_group_metadata(index_path, n_row_groups)
+                metadata = pj.read_metadata(index_path, [n_row_groups])
 
             self.assertTrue(f"Requested row_group={n_row_groups}, but only 0-{n_row_groups-1} are available!" in str(context.exception), context.exception)
 
@@ -150,7 +150,7 @@ class TestPalletJack(unittest.TestCase):
             pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
 
             with self.assertRaises(Exception) as context:
-                metadata = pj.read_row_group_metadata(path, n_row_groups)
+                metadata = pj.read_metadata(path, [0])
 
             self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
 
@@ -185,7 +185,7 @@ class TestPalletJack(unittest.TestCase):
             res_data_org = pr.read_row_groups([r], use_threads=False)
 
             # Reading using the indexed metadata
-            metadata = pj.read_row_group_metadata(expected_index_path, r)
+            metadata = pj.read_metadata(expected_index_path, row_groups = [r])
             pr = pq.ParquetReader()
             pr.open(path, metadata=metadata)
 

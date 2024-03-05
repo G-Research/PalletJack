@@ -4,57 +4,57 @@
 {
     "distutils": {
         "depends": [
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/numpy/core/include/numpy/halffloat.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/api.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/array/concatenate.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/builder.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/abi.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/bridge.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack_abi.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/api.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/expression.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/config.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/csv/api.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension/fixed_shape_tensor.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension_type.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/io/api.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/ipc/api.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/options.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/reader.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/api.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/arrow_to_pandas.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/async.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/benchmark.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/common.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/csv.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/extension_type.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/gdb.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/inference.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/init.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/ipc.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/platform.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/pyarrow.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/udf.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/result.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/byte_size.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/cancel.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/compression.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/decimal.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/future.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/io_util.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/iterator.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/key_value_metadata.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/thread_pool.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/value_parsing.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/reader.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/schema.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/writer.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/reader.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/schema.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/writer.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/encryption/encryption.h",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/properties.h"
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/numpy/core/include/numpy/halffloat.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/api.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/array/concatenate.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/builder.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/abi.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/bridge.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack_abi.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/api.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/expression.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/config.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/csv/api.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension/fixed_shape_tensor.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension_type.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/io/api.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/ipc/api.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/options.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/reader.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/api.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/arrow_to_pandas.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/async.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/benchmark.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/common.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/csv.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/extension_type.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/gdb.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/inference.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/init.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/ipc.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/platform.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/pyarrow.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/udf.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/result.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/byte_size.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/cancel.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/compression.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/decimal.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/future.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/io_util.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/iterator.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/key_value_metadata.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/thread_pool.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/value_parsing.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/reader.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/schema.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/writer.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/reader.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/schema.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/writer.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/encryption/encryption.h",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/properties.h"
         ],
         "extra_compile_args": [
             "-std=c++17"
@@ -62,8 +62,8 @@
         "include_dirs": [
             ".",
             "/workspace/PalletJack/python/vcpkg_installed/include",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow/include",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/numpy/core/include"
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow/include",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/numpy/core/include"
         ],
         "language": "c++",
         "libraries": [
@@ -73,7 +73,7 @@
         ],
         "library_dirs": [
             "/workspace/PalletJack/python/vcpkg_installed/lib",
-            "/tmp/pip-build-env-kktqtylx/overlay/local/lib/python3.10/dist-packages/pyarrow",
+            "/tmp/pip-build-env-fkptbo12/overlay/local/lib/python3.10/dist-packages/pyarrow",
             "/usr/local/lib"
         ],
         "name": "palletjack.palletjack_cython",
@@ -2049,8 +2049,8 @@ struct __pyx_opt_args_7pyarrow_8_parquet__create_arrow_writer_properties {
 };
 struct __pyx_opt_args_10palletjack_17palletjack_cython_read_metadata;
 
-/* "palletjack/palletjack_cython.pyx":22
- *     return read_metadata(index_file_path, row_groups, [])
+/* "palletjack/palletjack_cython.pyx":15
+ *     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
  * cpdef read_metadata(index_file_path, row_groups = [], columns = []):             # <<<<<<<<<<<<<<
  * 
@@ -5223,8 +5223,6 @@ static std::shared_ptr< arrow::Table>  (*__pyx_f_7pyarrow_3lib_pyarrow_unwrap_ta
 /* Module declarations from "palletjack.cpalletjack" */
 
 /* Module declarations from "palletjack.palletjack_cython" */
-static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_row_group_metadata(PyObject *, PyObject *, int __pyx_skip_dispatch); /*proto*/
-static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_row_groups_metadata(PyObject *, PyObject *, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_10palletjack_17palletjack_cython_read_metadata *__pyx_optional_args); /*proto*/
 static std::string __pyx_convert_string_from_py_std__in_string(PyObject *); /*proto*/
 static std::vector<uint32_t>  __pyx_convert_vector_from_py_uint32_t(PyObject *); /*proto*/
@@ -5241,7 +5239,7 @@ static PyObject *__pyx_builtin_RuntimeError;
 static const char __pyx_k__4[] = "*";
 static const char __pyx_k_pa[] = "pa";
 static const char __pyx_k_pq[] = "pq";
-static const char __pyx_k__14[] = "?";
+static const char __pyx_k__10[] = "?";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_spec[] = "__spec__";
@@ -5252,7 +5250,6 @@ static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_columns[] = "columns";
 static const char __pyx_k_parquet[] = "parquet";
 static const char __pyx_k_pyarrow[] = "pyarrow";
-static const char __pyx_k_row_group[] = "row_group";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_row_groups[] = "row_groups";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
@@ -5265,16 +5262,12 @@ static const char __pyx_k_pyarrow_parquet[] = "pyarrow.parquet";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_generate_metadata_index[] = "generate_metadata_index";
-static const char __pyx_k_read_row_group_metadata[] = "read_row_group_metadata";
-static const char __pyx_k_read_row_groups_metadata[] = "read_row_groups_metadata";
 static const char __pyx_k_palletjack_palletjack_cython[] = "palletjack.palletjack_cython";
 static const char __pyx_k_Time_zones_are_not_available_fro[] = "Time zones are not available from the C-API.";
 static const char __pyx_k_palletjack_palletjack_cython_pyx[] = "palletjack/palletjack_cython.pyx";
 /* #### Code section: decls ### */
 static PyObject *__pyx_pf_10palletjack_17palletjack_cython_generate_metadata_index(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_parquet_path, PyObject *__pyx_v_index_file_path); /* proto */
-static PyObject *__pyx_pf_10palletjack_17palletjack_cython_2read_row_group_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_group); /* proto */
-static PyObject *__pyx_pf_10palletjack_17palletjack_cython_4read_row_groups_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_groups); /* proto */
-static PyObject *__pyx_pf_10palletjack_17palletjack_cython_6read_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_groups, PyObject *__pyx_v_columns); /* proto */
+static PyObject *__pyx_pf_10palletjack_17palletjack_cython_2read_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_groups, PyObject *__pyx_v_columns); /* proto */
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
 typedef struct {
@@ -5529,7 +5522,7 @@ typedef struct {
   #endif
   PyObject *__pyx_n_s_RuntimeError;
   PyObject *__pyx_kp_u_Time_zones_are_not_available_fro;
-  PyObject *__pyx_n_s__14;
+  PyObject *__pyx_n_s__10;
   PyObject *__pyx_n_s__4;
   PyObject *__pyx_n_s_asyncio_coroutines;
   PyObject *__pyx_n_s_cline_in_traceback;
@@ -5552,9 +5545,6 @@ typedef struct {
   PyObject *__pyx_n_s_pyarrow_parquet;
   PyObject *__pyx_n_s_pyx_vtable;
   PyObject *__pyx_n_s_read_metadata;
-  PyObject *__pyx_n_s_read_row_group_metadata;
-  PyObject *__pyx_n_s_read_row_groups_metadata;
-  PyObject *__pyx_n_s_row_group;
   PyObject *__pyx_n_s_row_groups;
   PyObject *__pyx_n_s_spec;
   PyObject *__pyx_n_s_test;
@@ -5565,12 +5555,8 @@ typedef struct {
   PyObject *__pyx_tuple__5;
   PyObject *__pyx_tuple__6;
   PyObject *__pyx_tuple__8;
-  PyObject *__pyx_tuple__10;
-  PyObject *__pyx_tuple__12;
   PyObject *__pyx_codeobj__7;
   PyObject *__pyx_codeobj__9;
-  PyObject *__pyx_codeobj__11;
-  PyObject *__pyx_codeobj__13;
 } __pyx_mstate;
 
 #if CYTHON_USE_MODULE_STATE
@@ -5714,7 +5700,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_ptype_7pyarrow_8_parquet_FileDecryptionProperties);
   Py_CLEAR(clear_module_state->__pyx_n_s_RuntimeError);
   Py_CLEAR(clear_module_state->__pyx_kp_u_Time_zones_are_not_available_fro);
-  Py_CLEAR(clear_module_state->__pyx_n_s__14);
+  Py_CLEAR(clear_module_state->__pyx_n_s__10);
   Py_CLEAR(clear_module_state->__pyx_n_s__4);
   Py_CLEAR(clear_module_state->__pyx_n_s_asyncio_coroutines);
   Py_CLEAR(clear_module_state->__pyx_n_s_cline_in_traceback);
@@ -5737,9 +5723,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_pyarrow_parquet);
   Py_CLEAR(clear_module_state->__pyx_n_s_pyx_vtable);
   Py_CLEAR(clear_module_state->__pyx_n_s_read_metadata);
-  Py_CLEAR(clear_module_state->__pyx_n_s_read_row_group_metadata);
-  Py_CLEAR(clear_module_state->__pyx_n_s_read_row_groups_metadata);
-  Py_CLEAR(clear_module_state->__pyx_n_s_row_group);
   Py_CLEAR(clear_module_state->__pyx_n_s_row_groups);
   Py_CLEAR(clear_module_state->__pyx_n_s_spec);
   Py_CLEAR(clear_module_state->__pyx_n_s_test);
@@ -5750,12 +5733,8 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_tuple__5);
   Py_CLEAR(clear_module_state->__pyx_tuple__6);
   Py_CLEAR(clear_module_state->__pyx_tuple__8);
-  Py_CLEAR(clear_module_state->__pyx_tuple__10);
-  Py_CLEAR(clear_module_state->__pyx_tuple__12);
   Py_CLEAR(clear_module_state->__pyx_codeobj__7);
   Py_CLEAR(clear_module_state->__pyx_codeobj__9);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__11);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__13);
   return 0;
 }
 #endif
@@ -5877,7 +5856,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_ptype_7pyarrow_8_parquet_FileDecryptionProperties);
   Py_VISIT(traverse_module_state->__pyx_n_s_RuntimeError);
   Py_VISIT(traverse_module_state->__pyx_kp_u_Time_zones_are_not_available_fro);
-  Py_VISIT(traverse_module_state->__pyx_n_s__14);
+  Py_VISIT(traverse_module_state->__pyx_n_s__10);
   Py_VISIT(traverse_module_state->__pyx_n_s__4);
   Py_VISIT(traverse_module_state->__pyx_n_s_asyncio_coroutines);
   Py_VISIT(traverse_module_state->__pyx_n_s_cline_in_traceback);
@@ -5900,9 +5879,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_pyarrow_parquet);
   Py_VISIT(traverse_module_state->__pyx_n_s_pyx_vtable);
   Py_VISIT(traverse_module_state->__pyx_n_s_read_metadata);
-  Py_VISIT(traverse_module_state->__pyx_n_s_read_row_group_metadata);
-  Py_VISIT(traverse_module_state->__pyx_n_s_read_row_groups_metadata);
-  Py_VISIT(traverse_module_state->__pyx_n_s_row_group);
   Py_VISIT(traverse_module_state->__pyx_n_s_row_groups);
   Py_VISIT(traverse_module_state->__pyx_n_s_spec);
   Py_VISIT(traverse_module_state->__pyx_n_s_test);
@@ -5913,12 +5889,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_tuple__5);
   Py_VISIT(traverse_module_state->__pyx_tuple__6);
   Py_VISIT(traverse_module_state->__pyx_tuple__8);
-  Py_VISIT(traverse_module_state->__pyx_tuple__10);
-  Py_VISIT(traverse_module_state->__pyx_tuple__12);
   Py_VISIT(traverse_module_state->__pyx_codeobj__7);
   Py_VISIT(traverse_module_state->__pyx_codeobj__9);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__11);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__13);
   return 0;
 }
 #endif
@@ -6174,7 +6146,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 #define __pyx_n_s_RuntimeError __pyx_mstate_global->__pyx_n_s_RuntimeError
 #define __pyx_kp_u_Time_zones_are_not_available_fro __pyx_mstate_global->__pyx_kp_u_Time_zones_are_not_available_fro
-#define __pyx_n_s__14 __pyx_mstate_global->__pyx_n_s__14
+#define __pyx_n_s__10 __pyx_mstate_global->__pyx_n_s__10
 #define __pyx_n_s__4 __pyx_mstate_global->__pyx_n_s__4
 #define __pyx_n_s_asyncio_coroutines __pyx_mstate_global->__pyx_n_s_asyncio_coroutines
 #define __pyx_n_s_cline_in_traceback __pyx_mstate_global->__pyx_n_s_cline_in_traceback
@@ -6197,9 +6169,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_pyarrow_parquet __pyx_mstate_global->__pyx_n_s_pyarrow_parquet
 #define __pyx_n_s_pyx_vtable __pyx_mstate_global->__pyx_n_s_pyx_vtable
 #define __pyx_n_s_read_metadata __pyx_mstate_global->__pyx_n_s_read_metadata
-#define __pyx_n_s_read_row_group_metadata __pyx_mstate_global->__pyx_n_s_read_row_group_metadata
-#define __pyx_n_s_read_row_groups_metadata __pyx_mstate_global->__pyx_n_s_read_row_groups_metadata
-#define __pyx_n_s_row_group __pyx_mstate_global->__pyx_n_s_row_group
 #define __pyx_n_s_row_groups __pyx_mstate_global->__pyx_n_s_row_groups
 #define __pyx_n_s_spec __pyx_mstate_global->__pyx_n_s_spec
 #define __pyx_n_s_test __pyx_mstate_global->__pyx_n_s_test
@@ -6210,12 +6179,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_tuple__5 __pyx_mstate_global->__pyx_tuple__5
 #define __pyx_tuple__6 __pyx_mstate_global->__pyx_tuple__6
 #define __pyx_tuple__8 __pyx_mstate_global->__pyx_tuple__8
-#define __pyx_tuple__10 __pyx_mstate_global->__pyx_tuple__10
-#define __pyx_tuple__12 __pyx_mstate_global->__pyx_tuple__12
 #define __pyx_codeobj__7 __pyx_mstate_global->__pyx_codeobj__7
 #define __pyx_codeobj__9 __pyx_mstate_global->__pyx_codeobj__9
-#define __pyx_codeobj__11 __pyx_mstate_global->__pyx_codeobj__11
-#define __pyx_codeobj__13 __pyx_mstate_global->__pyx_codeobj__13
 /* #### Code section: module_code ### */
 
 /* "string.from_py":13
@@ -9378,7 +9343,7 @@ static PyObject *__pyx_pf_10palletjack_17palletjack_cython_generate_metadata_ind
  * def generate_metadata_index(parquet_path, index_file_path):
  *     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))             # <<<<<<<<<<<<<<
  * 
- * cpdef read_row_group_metadata(index_file_path, row_group):
+ * cpdef read_metadata(index_file_path, row_groups = [], columns = []):
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_parquet_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 13, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -9466,419 +9431,12 @@ static PyObject *__pyx_pf_10palletjack_17palletjack_cython_generate_metadata_ind
 /* "palletjack/palletjack_cython.pyx":15
  *     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
- * cpdef read_row_group_metadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- */
-
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_3read_row_group_metadata(PyObject *__pyx_self, 
-#if CYTHON_METH_FASTCALL
-PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
-#else
-PyObject *__pyx_args, PyObject *__pyx_kwds
-#endif
-); /*proto*/
-static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_row_group_metadata(PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_group, CYTHON_UNUSED int __pyx_skip_dispatch) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("read_row_group_metadata", 1);
-
-  /* "palletjack/palletjack_cython.pyx":16
- * 
- * cpdef read_row_group_metadata(index_file_path, row_group):
- *     return read_row_groups_metadata(index_file_path, [row_group])             # <<<<<<<<<<<<<<
- * 
- * cpdef read_row_groups_metadata(index_file_path, row_groups):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 16, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(__pyx_v_row_group);
-  __Pyx_GIVEREF(__pyx_v_row_group);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_1, 0, __pyx_v_row_group)) __PYX_ERR(4, 16, __pyx_L1_error);
-  __pyx_t_2 = __pyx_f_10palletjack_17palletjack_cython_read_row_groups_metadata(__pyx_v_index_file_path, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 16, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
-  goto __pyx_L0;
-
-  /* "palletjack/palletjack_cython.pyx":15
- *     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
- * 
- * cpdef read_row_group_metadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("palletjack.palletjack_cython.read_row_group_metadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* Python wrapper */
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_3read_row_group_metadata(PyObject *__pyx_self, 
-#if CYTHON_METH_FASTCALL
-PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
-#else
-PyObject *__pyx_args, PyObject *__pyx_kwds
-#endif
-); /*proto*/
-PyDoc_STRVAR(__pyx_doc_10palletjack_17palletjack_cython_2read_row_group_metadata, "read_row_group_metadata(index_file_path, row_group)");
-static PyMethodDef __pyx_mdef_10palletjack_17palletjack_cython_3read_row_group_metadata = {"read_row_group_metadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10palletjack_17palletjack_cython_3read_row_group_metadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_10palletjack_17palletjack_cython_2read_row_group_metadata};
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_3read_row_group_metadata(PyObject *__pyx_self, 
-#if CYTHON_METH_FASTCALL
-PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
-#else
-PyObject *__pyx_args, PyObject *__pyx_kwds
-#endif
-) {
-  PyObject *__pyx_v_index_file_path = 0;
-  PyObject *__pyx_v_row_group = 0;
-  #if !CYTHON_METH_FASTCALL
-  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
-  #endif
-  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
-  PyObject* values[2] = {0,0};
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("read_row_group_metadata (wrapper)", 0);
-  #if !CYTHON_METH_FASTCALL
-  #if CYTHON_ASSUME_SAFE_MACROS
-  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
-  #else
-  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
-  #endif
-  #endif
-  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
-  {
-    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_index_file_path,&__pyx_n_s_row_group,0};
-    if (__pyx_kwds) {
-      Py_ssize_t kw_args;
-      switch (__pyx_nargs) {
-        case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
-        CYTHON_FALLTHROUGH;
-        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
-        CYTHON_FALLTHROUGH;
-        case  0: break;
-        default: goto __pyx_L5_argtuple_error;
-      }
-      kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
-      switch (__pyx_nargs) {
-        case  0:
-        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_index_file_path)) != 0)) {
-          (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
-          kw_args--;
-        }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 15, __pyx_L3_error)
-        else goto __pyx_L5_argtuple_error;
-        CYTHON_FALLTHROUGH;
-        case  1:
-        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_row_group)) != 0)) {
-          (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
-          kw_args--;
-        }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 15, __pyx_L3_error)
-        else {
-          __Pyx_RaiseArgtupleInvalid("read_row_group_metadata", 1, 2, 2, 1); __PYX_ERR(4, 15, __pyx_L3_error)
-        }
-      }
-      if (unlikely(kw_args > 0)) {
-        const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "read_row_group_metadata") < 0)) __PYX_ERR(4, 15, __pyx_L3_error)
-      }
-    } else if (unlikely(__pyx_nargs != 2)) {
-      goto __pyx_L5_argtuple_error;
-    } else {
-      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
-      values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
-    }
-    __pyx_v_index_file_path = values[0];
-    __pyx_v_row_group = values[1];
-  }
-  goto __pyx_L6_skip;
-  __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("read_row_group_metadata", 1, 2, 2, __pyx_nargs); __PYX_ERR(4, 15, __pyx_L3_error)
-  __pyx_L6_skip:;
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  {
-    Py_ssize_t __pyx_temp;
-    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
-      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
-    }
-  }
-  __Pyx_AddTraceback("palletjack.palletjack_cython.read_row_group_metadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_10palletjack_17palletjack_cython_2read_row_group_metadata(__pyx_self, __pyx_v_index_file_path, __pyx_v_row_group);
-
-  /* function exit code */
-  {
-    Py_ssize_t __pyx_temp;
-    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
-      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
-    }
-  }
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_10palletjack_17palletjack_cython_2read_row_group_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_group) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("read_row_group_metadata", 1);
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_10palletjack_17palletjack_cython_read_row_group_metadata(__pyx_v_index_file_path, __pyx_v_row_group, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("palletjack.palletjack_cython.read_row_group_metadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "palletjack/palletjack_cython.pyx":18
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- * cpdef read_row_groups_metadata(index_file_path, row_groups):             # <<<<<<<<<<<<<<
- * 
- *     return read_metadata(index_file_path, row_groups, [])
- */
-
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_5read_row_groups_metadata(PyObject *__pyx_self, 
-#if CYTHON_METH_FASTCALL
-PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
-#else
-PyObject *__pyx_args, PyObject *__pyx_kwds
-#endif
-); /*proto*/
-static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_row_groups_metadata(PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_groups, CYTHON_UNUSED int __pyx_skip_dispatch) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  struct __pyx_opt_args_10palletjack_17palletjack_cython_read_metadata __pyx_t_3;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("read_row_groups_metadata", 1);
-
-  /* "palletjack/palletjack_cython.pyx":20
- * cpdef read_row_groups_metadata(index_file_path, row_groups):
- * 
- *     return read_metadata(index_file_path, row_groups, [])             # <<<<<<<<<<<<<<
- * 
- * cpdef read_metadata(index_file_path, row_groups = [], columns = []):
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 20, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3.__pyx_n = 2;
-  __pyx_t_3.row_groups = __pyx_v_row_groups;
-  __pyx_t_3.columns = __pyx_t_1;
-  __pyx_t_2 = __pyx_f_10palletjack_17palletjack_cython_read_metadata(__pyx_v_index_file_path, 0, &__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 20, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
-  goto __pyx_L0;
-
-  /* "palletjack/palletjack_cython.pyx":18
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- * cpdef read_row_groups_metadata(index_file_path, row_groups):             # <<<<<<<<<<<<<<
- * 
- *     return read_metadata(index_file_path, row_groups, [])
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("palletjack.palletjack_cython.read_row_groups_metadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* Python wrapper */
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_5read_row_groups_metadata(PyObject *__pyx_self, 
-#if CYTHON_METH_FASTCALL
-PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
-#else
-PyObject *__pyx_args, PyObject *__pyx_kwds
-#endif
-); /*proto*/
-PyDoc_STRVAR(__pyx_doc_10palletjack_17palletjack_cython_4read_row_groups_metadata, "read_row_groups_metadata(index_file_path, row_groups)");
-static PyMethodDef __pyx_mdef_10palletjack_17palletjack_cython_5read_row_groups_metadata = {"read_row_groups_metadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10palletjack_17palletjack_cython_5read_row_groups_metadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_10palletjack_17palletjack_cython_4read_row_groups_metadata};
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_5read_row_groups_metadata(PyObject *__pyx_self, 
-#if CYTHON_METH_FASTCALL
-PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
-#else
-PyObject *__pyx_args, PyObject *__pyx_kwds
-#endif
-) {
-  PyObject *__pyx_v_index_file_path = 0;
-  PyObject *__pyx_v_row_groups = 0;
-  #if !CYTHON_METH_FASTCALL
-  CYTHON_UNUSED Py_ssize_t __pyx_nargs;
-  #endif
-  CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
-  PyObject* values[2] = {0,0};
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("read_row_groups_metadata (wrapper)", 0);
-  #if !CYTHON_METH_FASTCALL
-  #if CYTHON_ASSUME_SAFE_MACROS
-  __pyx_nargs = PyTuple_GET_SIZE(__pyx_args);
-  #else
-  __pyx_nargs = PyTuple_Size(__pyx_args); if (unlikely(__pyx_nargs < 0)) return NULL;
-  #endif
-  #endif
-  __pyx_kwvalues = __Pyx_KwValues_FASTCALL(__pyx_args, __pyx_nargs);
-  {
-    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_index_file_path,&__pyx_n_s_row_groups,0};
-    if (__pyx_kwds) {
-      Py_ssize_t kw_args;
-      switch (__pyx_nargs) {
-        case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
-        CYTHON_FALLTHROUGH;
-        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
-        CYTHON_FALLTHROUGH;
-        case  0: break;
-        default: goto __pyx_L5_argtuple_error;
-      }
-      kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
-      switch (__pyx_nargs) {
-        case  0:
-        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_index_file_path)) != 0)) {
-          (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
-          kw_args--;
-        }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 18, __pyx_L3_error)
-        else goto __pyx_L5_argtuple_error;
-        CYTHON_FALLTHROUGH;
-        case  1:
-        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_row_groups)) != 0)) {
-          (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
-          kw_args--;
-        }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 18, __pyx_L3_error)
-        else {
-          __Pyx_RaiseArgtupleInvalid("read_row_groups_metadata", 1, 2, 2, 1); __PYX_ERR(4, 18, __pyx_L3_error)
-        }
-      }
-      if (unlikely(kw_args > 0)) {
-        const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "read_row_groups_metadata") < 0)) __PYX_ERR(4, 18, __pyx_L3_error)
-      }
-    } else if (unlikely(__pyx_nargs != 2)) {
-      goto __pyx_L5_argtuple_error;
-    } else {
-      values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
-      values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
-    }
-    __pyx_v_index_file_path = values[0];
-    __pyx_v_row_groups = values[1];
-  }
-  goto __pyx_L6_skip;
-  __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("read_row_groups_metadata", 1, 2, 2, __pyx_nargs); __PYX_ERR(4, 18, __pyx_L3_error)
-  __pyx_L6_skip:;
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  {
-    Py_ssize_t __pyx_temp;
-    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
-      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
-    }
-  }
-  __Pyx_AddTraceback("palletjack.palletjack_cython.read_row_groups_metadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_10palletjack_17palletjack_cython_4read_row_groups_metadata(__pyx_self, __pyx_v_index_file_path, __pyx_v_row_groups);
-
-  /* function exit code */
-  {
-    Py_ssize_t __pyx_temp;
-    for (__pyx_temp=0; __pyx_temp < (Py_ssize_t)(sizeof(values)/sizeof(values[0])); ++__pyx_temp) {
-      __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
-    }
-  }
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_10palletjack_17palletjack_cython_4read_row_groups_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_groups) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("read_row_groups_metadata", 1);
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_10palletjack_17palletjack_cython_read_row_groups_metadata(__pyx_v_index_file_path, __pyx_v_row_groups, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 18, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("palletjack.palletjack_cython.read_row_groups_metadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "palletjack/palletjack_cython.pyx":22
- *     return read_metadata(index_file_path, row_groups, [])
- * 
  * cpdef read_metadata(index_file_path, row_groups = [], columns = []):             # <<<<<<<<<<<<<<
  * 
  *     cdef shared_ptr[CFileMetaData] c_metadata
  */
 
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_7read_metadata(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_10palletjack_17palletjack_cython_3read_metadata(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -9915,14 +9473,14 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
     }
   }
 
-  /* "palletjack/palletjack_cython.pyx":25
+  /* "palletjack/palletjack_cython.pyx":18
  * 
  *     cdef shared_ptr[CFileMetaData] c_metadata
  *     cdef string encoded_path = index_file_path.encode('utf8')             # <<<<<<<<<<<<<<
  *     cdef vector[uint32_t] crow_groups = row_groups
  *     cdef vector[uint32_t] ccolumns = columns
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_index_file_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 25, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_index_file_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   __pyx_t_4 = 0;
@@ -9942,35 +9500,35 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
     PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_n_u_utf8};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_4, 1+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 25, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 18, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_5 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 25, __pyx_L1_error)
+  __pyx_t_5 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 18, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_encoded_path = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_5);
 
-  /* "palletjack/palletjack_cython.pyx":26
+  /* "palletjack/palletjack_cython.pyx":19
  *     cdef shared_ptr[CFileMetaData] c_metadata
  *     cdef string encoded_path = index_file_path.encode('utf8')
  *     cdef vector[uint32_t] crow_groups = row_groups             # <<<<<<<<<<<<<<
  *     cdef vector[uint32_t] ccolumns = columns
  *     with nogil:
  */
-  __pyx_t_6 = __pyx_convert_vector_from_py_uint32_t(__pyx_v_row_groups); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 26, __pyx_L1_error)
+  __pyx_t_6 = __pyx_convert_vector_from_py_uint32_t(__pyx_v_row_groups); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 19, __pyx_L1_error)
   __pyx_v_crow_groups = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_6);
 
-  /* "palletjack/palletjack_cython.pyx":27
+  /* "palletjack/palletjack_cython.pyx":20
  *     cdef string encoded_path = index_file_path.encode('utf8')
  *     cdef vector[uint32_t] crow_groups = row_groups
  *     cdef vector[uint32_t] ccolumns = columns             # <<<<<<<<<<<<<<
  *     with nogil:
  *         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumns)
  */
-  __pyx_t_6 = __pyx_convert_vector_from_py_uint32_t(__pyx_v_columns); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 27, __pyx_L1_error)
+  __pyx_t_6 = __pyx_convert_vector_from_py_uint32_t(__pyx_v_columns); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 20, __pyx_L1_error)
   __pyx_v_ccolumns = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_6);
 
-  /* "palletjack/palletjack_cython.pyx":28
+  /* "palletjack/palletjack_cython.pyx":21
  *     cdef vector[uint32_t] crow_groups = row_groups
  *     cdef vector[uint32_t] ccolumns = columns
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -9986,7 +9544,7 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
       #endif
       /*try:*/ {
 
-        /* "palletjack/palletjack_cython.pyx":29
+        /* "palletjack/palletjack_cython.pyx":22
  *     cdef vector[uint32_t] ccolumns = columns
  *     with nogil:
  *         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumns)             # <<<<<<<<<<<<<<
@@ -10003,12 +9561,12 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
           #ifdef WITH_THREAD
           __Pyx_PyGILState_Release(__pyx_gilstate_save);
           #endif
-          __PYX_ERR(4, 29, __pyx_L4_error)
+          __PYX_ERR(4, 22, __pyx_L4_error)
         }
         __pyx_v_c_metadata = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_7);
       }
 
-      /* "palletjack/palletjack_cython.pyx":28
+      /* "palletjack/palletjack_cython.pyx":21
  *     cdef vector[uint32_t] crow_groups = row_groups
  *     cdef vector[uint32_t] ccolumns = columns
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -10034,30 +9592,30 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
       }
   }
 
-  /* "palletjack/palletjack_cython.pyx":31
+  /* "palletjack/palletjack_cython.pyx":24
  *         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumns)
  * 
  *     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)             # <<<<<<<<<<<<<<
  *     m.init(c_metadata)
  *     return m
  */
-  __pyx_t_1 = __Pyx_tp_new(((PyObject *)__pyx_ptype_7pyarrow_8_parquet_FileMetaData), __pyx_empty_tuple); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 31, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_tp_new(((PyObject *)__pyx_ptype_7pyarrow_8_parquet_FileMetaData), __pyx_empty_tuple); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_7pyarrow_8_parquet_FileMetaData)))) __PYX_ERR(4, 31, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_7pyarrow_8_parquet_FileMetaData)))) __PYX_ERR(4, 24, __pyx_L1_error)
   __pyx_v_m = ((struct __pyx_obj_7pyarrow_8_parquet_FileMetaData *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "palletjack/palletjack_cython.pyx":32
+  /* "palletjack/palletjack_cython.pyx":25
  * 
  *     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
  *     m.init(c_metadata)             # <<<<<<<<<<<<<<
  *     return m
  */
-  __pyx_t_1 = __pyx_f_7pyarrow_8_parquet_12FileMetaData_init(__pyx_v_m, __pyx_v_c_metadata); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 32, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7pyarrow_8_parquet_12FileMetaData_init(__pyx_v_m, __pyx_v_c_metadata); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "palletjack/palletjack_cython.pyx":33
+  /* "palletjack/palletjack_cython.pyx":26
  *     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
  *     m.init(c_metadata)
  *     return m             # <<<<<<<<<<<<<<
@@ -10067,8 +9625,8 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
   __pyx_r = ((PyObject *)__pyx_v_m);
   goto __pyx_L0;
 
-  /* "palletjack/palletjack_cython.pyx":22
- *     return read_metadata(index_file_path, row_groups, [])
+  /* "palletjack/palletjack_cython.pyx":15
+ *     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
  * cpdef read_metadata(index_file_path, row_groups = [], columns = []):             # <<<<<<<<<<<<<<
  * 
@@ -10090,16 +9648,16 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_7read_metadata(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_10palletjack_17palletjack_cython_3read_metadata(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_10palletjack_17palletjack_cython_6read_metadata, "read_metadata(index_file_path, row_groups=[], columns=[])");
-static PyMethodDef __pyx_mdef_10palletjack_17palletjack_cython_7read_metadata = {"read_metadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10palletjack_17palletjack_cython_7read_metadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_10palletjack_17palletjack_cython_6read_metadata};
-static PyObject *__pyx_pw_10palletjack_17palletjack_cython_7read_metadata(PyObject *__pyx_self, 
+PyDoc_STRVAR(__pyx_doc_10palletjack_17palletjack_cython_2read_metadata, "read_metadata(index_file_path, row_groups=[], columns=[])");
+static PyMethodDef __pyx_mdef_10palletjack_17palletjack_cython_3read_metadata = {"read_metadata", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_10palletjack_17palletjack_cython_3read_metadata, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_10palletjack_17palletjack_cython_2read_metadata};
+static PyObject *__pyx_pw_10palletjack_17palletjack_cython_3read_metadata(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -10151,26 +9709,26 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 22, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 15, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_row_groups);
           if (value) { values[1] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 22, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 15, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
           PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_columns);
           if (value) { values[2] = __Pyx_Arg_NewRef_FASTCALL(value); kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 22, __pyx_L3_error)
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 15, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "read_metadata") < 0)) __PYX_ERR(4, 22, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "read_metadata") < 0)) __PYX_ERR(4, 15, __pyx_L3_error)
       }
     } else {
       switch (__pyx_nargs) {
@@ -10189,7 +9747,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("read_metadata", 0, 1, 3, __pyx_nargs); __PYX_ERR(4, 22, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("read_metadata", 0, 1, 3, __pyx_nargs); __PYX_ERR(4, 15, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -10203,7 +9761,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_10palletjack_17palletjack_cython_6read_metadata(__pyx_self, __pyx_v_index_file_path, __pyx_v_row_groups, __pyx_v_columns);
+  __pyx_r = __pyx_pf_10palletjack_17palletjack_cython_2read_metadata(__pyx_self, __pyx_v_index_file_path, __pyx_v_row_groups, __pyx_v_columns);
 
   /* function exit code */
   {
@@ -10216,7 +9774,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_10palletjack_17palletjack_cython_6read_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_groups, PyObject *__pyx_v_columns) {
+static PyObject *__pyx_pf_10palletjack_17palletjack_cython_2read_metadata(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_index_file_path, PyObject *__pyx_v_row_groups, PyObject *__pyx_v_columns) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -10229,7 +9787,7 @@ static PyObject *__pyx_pf_10palletjack_17palletjack_cython_6read_metadata(CYTHON
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.row_groups = __pyx_v_row_groups;
   __pyx_t_2.columns = __pyx_v_columns;
-  __pyx_t_1 = __pyx_f_10palletjack_17palletjack_cython_read_metadata(__pyx_v_index_file_path, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_10palletjack_17palletjack_cython_read_metadata(__pyx_v_index_file_path, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -10264,7 +9822,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
   __Pyx_StringTabEntry __pyx_string_tab[] = {
     {&__pyx_n_s_RuntimeError, __pyx_k_RuntimeError, sizeof(__pyx_k_RuntimeError), 0, 0, 1, 1},
     {&__pyx_kp_u_Time_zones_are_not_available_fro, __pyx_k_Time_zones_are_not_available_fro, sizeof(__pyx_k_Time_zones_are_not_available_fro), 0, 1, 0, 0},
-    {&__pyx_n_s__14, __pyx_k__14, sizeof(__pyx_k__14), 0, 0, 1, 1},
+    {&__pyx_n_s__10, __pyx_k__10, sizeof(__pyx_k__10), 0, 0, 1, 1},
     {&__pyx_n_s__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 0, 1, 1},
     {&__pyx_n_s_asyncio_coroutines, __pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 0, 1, 1},
     {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
@@ -10287,9 +9845,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_pyarrow_parquet, __pyx_k_pyarrow_parquet, sizeof(__pyx_k_pyarrow_parquet), 0, 0, 1, 1},
     {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
     {&__pyx_n_s_read_metadata, __pyx_k_read_metadata, sizeof(__pyx_k_read_metadata), 0, 0, 1, 1},
-    {&__pyx_n_s_read_row_group_metadata, __pyx_k_read_row_group_metadata, sizeof(__pyx_k_read_row_group_metadata), 0, 0, 1, 1},
-    {&__pyx_n_s_read_row_groups_metadata, __pyx_k_read_row_groups_metadata, sizeof(__pyx_k_read_row_groups_metadata), 0, 0, 1, 1},
-    {&__pyx_n_s_row_group, __pyx_k_row_group, sizeof(__pyx_k_row_group), 0, 0, 1, 1},
     {&__pyx_n_s_row_groups, __pyx_k_row_groups, sizeof(__pyx_k_row_groups), 0, 0, 1, 1},
     {&__pyx_n_s_spec, __pyx_k_spec, sizeof(__pyx_k_spec), 0, 0, 1, 1},
     {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
@@ -10348,38 +9903,14 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "palletjack/palletjack_cython.pyx":15
  *     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
- * cpdef read_row_group_metadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- */
-  __pyx_tuple__8 = PyTuple_Pack(2, __pyx_n_s_index_file_path, __pyx_n_s_row_group); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(4, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_palletjack_palletjack_cython_pyx, __pyx_n_s_read_row_group_metadata, 15, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(4, 15, __pyx_L1_error)
-
-  /* "palletjack/palletjack_cython.pyx":18
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- * cpdef read_row_groups_metadata(index_file_path, row_groups):             # <<<<<<<<<<<<<<
- * 
- *     return read_metadata(index_file_path, row_groups, [])
- */
-  __pyx_tuple__10 = PyTuple_Pack(2, __pyx_n_s_index_file_path, __pyx_n_s_row_groups); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(4, 18, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_palletjack_palletjack_cython_pyx, __pyx_n_s_read_row_groups_metadata, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(4, 18, __pyx_L1_error)
-
-  /* "palletjack/palletjack_cython.pyx":22
- *     return read_metadata(index_file_path, row_groups, [])
- * 
  * cpdef read_metadata(index_file_path, row_groups = [], columns = []):             # <<<<<<<<<<<<<<
  * 
  *     cdef shared_ptr[CFileMetaData] c_metadata
  */
-  __pyx_tuple__12 = PyTuple_Pack(3, __pyx_n_s_index_file_path, __pyx_n_s_row_groups, __pyx_n_s_columns); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(4, 22, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_palletjack_palletjack_cython_pyx, __pyx_n_s_read_metadata, 22, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(3, __pyx_n_s_index_file_path, __pyx_n_s_row_groups, __pyx_n_s_columns); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(4, 15, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_palletjack_palletjack_cython_pyx, __pyx_n_s_read_metadata, 15, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -10996,61 +10527,37 @@ if (!__Pyx_RefNanny) {
   /* "palletjack/palletjack_cython.pyx":15
  *     cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
  * 
- * cpdef read_row_group_metadata(index_file_path, row_group):             # <<<<<<<<<<<<<<
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10palletjack_17palletjack_cython_3read_row_group_metadata, 0, __pyx_n_s_read_row_group_metadata, NULL, __pyx_n_s_palletjack_palletjack_cython, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_row_group_metadata, __pyx_t_2) < 0) __PYX_ERR(4, 15, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "palletjack/palletjack_cython.pyx":18
- *     return read_row_groups_metadata(index_file_path, [row_group])
- * 
- * cpdef read_row_groups_metadata(index_file_path, row_groups):             # <<<<<<<<<<<<<<
- * 
- *     return read_metadata(index_file_path, row_groups, [])
- */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_10palletjack_17palletjack_cython_5read_row_groups_metadata, 0, __pyx_n_s_read_row_groups_metadata, NULL, __pyx_n_s_palletjack_palletjack_cython, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 18, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_row_groups_metadata, __pyx_t_2) < 0) __PYX_ERR(4, 18, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "palletjack/palletjack_cython.pyx":22
- *     return read_metadata(index_file_path, row_groups, [])
- * 
  * cpdef read_metadata(index_file_path, row_groups = [], columns = []):             # <<<<<<<<<<<<<<
  * 
  *     cdef shared_ptr[CFileMetaData] c_metadata
  */
-  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_k__2 = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_k__3 = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2)) __PYX_ERR(4, 22, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2)) __PYX_ERR(4, 15, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_3);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3)) __PYX_ERR(4, 22, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3)) __PYX_ERR(4, 15, __pyx_L1_error);
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_10palletjack_17palletjack_cython_7read_metadata, 0, __pyx_n_s_read_metadata, NULL, __pyx_n_s_palletjack_palletjack_cython, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 22, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_10palletjack_17palletjack_cython_3read_metadata, 0, __pyx_n_s_read_metadata, NULL, __pyx_n_s_palletjack_palletjack_cython, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_3, __pyx_t_4);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_metadata, __pyx_t_3) < 0) __PYX_ERR(4, 22, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_metadata, __pyx_t_3) < 0) __PYX_ERR(4, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "palletjack/palletjack_cython.pyx":1
@@ -14335,7 +13842,7 @@ __Pyx_PyType_GetName(PyTypeObject* tp)
     if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
         PyErr_Clear();
         Py_XDECREF(name);
-        name = __Pyx_NewRef(__pyx_n_s__14);
+        name = __Pyx_NewRef(__pyx_n_s__10);
     }
     return name;
 }

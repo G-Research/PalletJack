@@ -53,7 +53,7 @@ pj.generate_metadata_index(path, index_path)
 ### Reading a row group using the indexed metadata:
 ```
 row_group = 5
-metadata = pj.read_row_group_metadata(index_path, row_group)
+metadata = pj.read_metadata(index_path, [row_group])
 pr = pq.ParquetReader()
 pr.open(path, metadata=metadata)
 
@@ -62,7 +62,7 @@ data = pr.read_row_groups([0])
 
 ### Reading multiple row groups using the indexed metadata:
 ```
-metadata = pj.read_row_groups_metadata(index_path, [5, 7])
+metadata = pj.read_metadata(index_path, row_groups = [5, 7])
 pr = pq.ParquetReader()
 pr.open(path, metadata=metadata)
 
