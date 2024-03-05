@@ -55,10 +55,31 @@ def worker_palletjack_rowgroups():
     row_groups_batches = [all_row_groups[i:i+batch_size] for i in range(0, len(all_row_groups), batch_size)]
 
     for row_groups_batch in row_groups_batches:
-        metadata = pj.read_row_groups_metadata(index_path, row_groups_batch)
+        metadata = pj.read_metadata(index_path, row_groups=row_groups_batch)
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata=metadata)
-        res_data = pr.read_row_groups(range(0, len(row_groups_batch)), column_indices=[0,1,2], use_threads=False)
+        pr.read_row_groups(range(0, len(row_groups_batch)), column_indices=[0,1,2], use_threads=False)
+
+def worker_palletjack_columns():
+
+    all_columns = list(range(0, columns))
+    columns_batches = [all_columns[i:i+batch_size] for i in range(0, len(all_columns), batch_size)]
+
+    for columns_batch in columns_batches:
+        metadata = pj.read_metadata(index_path, columns=columns_batch)
+        pr = pq.ParquetReader()
+        pr.open(parquet_path, metadata=metadata)
+        pr.read_row_groups(range(0, row_groups), use_threads=False)
+        
+def worker_arrow_columns():
+
+    all_columns = list(range(0, columns))
+    columns_batches = [all_columns[i:i+batch_size] for i in range(0, len(all_columns), batch_size)]
+
+    for columns_batch in columns_batches:
+        pr = pq.ParquetReader()
+        pr.open(parquet_path)
+        pr.read_row_groups(range(0, row_groups), column_indices = columns_batch, use_threads=False)
 
 def worker_arrow():
     
@@ -126,6 +147,11 @@ print(f"Reading multiple row groups using arrow (single-threaded) {measure_readi
 print(f"Reading multiple row groups using palletjack (single-threaded) {measure_reading(1, worker_palletjack_rowgroups):.2f} seconds")
 print(f"Reading multiple row groups using arrow (multi-threaded) {measure_reading(8, worker_arrow_rowgroups):.3f} seconds")
 print(f"Reading multiple row groups using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_rowgroups):.3f} seconds")
+
+print(f"Reading multiple columns using arrow (single-threaded) {measure_reading(1, worker_arrow_columns):.3f} seconds")
+print(f"Reading multiple columns using palletjack (single-threaded) {measure_reading(1, worker_palletjack_columns):.3f} seconds")
+print(f"Reading multiple columns using arrow (multi-threaded) {measure_reading(8, worker_arrow_columns):.3f} seconds")
+print(f"Reading multiple columns using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_columns):.3f} seconds")
 
 print(f"Reading a row group metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_metadata):.3f} seconds")
 print(f"Reading a row groups metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_groups_metadata):.3f} seconds")
