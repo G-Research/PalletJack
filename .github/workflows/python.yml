@@ -227,6 +227,7 @@ jobs:
         # Check whether the tag and the package version match together
         if (-not (Test-Path -Path $expectedFile)) {
             echo "::error ::Expected file $expectedFile doesn't exist"
+            Get-ChildItem -Path dist
             exit 1
         }
     
