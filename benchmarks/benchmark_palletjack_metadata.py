@@ -3,7 +3,6 @@ import pyarrow.parquet as pq
 import pyarrow as pa
 import numpy as np
 import concurrent.futures
-import unittest
 import time
 import os
 
@@ -16,6 +15,8 @@ batch_size = 10
 
 all_columns = list(range(columns))
 all_row_groups = list(range(row_groups))
+columns_batches = [all_columns[i:i+batch_size] for i in range(0, len(all_columns), batch_size)]
+row_groups_batches = [all_row_groups[i:i+batch_size] for i in range(0, len(all_row_groups), batch_size)]
 
 parquet_path = "my.parquet"
 index_path = parquet_path + '.index'
@@ -66,7 +67,6 @@ def worker_palletjack_column():
 
 def worker_arrow_row_groups():
 
-    row_groups_batches = [all_row_groups[i:i+batch_size] for i in range(len(all_row_groups), batch_size)]
     for row_groups_batch in row_groups_batches:
         pr = pq.ParquetReader()
         pr.open(parquet_path)        
@@ -74,7 +74,6 @@ def worker_arrow_row_groups():
 
 def worker_palletjack_rowgroups():
     
-    row_groups_batches = [all_row_groups[i:i+batch_size] for i in range(len(all_row_groups), batch_size)]
     for row_groups_batch in row_groups_batches:
         metadata = pj.read_metadata(index_path, row_groups = row_groups_batch)
         pr = pq.ParquetReader()
@@ -83,7 +82,6 @@ def worker_palletjack_rowgroups():
 
 def worker_arrow_columns():
 
-    columns_batches = [all_columns[i:i+batch_size] for i in range(len(all_columns), batch_size)]
     for columns_batch in columns_batches:
         pr = pq.ParquetReader()
         pr.open(parquet_path)
@@ -91,7 +89,6 @@ def worker_arrow_columns():
 
 def worker_palletjack_columns():
 
-    columns_batches = [all_columns[i:i+batch_size] for i in range(len(all_columns), batch_size)]
     for columns_batch in columns_batches:
         metadata = pj.read_metadata(index_path, columns=columns_batch)
         pr = pq.ParquetReader()
@@ -107,7 +104,13 @@ def worker_palletjack_column_metadata():
     
     for c in range(0, columns):
         pj.read_metadata(index_path, columns = [c])
-   
+
+def worker_palletjack_row_group_column_metadata():
+
+    for r in range(0, row_groups):
+        for c in range(0, columns):
+            pj.read_metadata(index_path, row_groups = [r], columns = [c])
+
 def worker_arrow_metadata():
     
     for r in range(0, row_groups):
@@ -170,4 +173,5 @@ print(f"Reading multiple columns using palletjack (multi-threaded) {measure_read
 
 print(f"Reading a single row group metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_metadata):.3f} seconds")
 print(f"Reading a single column metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_column_metadata):.3f} seconds")
+print(f"Reading a single row group and column metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_column_metadata):.3f} seconds")
 print(f"Reading a metadata using arrow (single-threaded) {measure_reading(1, worker_arrow_metadata):.3f} seconds")
