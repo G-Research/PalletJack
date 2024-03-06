@@ -12,7 +12,7 @@ chunk_size = 1000
 rows = row_groups * chunk_size
 work_items = 32
 batch_size = 40
-n_reads = 300
+n_reads = 100
 
 all_columns = list(range(columns))
 all_row_groups = list(range(row_groups))
