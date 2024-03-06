@@ -10,7 +10,7 @@ row_groups = 200
 columns = 200
 chunk_size = 1000
 rows = row_groups * chunk_size
-work_items = 8
+work_items = 16
 batch_size = 40
 n_reads = 300
 
@@ -143,19 +143,23 @@ def measure_reading(max_workers, worker):
     def dummy_worker():
         time.sleep(0.01)
 
-    # Create the pool and warm it up 
-    pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
-    dummy_items = [pool.submit(dummy_worker) for i in range(0, len(all_columns), batch_size)]
-    for dummy_item in dummy_items: 
-        dummy_item.result()
+    tt = []
+    for _ in range(0, 3):
+        # Create the pool and warm it up 
+        pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+        dummy_items = [pool.submit(dummy_worker) for i in range(0, len(all_columns), batch_size)]
+        for dummy_item in dummy_items: 
+            dummy_item.result()
 
-    # Submit the work
-    t = time.time()
-    for i in range(0, work_items):
-        pool.submit(worker)
+        # Submit the work
+        t = time.time()
+        for i in range(0, work_items):
+            pool.submit(worker)
 
-    pool.shutdown(wait=True)
-    return time.time() - t
+        pool.shutdown(wait=True)
+        tt.append(time.time() - t)
+
+    return min (tt)
 
 table = get_table()
 genrate_data(table)
