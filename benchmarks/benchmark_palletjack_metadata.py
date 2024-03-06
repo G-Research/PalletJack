@@ -151,6 +151,9 @@ def measure_reading(max_workers, worker):
         for dummy_item in dummy_items: 
             dummy_item.result()
 
+        # warm up the OS cache
+        worker()
+
         # Submit the work
         t = time.time()
         for i in range(0, work_items):
