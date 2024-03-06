@@ -122,7 +122,7 @@ def genrate_data(table):
 
     t = time.time()
     print(f"writing parquet file, columns={columns}, row_groups={row_groups}, rows={rows}")
-    pq.write_table(table, parquet_path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, store_schema=False)
+    pq.write_table(table, parquet_path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, store_schema=True)
     dt = time.time() - t
     print(f"finished writing parquet file in {dt:.2f} seconds")
 
