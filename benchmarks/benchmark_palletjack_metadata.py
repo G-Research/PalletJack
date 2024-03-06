@@ -38,14 +38,14 @@ def get_table():
 
 def worker_arrow_row_group():
     
-    for r in range(0, row_groups / work_items):
+    for r in range(0, int(row_groups / work_items)):
         pr = pq.ParquetReader()
         pr.open(parquet_path)
         pr.read_row_groups([r], use_threads=False)
 
 def worker_palletjack_row_group():
     
-    for r in range(0, row_groups / work_items):
+    for r in range(0, int(row_groups / work_items)):
         metadata = pj.read_metadata(index_path, row_groups = [r])
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata = metadata)
@@ -53,14 +53,14 @@ def worker_palletjack_row_group():
 
 def worker_arrow_column():
     
-    for c in range(0, columns / work_items):
+    for c in range(0, int(columns / work_items)):
         pr = pq.ParquetReader()
         pr.open(parquet_path)        
         pr.read_all(column_indices = [c], use_threads=False)
 
 def worker_palletjack_column():
     
-    for c in range(0, columns / work_items):
+    for c in range(0, int(columns / work_items)):
         metadata = pj.read_metadata(index_path, columns = [c])
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata = metadata)
