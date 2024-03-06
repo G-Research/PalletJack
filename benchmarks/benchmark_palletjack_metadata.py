@@ -10,8 +10,9 @@ row_groups = 200
 columns = 200
 chunk_size = 1000
 rows = row_groups * chunk_size
-work_items = 32
+work_items = 8
 batch_size = 40
+n_reads = 300
 
 all_columns = list(range(columns))
 all_row_groups = list(range(row_groups))
@@ -97,17 +98,17 @@ def worker_palletjack_columns():
 
 def worker_palletjack_row_group_metadata():
     
-    for i in range(0, 100):
+    for i in range(0, n_reads):
        pj.read_metadata(index_path, row_groups =  [i % row_groups])
 
 def worker_palletjack_column_metadata():
     
-    for i in range(0, 100):
+    for i in range(0, n_reads):
         pj.read_metadata(index_path, columns = [i % columns])
 
 def worker_palletjack_row_group_column_metadata():
 
-    for i in range(0, 100):
+    for i in range(0, n_reads):
         pj.read_metadata(index_path, row_groups = [i % row_groups], columns = [i % columns])
 
 def worker_arrow_metadata():
@@ -139,8 +140,17 @@ def genrate_data(table):
 
 def measure_reading(max_workers, worker):
 
-    t = time.time()
+    def dummy_worker():
+        time.sleep(0.01)
+
+    # Create the pool and warm it up 
     pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+    dummy_items = [pool.submit(dummy_worker) for i in range(0, len(all_columns), batch_size)]
+    for dummy_item in dummy_items: 
+        dummy_item.result()
+
+    # Submit the work
+    t = time.time()
     for i in range(0, work_items):
         pool.submit(worker)
 
