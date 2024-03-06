@@ -10,7 +10,7 @@ row_groups = 200
 columns = 200
 chunk_size = 1000
 rows = row_groups * chunk_size
-work_items = 16
+work_items = 32
 batch_size = 40
 n_reads = 300
 
@@ -38,14 +38,14 @@ def get_table():
 
 def worker_arrow_row_group():
     
-    for r in range(0, row_groups):
+    for r in range(0, row_groups / work_items):
         pr = pq.ParquetReader()
         pr.open(parquet_path)
         pr.read_row_groups([r], use_threads=False)
 
 def worker_palletjack_row_group():
     
-    for r in range(0, row_groups):
+    for r in range(0, row_groups / work_items):
         metadata = pj.read_metadata(index_path, row_groups = [r])
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata = metadata)
@@ -53,14 +53,14 @@ def worker_palletjack_row_group():
 
 def worker_arrow_column():
     
-    for c in range(0, columns):
+    for c in range(0, columns / work_items):
         pr = pq.ParquetReader()
         pr.open(parquet_path)        
         pr.read_all(column_indices = [c], use_threads=False)
 
 def worker_palletjack_column():
     
-    for c in range(0, columns):
+    for c in range(0, columns / work_items):
         metadata = pj.read_metadata(index_path, columns = [c])
         pr = pq.ParquetReader()
         pr.open(parquet_path, metadata = metadata)
@@ -113,7 +113,7 @@ def worker_palletjack_row_group_column_metadata():
 
 def worker_arrow_metadata():
     
-    for i in range(0, 100):
+    for i in range(0, n_reads):
         pr = pq.ParquetReader()
         pr.open(parquet_path)
         metadata = pr.metadata
