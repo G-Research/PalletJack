@@ -144,6 +144,7 @@ def measure_reading(max_workers, worker):
         time.sleep(0.01)
 
     tt = []
+    # measure multiple times and take the fastest run
     for _ in range(0, 3):
         # Create the pool and warm it up 
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
