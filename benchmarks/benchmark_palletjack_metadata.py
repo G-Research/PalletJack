@@ -12,7 +12,7 @@ chunk_size = 1000
 rows = row_groups * chunk_size
 work_items = 32
 batch_size = 40
-n_reads = 100
+n_reads = 300
 
 all_columns = list(range(columns))
 all_row_groups = list(range(row_groups))
@@ -98,12 +98,12 @@ def worker_palletjack_columns():
 
 def worker_palletjack_row_group_metadata():
     
-    for i in range(0, n_reads):
+    for i in range(0, int(n_reads / work_items)):
        pj.read_metadata(index_path, row_groups =  [i % row_groups])
 
 def worker_palletjack_column_metadata():
     
-    for i in range(0, n_reads):
+    for i in range(0, int(n_reads / work_items)):
         pj.read_metadata(index_path, columns = [i % columns])
 
 def worker_palletjack_row_group_column_metadata():
@@ -113,7 +113,7 @@ def worker_palletjack_row_group_column_metadata():
 
 def worker_arrow_metadata():
     
-    for i in range(0, n_reads):
+    for i in range(0, int(n_reads / work_items)):
         pr = pq.ParquetReader()
         pr.open(parquet_path)
         metadata = pr.metadata
