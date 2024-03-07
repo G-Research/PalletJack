@@ -312,8 +312,6 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
 {
-    // auto begin = std::chrono::steady_clock::now();
-
     auto f = fopen(index_file_path, "rb");
     if (!f)
     {
@@ -546,10 +544,5 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     uint32_t length = index_dst;
     auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);
 
-/*
-    auto end = std::chrono::steady_clock::now();
-    auto dt = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
-    std::cerr << " ReadMetadata c++: " << dt.count() << "us" << std::endl;
-*/
     return result_metadata;
 }
