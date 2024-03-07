@@ -534,6 +534,5 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     #endif
 
     uint32_t length = index_dst;
-    DeserializeFileMetadata(&dst[0], length);
     return parquet::FileMetaData::Make(&dst[0], &length);
 }
