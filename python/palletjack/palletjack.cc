@@ -327,6 +327,12 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         throw std::logic_error(msg);
     }
 
+    if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
+    {
+        auto msg = std::string("File '") + index_file_path + "' has unexpected format!";
+        throw std::logic_error(msg);
+    }
+
     if (row_groups.size() > 0)
     {
         for (auto row_group : row_groups)
