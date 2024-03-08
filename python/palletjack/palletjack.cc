@@ -490,7 +490,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
             memcpy(&dst[index_dst], &src[index_src], toCopy);
             index_dst += toCopy;
 
-            index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size());
+            index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size(), tproto, mem_buffer); // one extra element for root);
 
             for (auto column_to_copy : columns)
             {
@@ -525,7 +525,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
+        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size(), tproto, mem_buffer); // one extra element for root
         index_src = column_orders_list[1];
 
         auto column_orders = &column_orders_offsets[1];
