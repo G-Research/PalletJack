@@ -421,7 +421,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteI64(&dst[index_dst], num_rows, columns.size() + 1, tproto, mem_buffer);
+        index_dst += WriteI64(&dst[index_dst], num_rows, tproto, mem_buffer);
         index_src = num_row_offsets[1];
     }
 
