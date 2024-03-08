@@ -138,14 +138,8 @@ size_t WriteListBegin(void *dst, const ::apache::thrift::protocol::TType elemTyp
     return len;
 }
 
-size_t WriteI32(void *dst, int32_t value)
+size_t WriteI32(void *dst, int32_t value, std::shared_ptr<apache::thrift::protocol::TProtocol> tproto, std::shared_ptr<ThriftBuffer> mem_buffer)
 {
-    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
-    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
-    // Protect against CPU and memory bombs
-    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
-    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
-    auto tproto = tproto_factory.getProtocol(mem_buffer);
     mem_buffer->resetBuffer();
     tproto->writeI32(value);
     uint8_t *ptr;
@@ -155,14 +149,8 @@ size_t WriteI32(void *dst, int32_t value)
     return len;
 }
 
-size_t WriteI64(void *dst, int64_t value)
+size_t WriteI64(void *dst, int64_t value, std::shared_ptr<apache::thrift::protocol::TProtocol> tproto, std::shared_ptr<ThriftBuffer> mem_buffer)
 {
-    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
-    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
-    // Protect against CPU and memory bombs
-    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
-    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
-    auto tproto = tproto_factory.getProtocol(mem_buffer);
     mem_buffer->resetBuffer();
     tproto->writeI64(value);
     uint8_t *ptr;
@@ -402,7 +390,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src = root_schema_element[0] + schema_num_children_offsets[1];
 
         // Update the num children in the schema
-        index_dst += WriteI32(&dst[index_dst], columns.size());
+        index_dst += WriteI32(&dst[index_dst], columns.size(), tproto, mem_buffer);
 
         toCopy = root_schema_element[1] - index_src;
         memcpy(&dst[index_dst], &src[index_src], toCopy);
@@ -433,7 +421,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteI64(&dst[index_dst], num_rows);
+        index_dst += WriteI64(&dst[index_dst], num_rows, columns.size() + 1, tproto, mem_buffer);
         index_src = num_row_offsets[1];
     }
 
@@ -550,7 +538,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 #endif
 
     uint32_t length = index_dst;
-    auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);
-
+    auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);	
     return result_metadata;
 }
