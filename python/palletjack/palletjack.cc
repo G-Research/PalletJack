@@ -310,8 +310,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     }
 
     DataHeader dataHeader;
-    fread(&dataHeader, 1, sizeof(dataHeader), f);
-    if (std::ferror(f))
+    size_t read_bytes = fread(&dataHeader, 1, sizeof(dataHeader), f);
+    if (read_bytes != sizeof(dataHeader))
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
         throw std::logic_error(msg);
@@ -351,8 +351,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     std::vector<uint8_t> data_body(body_size);
     std::vector<uint8_t> data_body_dst(dataHeader.metadata_length);
 
-    fread(&data_body[0], 1, data_body.size(), f);
-    if (std::ferror(f))
+    read_bytes = fread(&data_body[0], 1, data_body.size(), f);
+    if (read_bytes != data_body.size())
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
         throw std::logic_error(msg);
