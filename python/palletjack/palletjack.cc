@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 using arrow::Status;
 
@@ -35,10 +36,10 @@ struct DataHeader
     uint32_t row_groups = 0;
     uint32_t columns = 0;
     uint32_t metadata_length = 0;
-    uint32_t get_num_rows_offsets_size() { return 2; }                                   // 2   
+    uint32_t get_num_rows_offsets_size() { return 2; }                                   // 2
     uint32_t get_row_numbers_size() { return row_groups; }                               // rg
     uint32_t get_schema_offsets_size() { return 1 + 1 + columns + 1; }                   // 1 + 1 + c + 1
-    uint32_t get_schema_num_children_offsets_size() { return (columns + 1) * (1 + 1); }  // (c + 1) * (1 + 1) 
+    uint32_t get_schema_num_children_offsets_size() { return (columns + 1) * (1 + 1); }  // (c + 1) * (1 + 1)
     uint32_t get_row_groups_offsets_size() { return 1 + row_groups + 1; }                // 1 + rg + 1
     uint32_t get_column_orders_offsets_size() { return 1 + columns + 1; }                // 1 + c + 1
     uint32_t get_column_chunks_offsets_size() { return row_groups * (1 + columns + 1); } // rg * (1 + c + 1)
@@ -125,31 +126,20 @@ palletjack::parquet::FileMetaData DeserializeFileMetadata(const void *buf, uint3
     return fileMetaData;
 }
 
-size_t WriteListBegin(void *dst, const ::apache::thrift::protocol::TType elemType, uint32_t size)
+size_t WriteListBegin(void *dst, const ::apache::thrift::protocol::TType elemType, uint32_t size, std::shared_ptr<apache::thrift::protocol::TProtocol> tproto, std::shared_ptr<ThriftBuffer> mem_buffer)
 {
-    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
-    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
-    // Protect against CPU and memory bombs
-    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
-    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
-    auto tproto = tproto_factory.getProtocol(mem_buffer);
     mem_buffer->resetBuffer();
     tproto->writeListBegin(elemType, static_cast<uint32_t>(size));
     uint8_t *ptr;
     uint32_t len;
     mem_buffer->getBuffer(&ptr, &len);
     memcpy(dst, ptr, len);
+
     return len;
 }
 
-size_t WriteI32(void *dst, int32_t value)
+size_t WriteI32(void *dst, int32_t value, std::shared_ptr<apache::thrift::protocol::TProtocol> tproto, std::shared_ptr<ThriftBuffer> mem_buffer)
 {
-    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
-    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
-    // Protect against CPU and memory bombs
-    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
-    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
-    auto tproto = tproto_factory.getProtocol(mem_buffer);
     mem_buffer->resetBuffer();
     tproto->writeI32(value);
     uint8_t *ptr;
@@ -159,14 +149,8 @@ size_t WriteI32(void *dst, int32_t value)
     return len;
 }
 
-size_t WriteI64(void *dst, int64_t value)
+size_t WriteI64(void *dst, int64_t value, std::shared_ptr<apache::thrift::protocol::TProtocol> tproto, std::shared_ptr<ThriftBuffer> mem_buffer)
 {
-    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
-    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
-    // Protect against CPU and memory bombs
-    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
-    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
-    auto tproto = tproto_factory.getProtocol(mem_buffer);
     mem_buffer->resetBuffer();
     tproto->writeI64(value);
     uint8_t *ptr;
@@ -220,13 +204,13 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             throw new std::logic_error("Number of columns is not set!");
         if (data_header.metadata_length == 0)
             throw new std::logic_error("Number of metadata length is not set!");
-        
+
         if (data_header.get_num_rows_offsets_size() != metadata.num_rows_offsets.size())
         {
             auto msg = std::string("Number of rows offset information is invalid ") + std::to_string(data_header.get_num_rows_offsets_size()) + " != " + std::to_string(metadata.num_rows_offsets.size()) + " !";
-            throw new std::logic_error(msg); 
+            throw new std::logic_error(msg);
         }
-        
+
         if (data_header.row_groups != metadata.row_numbers.size())
         {
             auto msg = std::string("Row numbers information is invalid ") + std::to_string(data_header.row_groups) + " != " + std::to_string(metadata.row_numbers.size()) + " !";
@@ -245,15 +229,15 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             {
                 schema_elemnt.num_children_offsets.push_back(0);
                 schema_elemnt.num_children_offsets.push_back(0);
-            }  
+            }
             else if (schema_elemnt.num_children_offsets.size() != 2)
             {
                 auto msg = std::string("Num children offsets information is invalid, num_children_offsets=") + std::to_string(schema_elemnt.num_children_offsets.size()) + " !";
 
                 throw new std::logic_error(msg);
-            }            
+            }
         }
-        
+
         if (data_header.get_row_groups_offsets_size() != metadata.row_groups_offsets.size())
         {
             auto msg = std::string("Row group offsets information is invalid, columns=") + std::to_string(data_header.row_groups) + ", row_groups_offsets=" + std::to_string(metadata.row_groups_offsets.size()) + " !";
@@ -301,9 +285,9 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         }
 
         uint32_t offset = fs.tellp();
-        #ifdef DEBUG
-            std::cerr << " Writing thrift offset: " << offset << std::endl;
-        #endif
+#ifdef DEBUG
+        std::cerr << " Writing thrift offset: " << offset << std::endl;
+#endif
 
         fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
     }
@@ -311,13 +295,27 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
 {
-    std::vector<char> buf(4 * 1024 * 1024); // 4 MiB
-    std::ifstream fs(index_file_path, std::ios::binary);
-    fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
+    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
+    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
+    // Protect against CPU and memory bombs
+    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
+    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
+    auto tproto = tproto_factory.getProtocol(mem_buffer);
+
+    auto f = fopen(index_file_path, "rb");
+    if (!f)
+    {
+        auto msg = std::string("I/O error when opening '") + index_file_path + "'";
+        throw std::logic_error(msg);
+    }
 
     DataHeader dataHeader;
-    fs.read((char *)&dataHeader, sizeof(dataHeader));
+    size_t read_bytes = fread(&dataHeader, 1, sizeof(dataHeader), f);
+    if (read_bytes != sizeof(dataHeader))
+    {
+        auto msg = std::string("I/O error when reading '") + index_file_path + "'";
+        throw std::logic_error(msg);
+    }
 
     if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
     {
@@ -327,32 +325,38 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 
     if (row_groups.size() > 0)
     {
-        for(auto row_group : row_groups)
+        for (auto row_group : row_groups)
         {
             if (row_group >= dataHeader.row_groups)
             {
-                auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(dataHeader.row_groups-1) + " are available!";
+                auto msg = std::string("Requested row_group=") + std::to_string(row_group) + ", but only 0-" + std::to_string(dataHeader.row_groups - 1) + " are available!";
                 throw std::logic_error(msg);
             }
         }
-    }  
-     
+    }
+
     if (columns.size() > 0)
     {
-        for(auto column : columns)
+        for (auto column : columns)
         {
             if (column >= dataHeader.columns)
             {
-                auto msg = std::string("Requested column=") + std::to_string(column) + ", but only 0-" + std::to_string(dataHeader.columns-1) + " are available!";
+                auto msg = std::string("Requested column=") + std::to_string(column) + ", but only 0-" + std::to_string(dataHeader.columns - 1) + " are available!";
                 throw std::logic_error(msg);
             }
         }
-    }  
+    }
 
     auto body_size = dataHeader.get_body_size();
     std::vector<uint8_t> data_body(body_size);
     std::vector<uint8_t> data_body_dst(dataHeader.metadata_length);
-    fs.read((char *)&data_body[0], data_body.size());
+
+    read_bytes = fread(&data_body[0], 1, data_body.size(), f);
+    if (read_bytes != data_body.size())
+    {
+        auto msg = std::string("I/O error when reading '") + index_file_path + "'";
+        throw std::logic_error(msg);
+    }
 
     auto num_row_offsets = (uint32_t *)&data_body[0];
     auto row_numbers = (uint32_t *)&num_row_offsets[dataHeader.get_num_rows_offsets_size()];
@@ -368,7 +372,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     uint32_t index_dst = 0;
     size_t toCopy = 0;
 
-    if (columns.size () > 0)
+    if (columns.size() > 0)
     {
         auto schema_list = &schema_offsets[0];
         toCopy = schema_list[0] - index_src;
@@ -376,23 +380,23 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size() + 1); // one extra element for root
-        index_src = schema_list[1]; 
+        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size() + 1, tproto, mem_buffer); // one extra element for root
+        index_src = schema_list[1];
 
         auto root_schema_element = &schema_list[1];
         toCopy = root_schema_element[0] + schema_num_children_offsets[0] - index_src;
-        memcpy(&dst[index_dst], &src[index_src], toCopy); 
+        memcpy(&dst[index_dst], &src[index_src], toCopy);
         index_dst += toCopy;
         index_src = root_schema_element[0] + schema_num_children_offsets[1];
 
         // Update the num children in the schema
-        index_dst += WriteI32(&dst[index_dst], columns.size());
+        index_dst += WriteI32(&dst[index_dst], columns.size(), tproto, mem_buffer);
 
         toCopy = root_schema_element[1] - index_src;
-        memcpy(&dst[index_dst], &src[index_src], toCopy); 
+        memcpy(&dst[index_dst], &src[index_src], toCopy);
         index_dst += toCopy;
         index_src += toCopy;
-        
+
         auto schema_elements = &schema_offsets[2];
         for (auto column : columns)
         {
@@ -407,7 +411,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     if (row_groups.size() > 0)
     {
         int64_t num_rows = 0;
-        for (auto row_group: row_groups)
+        for (auto row_group : row_groups)
         {
             num_rows += row_numbers[row_group];
         }
@@ -417,7 +421,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteI64(&dst[index_dst], num_rows);
+        index_dst += WriteI64(&dst[index_dst], num_rows, tproto, mem_buffer);
         index_src = num_row_offsets[1];
     }
 
@@ -430,8 +434,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, row_groups.size());
-        index_src = row_groups_list[1]; 
+        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, row_groups.size(), tproto, mem_buffer); // one extra element for root);
+        index_src = row_groups_list[1];
     }
     else
     {
@@ -442,8 +446,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
     }
-    
-    for (auto idx = 0;;idx++)
+
+    for (auto idx = 0;; idx++)
     {
         size_t row_group_idx = 0;
 
@@ -458,13 +462,13 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         {
             if (idx >= dataHeader.row_groups)
                 break;
-            
+
             row_group_idx = idx;
-        }                
-    
+        }
+
         auto row_group_offset = row_groups_offsets[1 + row_group_idx];
         index_src = row_groups_offsets[1 + row_group_idx];
-        if (columns.size () > 0)
+        if (columns.size() > 0)
         {
             auto chunks_list = &column_chunks_offsets[(1 + dataHeader.columns + 1) * row_group_idx];
             auto chunks = &chunks_list[1];
@@ -474,7 +478,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
             memcpy(&dst[index_dst], &src[index_src], toCopy);
             index_dst += toCopy;
 
-            index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size());
+            index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size(), tproto, mem_buffer); // one extra element for root);
 
             for (auto column_to_copy : columns)
             {
@@ -491,7 +495,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
         else
         {
-             // START HERE
+            // START HERE
             toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
             memcpy(&dst[index_dst], &src[index_src], toCopy);
             index_dst += toCopy;
@@ -501,7 +505,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 
     index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size() - 1];
 
-    if (columns.size () > 0)
+    if (columns.size() > 0)
     {
         auto column_orders_list = &column_orders_offsets[0];
         toCopy = column_orders_list[0] - index_src;
@@ -509,8 +513,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
-        index_src = column_orders_list[1]; 
+        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size(), tproto, mem_buffer); // one extra element for root
+        index_src = column_orders_list[1];
 
         auto column_orders = &column_orders_offsets[1];
         for (auto column : columns)
@@ -527,13 +531,13 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     memcpy(&dst[index_dst], &src[index_src], toCopy);
     index_dst += toCopy;
 
-    #ifdef DEBUG
-        std::cerr << " Reading body_size: " << body_size << std::endl;
-        std::cerr << " Reading thrift offset: " << src - &data_body[0] << std::endl;
-        std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
-    #endif
+#ifdef DEBUG
+    std::cerr << " Reading body_size: " << body_size << std::endl;
+    std::cerr << " Reading thrift offset: " << src - &data_body[0] << std::endl;
+    std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
+#endif
 
     uint32_t length = index_dst;
-    DeserializeFileMetadata(&dst[0], length);
-    return parquet::FileMetaData::Make(&dst[0], &length);
+    auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);	
+    return result_metadata;
 }
