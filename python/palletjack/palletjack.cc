@@ -126,20 +126,15 @@ palletjack::parquet::FileMetaData DeserializeFileMetadata(const void *buf, uint3
     return fileMetaData;
 }
 
-size_t WriteListBegin(void *dst, const ::apache::thrift::protocol::TType elemType, uint32_t size)
+size_t WriteListBegin(void *dst, const ::apache::thrift::protocol::TType elemType, uint32_t size, std::shared_ptr<apache::thrift::protocol::TProtocol> tproto, std::shared_ptr<ThriftBuffer> mem_buffer)
 {
-    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
-    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
-    // Protect against CPU and memory bombs
-    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
-    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
-    auto tproto = tproto_factory.getProtocol(mem_buffer);
     mem_buffer->resetBuffer();
     tproto->writeListBegin(elemType, static_cast<uint32_t>(size));
     uint8_t *ptr;
     uint32_t len;
     mem_buffer->getBuffer(&ptr, &len);
     memcpy(dst, ptr, len);
+
     return len;
 }
 
@@ -312,6 +307,13 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
 {
+    std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
+    apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
+    // Protect against CPU and memory bombs
+    tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
+    tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
+    auto tproto = tproto_factory.getProtocol(mem_buffer);
+
     auto f = fopen(index_file_path, "rb");
     if (!f)
     {
@@ -390,7 +392,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size() + 1); // one extra element for root
+        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, columns.size() + 1, tproto, mem_buffer); // one extra element for root
         index_src = schema_list[1];
 
         auto root_schema_element = &schema_list[1];
@@ -444,7 +446,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         index_src += toCopy;
         index_dst += toCopy;
 
-        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, row_groups.size());
+        index_dst += WriteListBegin(&dst[index_dst], ::apache::thrift::protocol::T_STRUCT, row_groups.size(), tproto, mem_buffer); // one extra element for root);
         index_src = row_groups_list[1];
     }
     else
