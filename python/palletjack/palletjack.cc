@@ -35,7 +35,9 @@ struct DataHeader
     char header[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
     uint32_t row_groups = 0;
     uint32_t columns = 0;
+    uint32_t column_names_length = 0;
     uint32_t metadata_length = 0;
+    
     uint32_t get_num_rows_offsets_size() { return 2; }                                   // 2
     uint32_t get_row_numbers_size() { return row_groups; }                               // rg
     uint32_t get_schema_offsets_size() { return 1 + 1 + columns + 1; }                   // 1 + 1 + c + 1
@@ -52,6 +54,7 @@ struct DataHeader
                get_row_groups_offsets_size() * sizeof(uint32_t) +
                get_column_orders_offsets_size() * sizeof(uint32_t) +
                get_column_chunks_offsets_size() * sizeof(uint32_t) +
+               column_names_length +
                metadata_length;
     }
 };
@@ -178,7 +181,7 @@ size_t WriteI64(void *dst, int64_t value, std::shared_ptr<apache::thrift::protoc
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
 {
     std::shared_ptr<arrow::Buffer> thrift_buffer;
-    DataHeader data_header;
+    DataHeader data_header = {};
 
     {
         std::shared_ptr<arrow::io::ReadableFile> infile;
@@ -192,6 +195,11 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         data_header.row_groups = metadata->num_row_groups();
         data_header.columns = metadata->num_columns();
         data_header.metadata_length = thrift_buffer.get()->size();
+
+        for (uint32_t c = 0; c < data_header.columns; c++)
+        {
+            data_header.column_names_length += metadata.get()->schema()->Column(c)->name().length() + 1;
+        }
     }
 
     auto metadata = DeserializeFileMetadata(thrift_buffer.get()->data(), thrift_buffer.get()->size());
@@ -284,6 +292,21 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             fs.write((const char *)&row_group.column_chunks_offsets[0], sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
         }
 
+        uint32_t written_column_names_length = 0;
+        for (uint32_t c = 1; c <= data_header.columns; c++)
+        {
+            auto name = metadata.schema[c].name;
+            auto cname = name.c_str();
+            auto to_write = name.length() + 1;
+            fs.write((const char *)cname, to_write);
+            written_column_names_length += to_write;
+        }
+        
+        if (data_header.column_names_length != written_column_names_length)
+        {
+            throw new std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
+        }
+
         uint32_t offset = fs.tellp();
 #ifdef DEBUG
         std::cerr << " Writing thrift offset: " << offset << std::endl;
@@ -365,7 +388,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     auto row_groups_offsets = (uint32_t *)&schema_num_children_offsets[dataHeader.get_schema_num_children_offsets_size()];
     auto column_orders_offsets = (uint32_t *)&row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
     auto column_chunks_offsets = (uint32_t *)&column_orders_offsets[dataHeader.get_column_orders_offsets_size()];
-    auto src = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
+    auto column_names = (uint8_t*)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
+    auto src = (uint8_t *)&column_names[dataHeader.column_names_length];
     auto dst = (uint8_t *)&data_body_dst[0];
 
     uint32_t index_src = 0;
