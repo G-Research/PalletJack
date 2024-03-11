@@ -396,6 +396,21 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     uint32_t index_dst = 0;
     size_t toCopy = 0;
 
+    auto column_names_ptr = (const char *)column_names;
+    std::unordered_map<std::string, uint32_t> columns_map;
+    for (uint32_t c = 0; c < dataHeader.columns; c++)
+    {
+        std::string s = column_names_ptr;
+        column_names_ptr += s.length() + 1;
+        columns_map[s] = c;
+    }
+
+    if (column_names_ptr != (const char *)src)
+    {
+        auto msg = std::string("Internal error, when reading column names!");
+        throw std::logic_error(msg);
+    }
+
     if (columns.size() > 0)
     {
         auto schema_list = &schema_offsets[0];
