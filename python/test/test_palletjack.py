@@ -31,21 +31,21 @@ class TestPalletJack(unittest.TestCase):
       
     def test_read_metadata_columns_rows(self):
 
-        def validate_reading(parquet_path, index_path, row_groups, columns):
+        def validate_reading(parquet_path, index_path, row_groups, column_indices):
             # Reading using the original metadata
             pr = pq.ParquetReader()
             pr.open(parquet_path)
             org_data = pr.read_row_groups(row_groups)
-            if len(columns) > 0:                
-                org_data = org_data.select(columns)
+            if len(column_indices) > 0:                
+                org_data = org_data.select(column_indices)
 
             # Reading using the indexed metadata
-            metadata = pj.read_metadata(index_path, row_groups=row_groups, columns=columns)
+            metadata = pj.read_metadata(index_path, row_groups=row_groups, column_indices=column_indices)
             pr = pq.ParquetReader()
             pr.open(parquet_path, metadata=metadata)
 
             pj_data = pr.read_row_groups(list(range(0, len(row_groups))))
-            self.assertEqual(org_data, pj_data, f"row_groups={row_groups}, columns={columns}")
+            self.assertEqual(org_data, pj_data, f"row_groups={row_groups}, column_indices={column_indices}")
 
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
@@ -61,7 +61,7 @@ class TestPalletJack(unittest.TestCase):
                 for rp in it.permutations(all_row_groups, r):
                     for c in range(0, 4):
                         for cp in it.permutations(all_columns, c):
-                            validate_reading(path, index_path, row_groups = rp, columns = cp)
+                            validate_reading(path, index_path, row_groups = rp, column_indices = cp)
 
     def test_read_row_group_metadata(self):
         
@@ -138,7 +138,7 @@ class TestPalletJack(unittest.TestCase):
                 pj.generate_metadata_index(path, index_path)
                 
                 with self.assertRaises(RuntimeError) as context:
-                    metadata = pj.read_metadata(index_path, row_groups=[], columns=[n_columns])
+                    metadata = pj.read_metadata(index_path, row_groups=[], column_indices=[n_columns])
 
                 self.assertTrue(f"Requested column={n_columns}, but only 0-{n_columns-1} are available!" in str(context.exception), context.exception)
 

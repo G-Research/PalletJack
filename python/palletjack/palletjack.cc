@@ -37,7 +37,7 @@ struct DataHeader
     uint32_t columns = 0;
     uint32_t column_names_length = 0;
     uint32_t metadata_length = 0;
-    
+
     uint32_t get_num_rows_offsets_size() { return 2; }                                   // 2
     uint32_t get_row_numbers_size() { return row_groups; }                               // rg
     uint32_t get_schema_offsets_size() { return 1 + 1 + columns + 1; }                   // 1 + 1 + c + 1
@@ -301,7 +301,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             fs.write((const char *)cname, to_write);
             written_column_names_length += to_write;
         }
-        
+
         if (data_header.column_names_length != written_column_names_length)
         {
             throw new std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
@@ -316,7 +316,10 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     }
 }
 
-std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
+std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
+                                                    const std::vector<uint32_t> &row_groups,
+                                                    const std::vector<uint32_t> &column_indices,
+                                                    const std::vector<std::string> &column_names)
 {
     std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
@@ -358,9 +361,9 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
     }
 
-    if (columns.size() > 0)
+    if (column_indices.size() > 0)
     {
-        for (auto column : columns)
+        for (auto column : column_indices)
         {
             if (column >= dataHeader.columns)
             {
@@ -388,27 +391,48 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     auto row_groups_offsets = (uint32_t *)&schema_num_children_offsets[dataHeader.get_schema_num_children_offsets_size()];
     auto column_orders_offsets = (uint32_t *)&row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
     auto column_chunks_offsets = (uint32_t *)&column_orders_offsets[dataHeader.get_column_orders_offsets_size()];
-    auto column_names = (uint8_t*)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
-    auto src = (uint8_t *)&column_names[dataHeader.column_names_length];
+    auto column_names_ptr = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
+    auto src = (uint8_t *)&column_names_ptr[dataHeader.column_names_length];
     auto dst = (uint8_t *)&data_body_dst[0];
 
     uint32_t index_src = 0;
     uint32_t index_dst = 0;
     size_t toCopy = 0;
 
-    auto column_names_ptr = (const char *)column_names;
-    std::unordered_map<std::string, uint32_t> columns_map;
-    for (uint32_t c = 0; c < dataHeader.columns; c++)
+    if (column_indices.size() > 0 && column_names.size() > 0)
     {
-        std::string s = column_names_ptr;
-        column_names_ptr += s.length() + 1;
-        columns_map[s] = c;
+        auto msg = std::string("Cannot specify both column indicies and column names at the same time!");
+        throw std::logic_error(msg);
     }
 
-    if (column_names_ptr != (const char *)src)
+    std::vector<uint32_t> columns = column_indices;
+    if (column_names.size() > 0)
     {
-        auto msg = std::string("Internal error, when reading column names!");
-        throw std::logic_error(msg);
+        std::unordered_map<std::string, uint32_t> columns_map;
+        for (uint32_t c = 0; c < dataHeader.columns; c++)
+        {
+            std::string s = (const char *)column_names_ptr;
+            column_names_ptr += s.length() + 1;
+            columns_map[s] = c;
+        }
+
+        if (column_names_ptr != src)
+        {
+            auto msg = std::string("Internal error, when reading column names!");
+            throw std::logic_error(msg);
+        }
+
+        for (const auto &column_name : column_names)
+        {
+            auto kvp = columns_map.find(column_name);
+            if (kvp == columns_map.end())
+            {
+                auto msg = std::string("Couldn't find a column with a name:'") + column_name + "'";
+                throw std::logic_error(msg);
+            }
+
+            columns.push_back(kvp->second);
+        }
     }
 
     if (columns.size() > 0)
@@ -577,6 +601,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 #endif
 
     uint32_t length = index_dst;
-    auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);	
+    auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);
     return result_metadata;
 }
