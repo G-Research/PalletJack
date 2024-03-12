@@ -29,6 +29,44 @@ def get_table():
 
 class TestPalletJack(unittest.TestCase):
 
+    def test_read_metadata_columns_rows(self):
+
+        def validate_reading(parquet_path, index_path, row_groups, column_indices):
+            # Reading using the original metadata
+            pr = pq.ParquetReader()
+            pr.open(parquet_path)
+            org_data = pr.read_row_groups(row_groups)
+            if len(column_indices) > 0:                
+                org_data = org_data.select(column_indices)
+
+            # Reading using the indexed metadata
+            metadata = pj.read_metadata(index_path, row_groups=row_groups, column_indices=column_indices)
+            metadata_names = pj.read_metadata(index_path, row_groups=row_groups, column_names=[f'column_{i}' for i in column_indices])
+            self.assertEqual(metadata, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
+
+            pr = pq.ParquetReader()
+            pr.open(parquet_path, metadata=metadata)
+
+            pj_data = pr.read_row_groups(list(range(0, len(row_groups))))
+            self.assertEqual(org_data, pj_data, f"row_groups={row_groups}, column_indices={column_indices}")
+
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+            index_path = path + '.index'
+            pj.generate_metadata_index(path, index_path)
+
+            all_columns = list(range(0, n_columns))
+            all_row_groups = list(range(0, n_row_groups))
+            for r in range(0, 4):
+                for rp in it.permutations(all_row_groups, r):
+                    for c in range(0, 4):
+                        for cp in it.permutations(all_columns, c):
+                            validate_reading(path, index_path, row_groups = rp, column_indices = cp)
+
     def test_read_row_group_metadata(self):
         
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
