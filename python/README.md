@@ -60,7 +60,14 @@ data = pr.read_all()
 
 ### Reading some columns using the indexed metadata:
 ```
-metadata = pj.read_metadata(index_path, columns = [1, 3])
+metadata = pj.read_metadata(index_path, column_indices = [1, 3])
+pr = pq.ParquetReader()
+pr.open(path, metadata=metadata)
+
+data = pr.read_all()
+```
+```
+metadata = pj.read_metadata(index_path, column_names = ['column_1', 'column_3'])
 pr = pq.ParquetReader()
 pr.open(path, metadata=metadata)
 
@@ -69,7 +76,7 @@ data = pr.read_all()
 
 ### Reading some row groups and some columns using the indexed metadata:
 ```
-metadata = pj.read_metadata(index_path, row_groups = [5, 7], columns = [1, 3])
+metadata = pj.read_metadata(index_path, row_groups = [5, 7], column_indices = [1, 3])
 pr = pq.ParquetReader()
 pr.open(path, metadata=metadata)
 
