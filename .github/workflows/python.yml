@@ -6,6 +6,9 @@ name: Python
 on:
   push:
 
+env:
+  CYTHONIZE: 1
+
 permissions:
   contents: read
 
