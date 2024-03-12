@@ -364,6 +364,12 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 
     if (column_indices.size() > 0)
     {
+        if (column_names.size() > 0)
+        {
+            auto msg = std::string("Cannot specify both column indices and column names at the same time!");
+            throw std::logic_error(msg);
+        }
+
         for (auto column : column_indices)
         {
             if (column >= dataHeader.columns)
@@ -399,12 +405,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     uint32_t index_src = 0;
     uint32_t index_dst = 0;
     size_t toCopy = 0;
-
-    if (column_indices.size() > 0 && column_names.size() > 0)
-    {
-        auto msg = std::string("Cannot specify both column indicies and column names at the same time!");
-        throw std::logic_error(msg);
-    }
 
     std::vector<uint32_t> columns = column_indices;
     if (column_names.size() > 0)

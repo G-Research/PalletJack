@@ -143,13 +143,15 @@ class TestPalletJack(unittest.TestCase):
 
                 with self.assertRaises(RuntimeError) as context:
                     metadata = pj.read_metadata(index_path, row_groups=[], column_indices=[n_columns])
-
                 self.assertTrue(f"Requested column={n_columns}, but only 0-{n_columns-1} are available!" in str(context.exception), context.exception)
 
                 with self.assertRaises(RuntimeError) as context:
                     metadata = pj.read_metadata(index_path, row_groups=[], column_names=["no_such_column"])
+                self.assertTrue("Couldn't find a column with a name 'no_such_column'!" in str(context.exception), context.exception)
 
-                self.assertTrue("Couldn't find a column with a name:'no_such_column'!")
+                with self.assertRaises(RuntimeError) as context:
+                    metadata = pj.read_metadata(index_path, row_groups=[], column_indices=[n_columns], column_names=["n_columns0"])
+                self.assertTrue("Cannot specify both column indicies and column names at the same time!" in str(context.exception), context.exception)
 
     def test_reading_invalid_index_file(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
