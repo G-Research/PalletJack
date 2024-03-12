@@ -102,7 +102,7 @@ class TestPalletJack(unittest.TestCase):
 
                 with self.assertRaises(RuntimeError) as context:
                     metadata = pj.read_metadata(index_path, row_groups=[], column_indices=[n_columns], column_names=["n_columns0"])
-                self.assertTrue("Cannot specify both column indicies and column names at the same time!" in str(context.exception), context.exception)
+                self.assertTrue("Cannot specify both column indices and column names at the same time!" in str(context.exception), context.exception)
 
     def test_reading_invalid_index_file(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
