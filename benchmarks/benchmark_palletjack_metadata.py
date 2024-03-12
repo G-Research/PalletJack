@@ -104,7 +104,7 @@ def worker_palletjack_row_group_metadata():
 def worker_palletjack_column_metadata():
     
     for i in range(0, int(n_reads / work_items)):
-        pj.read_metadata(index_path, columns = [i % columns])
+        pj.read_metadata(index_path, column_indices = [i % columns])
 
 def worker_palletjack_column_name_metadata():
 
