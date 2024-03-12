@@ -54,5 +54,114 @@ class TestPalletJack(unittest.TestCase):
                 res_data_index = pr.read_row_groups([0], use_threads=False)
                 self.assertEqual(res_data_org, res_data_index, f"Row={r}")
 
+    def test_reading_row_groups(self):
+
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+            index_path = path + '.index'
+            pj.generate_metadata_index(path, index_path)
+
+            # Reading using the original metadata
+            pr = pq.ParquetReader()
+            pr.open(path)
+            res_data_org = pr.read_row_groups([2, 3, 4], use_threads=False)
+
+            # Reading using the indexed metadata
+            metadata = pj.read_metadata(index_path, row_groups = [2, 3, 4])
+            pr = pq.ParquetReader()
+            pr.open(path, metadata=metadata)
+
+            res_data_index = pr.read_row_groups([0, 1, 2], use_threads=False)
+            self.assertEqual(res_data_org, res_data_index)
+
+    def test_reading_invalid_row_group(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+            index_path = path + '.index'
+            pj.generate_metadata_index(path, index_path)
+
+            with self.assertRaises(RuntimeError) as context:
+                metadata = pj.read_metadata(index_path, [n_row_groups])
+
+            self.assertTrue(f"Requested row_group={n_row_groups}, but only 0-{n_row_groups-1} are available!" in str(context.exception), context.exception)
+
+    def test_reading_invalid_column(self):
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                path = os.path.join(tmpdirname, "my.parquet")
+                table = get_table()
+
+                pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+                index_path = path + '.index'
+                pj.generate_metadata_index(path, index_path)
+
+                with self.assertRaises(RuntimeError) as context:
+                    metadata = pj.read_metadata(index_path, row_groups=[], column_indices=[n_columns])
+
+                self.assertTrue(f"Requested column={n_columns}, but only 0-{n_columns-1} are available!" in str(context.exception), context.exception)
+
+                with self.assertRaises(RuntimeError) as context:
+                    metadata = pj.read_metadata(index_path, row_groups=[], column_names=["no_such_column"])
+
+                self.assertTrue("Couldn't find a column with a name:'no_such_column'!")
+
+    def test_reading_invalid_index_file(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+            with self.assertRaises(Exception) as context:
+                metadata = pj.read_metadata(path, [0])
+
+            self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
+
+    def test_index_file_golden_master(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            index_path = os.path.join(tmpdirname, 'my.parquet.index')
+            path = os.path.join(current_dir, 'data/sample.parquet')
+            expected_index_path = os.path.join(current_dir, 'data/sample.parquet.index')
+            pj.generate_metadata_index(path, index_path)
+
+            # Read the expected output
+            with open(expected_index_path, 'rb') as file:
+                expected_output = file.read()
+
+            # Read the expected output
+            with open(index_path, 'rb') as file:
+                actual_output = file.read()
+
+            # Compare the actual output to the expected output
+            self.assertEqual(actual_output, expected_output)
+
+        pr = pq.ParquetReader()
+        pr.open(path)
+        metadata = pr.metadata
+        row_groups = metadata.num_row_groups
+
+        for r in range(0, row_groups):
+
+            # Reading using the original metadata
+            pr = pq.ParquetReader()
+            pr.open(path)
+            res_data_org = pr.read_row_groups([r], use_threads=False)
+
+            # Reading using the indexed metadata
+            metadata = pj.read_metadata(expected_index_path, row_groups = [r])
+            pr = pq.ParquetReader()
+            pr.open(path, metadata=metadata)
+
+            res_data_index = pr.read_row_groups([0], use_threads=False)
+            self.assertEqual(res_data_org, res_data_index, f"Row={r}")
+
 if __name__ == '__main__':
     unittest.main()
