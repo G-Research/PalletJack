@@ -1,2 +1,3 @@
 *.parquet
 *.parquet.index
+/python/palletjack/palletjack_cython.cpp

@@ -163,6 +163,12 @@ class TestPalletJack(unittest.TestCase):
 
             self.assertTrue(f"File '{path}' has unexpected format!" in str(context.exception), context.exception)
 
+    def test_reading_missing_index_file(self):
+            with self.assertRaises(Exception) as context:
+                metadata = pj.read_metadata("not_existing_file.parquet.index", [0])
+
+            self.assertTrue(f"I/O error when opening 'not_existing_file.parquet.index'" in str(context.exception), context.exception)
+
     def test_index_file_golden_master(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             index_path = os.path.join(tmpdirname, 'my.parquet.index')
