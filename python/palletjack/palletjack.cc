@@ -427,7 +427,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
             auto kvp = columns_map.find(column_name);
             if (kvp == columns_map.end())
             {
-                auto msg = std::string("Couldn't find a column with a name:'") + column_name + "'";
+                auto msg = std::string("Couldn't find a column with a name '") + column_name + "'!";
                 throw std::logic_error(msg);
             }
 

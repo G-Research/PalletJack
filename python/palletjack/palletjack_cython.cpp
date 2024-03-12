@@ -4,57 +4,57 @@
 {
     "distutils": {
         "depends": [
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/numpy/core/include/numpy/halffloat.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/api.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/array/concatenate.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/builder.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/abi.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/bridge.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack_abi.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/api.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/expression.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/config.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/csv/api.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension/fixed_shape_tensor.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension_type.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/io/api.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/ipc/api.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/options.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/reader.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/api.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/arrow_to_pandas.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/async.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/benchmark.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/common.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/csv.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/extension_type.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/gdb.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/inference.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/init.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/ipc.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/platform.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/pyarrow.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/udf.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/result.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/byte_size.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/cancel.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/compression.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/decimal.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/future.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/io_util.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/iterator.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/key_value_metadata.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/thread_pool.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/value_parsing.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/reader.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/schema.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/writer.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/reader.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/schema.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/writer.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/encryption/encryption.h",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/properties.h"
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/numpy/core/include/numpy/halffloat.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/api.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/array/concatenate.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/builder.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/abi.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/bridge.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/c/dlpack_abi.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/api.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/compute/expression.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/config.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/csv/api.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension/fixed_shape_tensor.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/extension_type.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/io/api.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/ipc/api.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/options.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/json/reader.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/api.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/arrow_to_pandas.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/async.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/benchmark.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/common.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/csv.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/extension_type.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/gdb.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/inference.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/init.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/ipc.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/platform.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/pyarrow.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/python/udf.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/result.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/byte_size.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/cancel.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/compression.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/decimal.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/future.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/io_util.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/iterator.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/key_value_metadata.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/thread_pool.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/arrow/util/value_parsing.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/reader.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/schema.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/api/writer.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/reader.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/schema.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/arrow/writer.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/encryption/encryption.h",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include/parquet/properties.h"
         ],
         "extra_compile_args": [
             "-std=c++17"
@@ -62,8 +62,8 @@
         "include_dirs": [
             ".",
             "/workspace/PalletJack/python/vcpkg_installed/include",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow/include",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/numpy/core/include"
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow/include",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/numpy/core/include"
         ],
         "language": "c++",
         "libraries": [
@@ -73,7 +73,7 @@
         ],
         "library_dirs": [
             "/workspace/PalletJack/python/vcpkg_installed/lib",
-            "/tmp/pip-build-env-d9ykg7pm/overlay/local/lib/python3.10/dist-packages/pyarrow",
+            "/tmp/pip-build-env-h_hr8hoo/overlay/local/lib/python3.10/dist-packages/pyarrow",
             "/usr/local/lib"
         ],
         "name": "palletjack.palletjack_cython",
@@ -4686,6 +4686,27 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject *const *kwvalues
   #define __PYX_STD_MOVE_IF_SUPPORTED(x) std::move(x)
 #else
   #define __PYX_STD_MOVE_IF_SUPPORTED(x) x
+#endif
+
+/* ListCompAppend.proto */
+#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
+static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
+    PyListObject* L = (PyListObject*) list;
+    Py_ssize_t len = Py_SIZE(list);
+    if (likely(L->allocated > len)) {
+        Py_INCREF(x);
+        #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030d0000
+        L->ob_item[len] = x;
+        #else
+        PyList_SET_ITEM(list, len, x);
+        #endif
+        __Pyx_SET_SIZE(list, len + 1);
+        return 0;
+    }
+    return PyList_Append(list, x);
+}
+#else
+#define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
 #endif
 
 /* tp_new.proto */
@@ -9584,6 +9605,7 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
   std::vector<uint32_t>  __pyx_v_ccolumn_indices;
   std::vector<std::string>  __pyx_v_ccolumn_names;
   struct __pyx_obj_7pyarrow_8_parquet_FileMetaData *__pyx_v_m = 0;
+  PyObject *__pyx_7genexpr__pyx_v_c = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -9592,8 +9614,12 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
   int __pyx_t_4;
   std::string __pyx_t_5;
   std::vector<uint32_t>  __pyx_t_6;
-  std::vector<std::string>  __pyx_t_7;
-  std::shared_ptr< parquet::FileMetaData>  __pyx_t_8;
+  Py_ssize_t __pyx_t_7;
+  PyObject *(*__pyx_t_8)(PyObject *);
+  PyObject *__pyx_t_9 = NULL;
+  PyObject *__pyx_t_10 = NULL;
+  std::vector<std::string>  __pyx_t_11;
+  std::shared_ptr< parquet::FileMetaData>  __pyx_t_12;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -9650,7 +9676,7 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
  *     cdef string encoded_path = index_file_path.encode('utf8')
  *     cdef vector[uint32_t] crow_groups = row_groups             # <<<<<<<<<<<<<<
  *     cdef vector[uint32_t] ccolumn_indices = column_indices
- *     cdef vector[string] ccolumn_names = column_names
+ *     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
  */
   __pyx_t_6 = __pyx_convert_vector_from_py_uint32_t(__pyx_v_row_groups); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 19, __pyx_L1_error)
   __pyx_v_crow_groups = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_6);
@@ -9659,7 +9685,7 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
  *     cdef string encoded_path = index_file_path.encode('utf8')
  *     cdef vector[uint32_t] crow_groups = row_groups
  *     cdef vector[uint32_t] ccolumn_indices = column_indices             # <<<<<<<<<<<<<<
- *     cdef vector[string] ccolumn_names = column_names
+ *     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
  *     with nogil:
  */
   __pyx_t_6 = __pyx_convert_vector_from_py_uint32_t(__pyx_v_column_indices); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 20, __pyx_L1_error)
@@ -9668,16 +9694,109 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
   /* "palletjack/palletjack_cython.pyx":21
  *     cdef vector[uint32_t] crow_groups = row_groups
  *     cdef vector[uint32_t] ccolumn_indices = column_indices
- *     cdef vector[string] ccolumn_names = column_names             # <<<<<<<<<<<<<<
+ *     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]             # <<<<<<<<<<<<<<
  *     with nogil:
  *         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names)
  */
-  __pyx_t_7 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_v_column_names); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 21, __pyx_L1_error)
-  __pyx_v_ccolumn_names = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_7);
+  { /* enter inner scope */
+    __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 21, __pyx_L5_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    if (likely(PyList_CheckExact(__pyx_v_column_names)) || PyTuple_CheckExact(__pyx_v_column_names)) {
+      __pyx_t_2 = __pyx_v_column_names; __Pyx_INCREF(__pyx_t_2);
+      __pyx_t_7 = 0;
+      __pyx_t_8 = NULL;
+    } else {
+      __pyx_t_7 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_column_names); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 21, __pyx_L5_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_8 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(4, 21, __pyx_L5_error)
+    }
+    for (;;) {
+      if (likely(!__pyx_t_8)) {
+        if (likely(PyList_CheckExact(__pyx_t_2))) {
+          {
+            Py_ssize_t __pyx_temp = __Pyx_PyList_GET_SIZE(__pyx_t_2);
+            #if !CYTHON_ASSUME_SAFE_MACROS
+            if (unlikely((__pyx_temp < 0))) __PYX_ERR(4, 21, __pyx_L5_error)
+            #endif
+            if (__pyx_t_7 >= __pyx_temp) break;
+          }
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_7); __Pyx_INCREF(__pyx_t_3); __pyx_t_7++; if (unlikely((0 < 0))) __PYX_ERR(4, 21, __pyx_L5_error)
+          #else
+          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_2, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 21, __pyx_L5_error)
+          __Pyx_GOTREF(__pyx_t_3);
+          #endif
+        } else {
+          {
+            Py_ssize_t __pyx_temp = __Pyx_PyTuple_GET_SIZE(__pyx_t_2);
+            #if !CYTHON_ASSUME_SAFE_MACROS
+            if (unlikely((__pyx_temp < 0))) __PYX_ERR(4, 21, __pyx_L5_error)
+            #endif
+            if (__pyx_t_7 >= __pyx_temp) break;
+          }
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_7); __Pyx_INCREF(__pyx_t_3); __pyx_t_7++; if (unlikely((0 < 0))) __PYX_ERR(4, 21, __pyx_L5_error)
+          #else
+          __pyx_t_3 = __Pyx_PySequence_ITEM(__pyx_t_2, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 21, __pyx_L5_error)
+          __Pyx_GOTREF(__pyx_t_3);
+          #endif
+        }
+      } else {
+        __pyx_t_3 = __pyx_t_8(__pyx_t_2);
+        if (unlikely(!__pyx_t_3)) {
+          PyObject* exc_type = PyErr_Occurred();
+          if (exc_type) {
+            if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+            else __PYX_ERR(4, 21, __pyx_L5_error)
+          }
+          break;
+        }
+        __Pyx_GOTREF(__pyx_t_3);
+      }
+      __Pyx_XDECREF_SET(__pyx_7genexpr__pyx_v_c, __pyx_t_3);
+      __pyx_t_3 = 0;
+      __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_7genexpr__pyx_v_c, __pyx_n_s_encode); if (unlikely(!__pyx_t_9)) __PYX_ERR(4, 21, __pyx_L5_error)
+      __Pyx_GOTREF(__pyx_t_9);
+      __pyx_t_10 = NULL;
+      __pyx_t_4 = 0;
+      #if CYTHON_UNPACK_METHODS
+      if (likely(PyMethod_Check(__pyx_t_9))) {
+        __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_9);
+        if (likely(__pyx_t_10)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
+          __Pyx_INCREF(__pyx_t_10);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_9, function);
+          __pyx_t_4 = 1;
+        }
+      }
+      #endif
+      {
+        PyObject *__pyx_callargs[2] = {__pyx_t_10, __pyx_n_u_utf8};
+        __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_9, __pyx_callargs+1-__pyx_t_4, 1+__pyx_t_4);
+        __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+        if (unlikely(!__pyx_t_3)) __PYX_ERR(4, 21, __pyx_L5_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+      }
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_3))) __PYX_ERR(4, 21, __pyx_L5_error)
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    }
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_XDECREF(__pyx_7genexpr__pyx_v_c); __pyx_7genexpr__pyx_v_c = 0;
+    goto __pyx_L9_exit_scope;
+    __pyx_L5_error:;
+    __Pyx_XDECREF(__pyx_7genexpr__pyx_v_c); __pyx_7genexpr__pyx_v_c = 0;
+    goto __pyx_L1_error;
+    __pyx_L9_exit_scope:;
+  } /* exit inner scope */
+  __pyx_t_11 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(4, 21, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_ccolumn_names = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_11);
 
   /* "palletjack/palletjack_cython.pyx":22
  *     cdef vector[uint32_t] ccolumn_indices = column_indices
- *     cdef vector[string] ccolumn_names = column_names
+ *     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
  *     with nogil:             # <<<<<<<<<<<<<<
  *         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names)
  * 
@@ -9692,14 +9811,14 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
       /*try:*/ {
 
         /* "palletjack/palletjack_cython.pyx":23
- *     cdef vector[string] ccolumn_names = column_names
+ *     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
  *     with nogil:
  *         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names)             # <<<<<<<<<<<<<<
  * 
  *     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
  */
         try {
-          __pyx_t_8 = ReadMetadata(__pyx_v_encoded_path.c_str(), __pyx_v_crow_groups, __pyx_v_ccolumn_indices, __pyx_v_ccolumn_names);
+          __pyx_t_12 = ReadMetadata(__pyx_v_encoded_path.c_str(), __pyx_v_crow_groups, __pyx_v_ccolumn_indices, __pyx_v_ccolumn_names);
         } catch(...) {
           #ifdef WITH_THREAD
           PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
@@ -9708,14 +9827,14 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
           #ifdef WITH_THREAD
           __Pyx_PyGILState_Release(__pyx_gilstate_save);
           #endif
-          __PYX_ERR(4, 23, __pyx_L4_error)
+          __PYX_ERR(4, 23, __pyx_L11_error)
         }
-        __pyx_v_c_metadata = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_8);
+        __pyx_v_c_metadata = __PYX_STD_MOVE_IF_SUPPORTED(__pyx_t_12);
       }
 
       /* "palletjack/palletjack_cython.pyx":22
  *     cdef vector[uint32_t] ccolumn_indices = column_indices
- *     cdef vector[string] ccolumn_names = column_names
+ *     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
  *     with nogil:             # <<<<<<<<<<<<<<
  *         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names)
  * 
@@ -9726,16 +9845,16 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
           __Pyx_FastGIL_Forget();
           Py_BLOCK_THREADS
           #endif
-          goto __pyx_L5;
+          goto __pyx_L12;
         }
-        __pyx_L4_error: {
+        __pyx_L11_error: {
           #ifdef WITH_THREAD
           __Pyx_FastGIL_Forget();
           Py_BLOCK_THREADS
           #endif
           goto __pyx_L1_error;
         }
-        __pyx_L5:;
+        __pyx_L12:;
       }
   }
 
@@ -9785,10 +9904,13 @@ static PyObject *__pyx_f_10palletjack_17palletjack_cython_read_metadata(PyObject
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("palletjack.palletjack_cython.read_metadata", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XDECREF((PyObject *)__pyx_v_m);
+  __Pyx_XDECREF(__pyx_7genexpr__pyx_v_c);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;

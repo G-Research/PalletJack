@@ -28,7 +28,7 @@ def get_table():
     return pa.Table.from_arrays(pa_arrays, names=column_names)
 
 class TestPalletJack(unittest.TestCase):
-      
+
     def test_read_metadata_columns_rows(self):
 
         def validate_reading(parquet_path, index_path, row_groups, column_indices):
@@ -41,6 +41,9 @@ class TestPalletJack(unittest.TestCase):
 
             # Reading using the indexed metadata
             metadata = pj.read_metadata(index_path, row_groups=row_groups, column_indices=column_indices)
+            metadata_names = pj.read_metadata(index_path, row_groups=row_groups, column_names=[f'column_{i}' for i in column_indices])
+            self.assertEqual(metadata, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
+
             pr = pq.ParquetReader()
             pr.open(parquet_path, metadata=metadata)
 
@@ -52,6 +55,7 @@ class TestPalletJack(unittest.TestCase):
             table = get_table()
 
             pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
             index_path = path + '.index'
             pj.generate_metadata_index(path, index_path)
 
@@ -89,7 +93,7 @@ class TestPalletJack(unittest.TestCase):
                 self.assertEqual(res_data_org, res_data_index, f"Row={r}")
 
     def test_reading_row_groups(self):
-        
+
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
             table = get_table()
@@ -103,7 +107,7 @@ class TestPalletJack(unittest.TestCase):
             pr = pq.ParquetReader()
             pr.open(path)
             res_data_org = pr.read_row_groups([2, 3, 4], use_threads=False)
-            
+
             # Reading using the indexed metadata
             metadata = pj.read_metadata(index_path, row_groups = [2, 3, 4])
             pr = pq.ParquetReader()
@@ -121,7 +125,7 @@ class TestPalletJack(unittest.TestCase):
 
             index_path = path + '.index'
             pj.generate_metadata_index(path, index_path)
-            
+
             with self.assertRaises(RuntimeError) as context:
                 metadata = pj.read_metadata(index_path, [n_row_groups])
 
@@ -136,11 +140,16 @@ class TestPalletJack(unittest.TestCase):
 
                 index_path = path + '.index'
                 pj.generate_metadata_index(path, index_path)
-                
+
                 with self.assertRaises(RuntimeError) as context:
                     metadata = pj.read_metadata(index_path, row_groups=[], column_indices=[n_columns])
 
                 self.assertTrue(f"Requested column={n_columns}, but only 0-{n_columns-1} are available!" in str(context.exception), context.exception)
+
+                with self.assertRaises(RuntimeError) as context:
+                    metadata = pj.read_metadata(index_path, row_groups=[], column_names=["no_such_column"])
+
+                self.assertTrue("Couldn't find a column with a name:'no_such_column'!")
 
     def test_reading_invalid_index_file(self):
         with tempfile.TemporaryDirectory() as tmpdirname:

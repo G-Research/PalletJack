@@ -18,7 +18,7 @@ cpdef read_metadata(index_file_path, row_groups = [], column_indices = [], colum
     cdef string encoded_path = index_file_path.encode('utf8')
     cdef vector[uint32_t] crow_groups = row_groups
     cdef vector[uint32_t] ccolumn_indices = column_indices
-    cdef vector[string] ccolumn_names = column_names
+    cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
     with nogil:
         c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names)
 
