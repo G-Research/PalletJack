@@ -67,55 +67,6 @@ class TestPalletJack(unittest.TestCase):
                         for cp in it.permutations(all_columns, c):
                             validate_reading(path, index_path, row_groups = rp, column_indices = cp)
 
-    def test_read_row_group_metadata(self):
-        
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
-            path = os.path.join(tmpdirname, "my.parquet")
-            table = get_table()
-
-            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
-
-            index_path = path + '.index'
-            pj.generate_metadata_index(path, index_path)
-            for r in range(0, n_row_groups):
-
-                # Reading using the original metadata
-                pr = pq.ParquetReader()
-                pr.open(path)
-                res_data_org = pr.read_row_groups([r], use_threads=False)
-
-                # Reading using the indexed metadata
-                metadata = pj.read_metadata(index_path, row_groups = [r])
-                pr = pq.ParquetReader()
-                pr.open(path, metadata=metadata)
-
-                res_data_index = pr.read_row_groups([0], use_threads=False)
-                self.assertEqual(res_data_org, res_data_index, f"Row={r}")
-
-    def test_reading_row_groups(self):
-
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
-            path = os.path.join(tmpdirname, "my.parquet")
-            table = get_table()
-
-            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
-
-            index_path = path + '.index'
-            pj.generate_metadata_index(path, index_path)
-
-            # Reading using the original metadata
-            pr = pq.ParquetReader()
-            pr.open(path)
-            res_data_org = pr.read_row_groups([2, 3, 4], use_threads=False)
-
-            # Reading using the indexed metadata
-            metadata = pj.read_metadata(index_path, row_groups = [2, 3, 4])
-            pr = pq.ParquetReader()
-            pr.open(path, metadata=metadata)
-
-            res_data_index = pr.read_row_groups([0, 1, 2], use_threads=False)
-            self.assertEqual(res_data_org, res_data_index)
-
     def test_reading_invalid_row_group(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
