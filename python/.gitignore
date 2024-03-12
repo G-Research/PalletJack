@@ -5,3 +5,4 @@ __pycache__
 *.so
 vcpkg_installed
 .vscode
+/palletjack/palletjack_cython.cpp

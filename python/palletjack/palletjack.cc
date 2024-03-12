@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <memory>
 
 using arrow::Status;
 
@@ -35,7 +36,9 @@ struct DataHeader
     char header[HEADER_V1_LENGTH] = {'P', 'J', '_', '2'};
     uint32_t row_groups = 0;
     uint32_t columns = 0;
+    uint32_t column_names_length = 0;
     uint32_t metadata_length = 0;
+
     uint32_t get_num_rows_offsets_size() { return 2; }                                   // 2
     uint32_t get_row_numbers_size() { return row_groups; }                               // rg
     uint32_t get_schema_offsets_size() { return 1 + 1 + columns + 1; }                   // 1 + 1 + c + 1
@@ -52,6 +55,7 @@ struct DataHeader
                get_row_groups_offsets_size() * sizeof(uint32_t) +
                get_column_orders_offsets_size() * sizeof(uint32_t) +
                get_column_chunks_offsets_size() * sizeof(uint32_t) +
+               column_names_length +
                metadata_length;
     }
 };
@@ -178,7 +182,7 @@ size_t WriteI64(void *dst, int64_t value, std::shared_ptr<apache::thrift::protoc
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
 {
     std::shared_ptr<arrow::Buffer> thrift_buffer;
-    DataHeader data_header;
+    DataHeader data_header = {};
 
     {
         std::shared_ptr<arrow::io::ReadableFile> infile;
@@ -192,6 +196,11 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         data_header.row_groups = metadata->num_row_groups();
         data_header.columns = metadata->num_columns();
         data_header.metadata_length = thrift_buffer.get()->size();
+
+        for (uint32_t c = 0; c < data_header.columns; c++)
+        {
+            data_header.column_names_length += metadata.get()->schema()->Column(c)->name().length() + 1;
+        }
     }
 
     auto metadata = DeserializeFileMetadata(thrift_buffer.get()->data(), thrift_buffer.get()->size());
@@ -284,6 +293,21 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             fs.write((const char *)&row_group.column_chunks_offsets[0], sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
         }
 
+        uint32_t written_column_names_length = 0;
+        for (uint32_t c = 1; c <= data_header.columns; c++)
+        {
+            auto name = metadata.schema[c].name;
+            auto cname = name.c_str();
+            auto to_write = name.length() + 1;
+            fs.write((const char *)cname, to_write);
+            written_column_names_length += to_write;
+        }
+
+        if (data_header.column_names_length != written_column_names_length)
+        {
+            throw new std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
+        }
+
         uint32_t offset = fs.tellp();
 #ifdef DEBUG
         std::cerr << " Writing thrift offset: " << offset << std::endl;
@@ -293,7 +317,10 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     }
 }
 
-std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path, const std::vector<uint32_t> &row_groups, const std::vector<uint32_t> &columns)
+std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
+                                                    const std::vector<uint32_t> &row_groups,
+                                                    const std::vector<uint32_t> &column_indices,
+                                                    const std::vector<std::string> &column_names)
 {
     std::shared_ptr<ThriftBuffer> mem_buffer(new ThriftBuffer(16));
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
@@ -302,7 +329,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
     auto tproto = tproto_factory.getProtocol(mem_buffer);
 
-    auto f = fopen(index_file_path, "rb");
+    auto f = std::unique_ptr<FILE, decltype(&fclose)>(fopen(index_file_path, "rb"), &fclose);
     if (!f)
     {
         auto msg = std::string("I/O error when opening '") + index_file_path + "'";
@@ -310,7 +337,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     }
 
     DataHeader dataHeader;
-    size_t read_bytes = fread(&dataHeader, 1, sizeof(dataHeader), f);
+    size_t read_bytes = fread(&dataHeader, 1, sizeof(dataHeader), f.get());
     if (read_bytes != sizeof(dataHeader))
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
@@ -335,9 +362,15 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
     }
 
-    if (columns.size() > 0)
+    if (column_indices.size() > 0)
     {
-        for (auto column : columns)
+        if (column_names.size() > 0)
+        {
+            auto msg = std::string("Cannot specify both column indices and column names at the same time!");
+            throw std::logic_error(msg);
+        }
+
+        for (auto column : column_indices)
         {
             if (column >= dataHeader.columns)
             {
@@ -351,7 +384,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     std::vector<uint8_t> data_body(body_size);
     std::vector<uint8_t> data_body_dst(dataHeader.metadata_length);
 
-    read_bytes = fread(&data_body[0], 1, data_body.size(), f);
+    read_bytes = fread(&data_body[0], 1, data_body.size(), f.get());
     if (read_bytes != data_body.size())
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
@@ -365,12 +398,43 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     auto row_groups_offsets = (uint32_t *)&schema_num_children_offsets[dataHeader.get_schema_num_children_offsets_size()];
     auto column_orders_offsets = (uint32_t *)&row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
     auto column_chunks_offsets = (uint32_t *)&column_orders_offsets[dataHeader.get_column_orders_offsets_size()];
-    auto src = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
+    auto column_names_ptr = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
+    auto src = (uint8_t *)&column_names_ptr[dataHeader.column_names_length];
     auto dst = (uint8_t *)&data_body_dst[0];
 
     uint32_t index_src = 0;
     uint32_t index_dst = 0;
     size_t toCopy = 0;
+
+    std::vector<uint32_t> columns = column_indices;
+    if (column_names.size() > 0)
+    {
+        std::unordered_map<std::string, uint32_t> columns_map;
+        for (uint32_t c = 0; c < dataHeader.columns; c++)
+        {
+            std::string s = (const char *)column_names_ptr;
+            column_names_ptr += s.length() + 1;
+            columns_map[s] = c;
+        }
+
+        if (column_names_ptr != src)
+        {
+            auto msg = std::string("Internal error, when reading column names!");
+            throw std::logic_error(msg);
+        }
+
+        for (const auto &column_name : column_names)
+        {
+            auto kvp = columns_map.find(column_name);
+            if (kvp == columns_map.end())
+            {
+                auto msg = std::string("Couldn't find a column with a name '") + column_name + "'!";
+                throw std::logic_error(msg);
+            }
+
+            columns.push_back(kvp->second);
+        }
+    }
 
     if (columns.size() > 0)
     {
@@ -538,6 +602,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 #endif
 
     uint32_t length = index_dst;
-    auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);	
+    auto result_metadata = parquet::FileMetaData::Make(&dst[0], &length);
     return result_metadata;
 }
