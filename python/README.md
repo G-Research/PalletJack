@@ -82,3 +82,10 @@ pr.open(path, metadata=metadata)
 
 data = pr.read_all()
 ```
+```
+metadata = pj.read_metadata(index_path, row_groups = [5, 7], column_names = ['column_1', 'column_3'])
+pr = pq.ParquetReader()
+pr.open(path, metadata=metadata)
+
+data = pr.read_all()
+```
