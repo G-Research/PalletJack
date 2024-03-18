@@ -144,6 +144,12 @@ public:
 
     void Write(const uint8_t *src, size_t to_write)
     {
+        if (dst_idx > dst_data.size() || dst_data.size() - dst_idx < to_write)
+        {
+            auto msg = std::string("No space for data to be written, dst_data_size=") + std::to_string(dst_data.size()) + ", dst_idx=" + std::to_string(dst_idx) + ", to_write=" + std::to_string(to_write);
+            throw new std::logic_error(msg);   
+        }
+
         memcpy(&dst_data[dst_idx], src, to_write);
         dst_idx += to_write;
     }
@@ -569,7 +575,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
         else
         {
-            // START HERE
             toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
             thriftWriter.Write(&src[index_src], toCopy);
             index_src += toCopy;
