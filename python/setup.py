@@ -59,9 +59,12 @@ print ("library_dirs=", library_dirs)
 
 extra_compile_args = []
 extra_link_args = []
+debug = False,
 
 if os.getenv('DEBUG', '') == 'ON':
     extra_compile_args = ["-Og", '-DDEBUG']
+    extra_link_args = ["-debug:full"]
+    debug = True,
 
 # Define your extension
 extensions = [
@@ -79,7 +82,7 @@ CYTHONIZE = True # Always cythonize
 
 if CYTHONIZE:
     compiler_directives = {"language_level": 3, "embedsignature": True}
-    extensions = cythonize(extensions, compiler_directives=compiler_directives)
+    extensions = cythonize(extensions, compiler_directives=compiler_directives, gdb_debug=debug, emit_linenums=debug)
 else:
     extensions = no_cythonize(extensions)
 
