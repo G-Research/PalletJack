@@ -57,7 +57,11 @@ print ("VCPKG_ROOT=", vcpkg_installed)
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)
 
-extra_compile_args = [] # ['-DDEBUG']
+extra_compile_args = []
+extra_link_args = []
+
+if os.getenv('DEBUG', '') == 'ON':
+    extra_compile_args = ["-Og", '-DDEBUG']
 
 # Define your extension
 extensions = [
@@ -66,7 +70,8 @@ extensions = [
         library_dirs = library_dirs,
         libraries=["arrow", "parquet", "thriftmd" if sys.platform.startswith('win') else "thrift"], 
         language = "c++",
-        extra_compile_args = extra_compile_args + ['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17'],
+        extra_compile_args = extra_compile_args + (['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17']),
+        extra_link_args = extra_link_args,
     )
 ]
 
