@@ -123,18 +123,37 @@ void DeserializeUnencryptedMessage(const uint8_t *buf, uint32_t *len,
     *len = *len - bytes_left;
 }
 
-class ThriftWriter
+class ThriftCopier
 {
+    const uint8_t *src;
+    const uint8_t *src_end;
     std::vector<uint8_t> dst_data;
+    uint8_t *dst;
+    uint8_t *dst_end;
     size_t dst_idx = {};
     std::shared_ptr<ThriftBuffer> mem_buffer;
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
     std::shared_ptr<apache::thrift::protocol::TProtocol> tproto;
 
+    void Copy(const uint8_t *src, size_t to_copy)
+    {
+        if (dst + dst_idx + to_copy > dst_end)
+        {
+            auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_end - dst);
+            throw new std::logic_error(msg);
+        }
+
+        memcpy(&dst_data[dst_idx], src, to_copy);
+        dst_idx += to_copy;
+    }
+
 public:
-    ThriftWriter(size_t size): 
-        dst_data(size), 
-        mem_buffer (new ThriftBuffer(16))
+    ThriftCopier(const uint8_t *src, size_t size) : src(src),
+                                                    src_end(src + size),
+                                                    dst_data(size),
+                                                    dst(&dst_data[0]),
+                                                    dst_end(dst + size),
+                                                    mem_buffer(new ThriftBuffer(16))
     {
         // Protect against CPU and memory bombs
         tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
@@ -142,16 +161,22 @@ public:
         tproto = tproto_factory.getProtocol(mem_buffer);
     }
 
-    void Write(const uint8_t *src, size_t to_write)
+    void Copy(size_t src_idx, size_t to_copy)
     {
-        if (dst_idx > dst_data.size() || dst_data.size() - dst_idx < to_write)
+        if (src + src_idx + to_copy > src_end)
         {
-            auto msg = std::string("No space for data to be written, dst_data_size=") + std::to_string(dst_data.size()) + ", dst_idx=" + std::to_string(dst_idx) + ", to_write=" + std::to_string(to_write);
-            throw new std::logic_error(msg);   
+            auto msg = std::string("Requested reading outside source range, src_idx=") + std::to_string(src_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(src_end - src);
+            throw new std::logic_error(msg);
         }
 
-        memcpy(&dst_data[dst_idx], src, to_write);
-        dst_idx += to_write;
+        if (dst + dst_idx + to_copy > dst_end)
+        {
+            auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_end - dst);
+            throw new std::logic_error(msg);
+        }
+
+        memcpy(dst + dst_idx, src + src_idx, to_copy);
+        dst_idx += to_copy;
     }
 
     void WriteListBegin(const ::apache::thrift::protocol::TType elemType, uint32_t size)
@@ -161,8 +186,7 @@ public:
         uint8_t *ptr;
         uint32_t len;
         mem_buffer->getBuffer(&ptr, &len);
-        memcpy(&dst_data[dst_idx], ptr, len);
-        dst_idx += len;
+        Copy(ptr, len);
     }
 
     void WriteI32(int32_t value)
@@ -172,8 +196,7 @@ public:
         uint8_t *ptr;
         uint32_t len;
         mem_buffer->getBuffer(&ptr, &len);
-        memcpy(&dst_data[dst_idx], ptr, len);
-        dst_idx += len;
+        Copy(ptr, len);
     }
 
     void WriteI64(int64_t value)
@@ -183,8 +206,7 @@ public:
         uint8_t *ptr;
         uint32_t len;
         mem_buffer->getBuffer(&ptr, &len);
-        memcpy(&dst_data[dst_idx], ptr, len);
-        dst_idx += len;
+        Copy(ptr, len);
     }
 
     size_t GetSize() { return dst_idx; }
@@ -410,7 +432,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 
     auto body_size = dataHeader.get_body_size();
     std::vector<uint8_t> data_body(body_size);
-    ThriftWriter thriftWriter(dataHeader.metadata_length);
 
     read_bytes = fread(&data_body[0], 1, data_body.size(), f.get());
     if (read_bytes != data_body.size())
@@ -428,6 +449,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     auto column_chunks_offsets = (uint32_t *)&column_orders_offsets[dataHeader.get_column_orders_offsets_size()];
     auto column_names_ptr = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
     auto src = (uint8_t *)&column_names_ptr[dataHeader.column_names_length];
+    ThriftCopier thriftCopier(src, dataHeader.metadata_length);
 
     uint32_t index_src = 0;
     size_t toCopy = 0;
@@ -466,29 +488,29 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     {
         auto schema_list = &schema_offsets[0];
         toCopy = schema_list[0] - index_src;
-        thriftWriter.Write(&src[index_src], toCopy);
+        thriftCopier.Copy(index_src, toCopy);
         index_src += toCopy;
 
-        thriftWriter.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size() + 1); // one extra element for root
+        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size() + 1); // one extra element for root
         index_src = schema_list[1];
 
         auto root_schema_element = &schema_list[1];
         toCopy = root_schema_element[0] + schema_num_children_offsets[0] - index_src;
-        thriftWriter.Write(&src[index_src], toCopy);
+        thriftCopier.Copy(index_src, toCopy);
         index_src = root_schema_element[0] + schema_num_children_offsets[1];
 
         // Update the num children in the schema
-        thriftWriter.WriteI32(columns.size());
+        thriftCopier.WriteI32(columns.size());
 
         toCopy = root_schema_element[1] - index_src;
-        thriftWriter.Write(&src[index_src], toCopy);
+        thriftCopier.Copy(index_src, toCopy);
         index_src += toCopy;
 
         auto schema_elements = &schema_offsets[2];
         for (auto column : columns)
         {
             toCopy = schema_elements[column + 1] - schema_elements[column];
-            thriftWriter.Write(&src[schema_elements[column]], toCopy);
+            thriftCopier.Copy(schema_elements[column], toCopy);
         }
 
         index_src = schema_elements[dataHeader.columns];
@@ -503,10 +525,10 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
 
         toCopy = num_row_offsets[0] - index_src;
-        thriftWriter.Write(&src[index_src], toCopy);
+        thriftCopier.Copy(index_src, toCopy);
         index_src += toCopy;
 
-        thriftWriter.WriteI64(num_rows);
+        thriftCopier.WriteI64(num_rows);
         index_src = num_row_offsets[1];
     }
 
@@ -515,10 +537,10 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     {
         auto row_groups_list = &row_groups_offsets[0];
         toCopy = row_groups_list[0] - index_src;
-        thriftWriter.Write(&src[index_src], toCopy);
+        thriftCopier.Copy(index_src, toCopy);
         index_src += toCopy;
 
-        thriftWriter.WriteListBegin(::apache::thrift::protocol::T_STRUCT, row_groups.size()); // one extra element for root);
+        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, row_groups.size()); // one extra element for root);
         index_src = row_groups_list[1];
     }
     else
@@ -526,7 +548,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         // copy, including the list
         auto row_groups_list = &row_groups_offsets[0];
         toCopy = row_groups_list[1] - index_src;
-        thriftWriter.Write(&src[index_src], toCopy);
+        thriftCopier.Copy(index_src, toCopy);
         index_src += toCopy;
     }
 
@@ -558,25 +580,25 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 
             // START HERE
             toCopy = row_group_offset + chunks_list[0] - index_src;
-            thriftWriter.Write(&src[index_src], toCopy);
+            thriftCopier.Copy(index_src, toCopy);
 
-            thriftWriter.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root);
+            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root);
 
             for (auto column_to_copy : columns)
             {
                 toCopy = chunks[column_to_copy + 1] - chunks[column_to_copy];
-                thriftWriter.Write(&src[row_group_offset + chunks[column_to_copy]], toCopy);
+                thriftCopier.Copy(row_group_offset + chunks[column_to_copy], toCopy);
             }
 
             index_src = row_group_offset + chunks[dataHeader.columns];
             toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
-            thriftWriter.Write(&src[index_src], toCopy);
+            thriftCopier.Copy(index_src, toCopy);
             index_src += toCopy;
         }
         else
         {
             toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
-            thriftWriter.Write(&src[index_src], toCopy);
+            thriftCopier.Copy(index_src, toCopy);
             index_src += toCopy;
         }
     }
@@ -587,24 +609,24 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     {
         auto column_orders_list = &column_orders_offsets[0];
         toCopy = column_orders_list[0] - index_src;
-        thriftWriter.Write(&src[index_src], toCopy);
+        thriftCopier.Copy(index_src, toCopy);
         index_src += toCopy;
 
-        thriftWriter.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
+        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
         index_src = column_orders_list[1];
 
         auto column_orders = &column_orders_offsets[1];
         for (auto column : columns)
         {
             toCopy = column_orders[column + 1] - column_orders[column];
-            thriftWriter.Write(&src[column_orders[column]], toCopy);
+            thriftCopier.Copy(column_orders[column], toCopy);
         }
         index_src = column_orders[dataHeader.columns];
     }
 
     // Copy leftovers
     toCopy = dataHeader.metadata_length - index_src;
-    thriftWriter.Write(&src[index_src], toCopy);
+    thriftCopier.Copy(index_src, toCopy);
 
 #ifdef DEBUG
     std::cerr << " Reading body_size: " << body_size << std::endl;
@@ -612,7 +634,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
 #endif
 
-    uint32_t length = thriftWriter.GetSize();
-    auto result_metadata = parquet::FileMetaData::Make(thriftWriter.GetData(), &length);
+    uint32_t length = thriftCopier.GetSize();
+    auto result_metadata = parquet::FileMetaData::Make(thriftCopier.GetData(), &length);
     return result_metadata;
 }
