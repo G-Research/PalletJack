@@ -140,7 +140,7 @@ class ThriftCopier
         if (dst + dst_idx + to_copy > dst_end)
         {
             auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_end - dst);
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         memcpy(&dst_data[dst_idx], src, to_copy);
@@ -166,13 +166,13 @@ public:
         if (src + src_idx + to_copy > src_end)
         {
             auto msg = std::string("Requested reading outside source range, src_idx=") + std::to_string(src_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(src_end - src);
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         if (dst + dst_idx + to_copy > dst_end)
         {
             auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_end - dst);
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         memcpy(dst + dst_idx, src + src_idx, to_copy);
@@ -265,28 +265,28 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
     // Validate data
     {
         if (data_header.row_groups == 0)
-            throw new std::logic_error("Number of row groups is not set!");
+            throw std::logic_error("Number of row groups is not set!");
         if (data_header.columns == 0)
-            throw new std::logic_error("Number of columns is not set!");
+            throw std::logic_error("Number of columns is not set!");
         if (data_header.metadata_length == 0)
-            throw new std::logic_error("Number of metadata length is not set!");
+            throw std::logic_error("Number of metadata length is not set!");
 
         if (data_header.get_num_rows_offsets_size() != metadata.num_rows_offsets.size())
         {
             auto msg = std::string("Number of rows offset information is invalid ") + std::to_string(data_header.get_num_rows_offsets_size()) + " != " + std::to_string(metadata.num_rows_offsets.size()) + " !";
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         if (data_header.row_groups != metadata.row_numbers.size())
         {
             auto msg = std::string("Row numbers information is invalid ") + std::to_string(data_header.row_groups) + " != " + std::to_string(metadata.row_numbers.size()) + " !";
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         if (data_header.get_schema_offsets_size() != metadata.schema_offsets.size())
         {
             auto msg = std::string("Schema offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", schema_offsets=" + std::to_string(metadata.schema_offsets.size()) + " !";
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         for (auto &schema_elemnt : metadata.schema)
@@ -300,7 +300,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             {
                 auto msg = std::string("Num children offsets information is invalid, num_children_offsets=") + std::to_string(schema_elemnt.num_children_offsets.size()) + " !";
 
-                throw new std::logic_error(msg);
+                throw std::logic_error(msg);
             }
         }
 
@@ -308,14 +308,14 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         {
             auto msg = std::string("Row group offsets information is invalid, columns=") + std::to_string(data_header.row_groups) + ", row_groups_offsets=" + std::to_string(metadata.row_groups_offsets.size()) + " !";
 
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         if (data_header.get_column_orders_offsets_size() != metadata.column_orders_offsets.size())
         {
             auto msg = std::string("Column orders offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", column_orders_offsets=" + std::to_string(metadata.column_orders_offsets.size()) + " !";
 
-            throw new std::logic_error(msg);
+            throw std::logic_error(msg);
         }
 
         for (const auto &row_group : metadata.row_groups)
@@ -324,7 +324,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
             {
                 auto msg = std::string("Column chunk offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", column_chunks_offsets=" + std::to_string(row_group.column_chunks_offsets.size()) + " !";
 
-                throw new std::logic_error(msg);
+                throw std::logic_error(msg);
             }
         }
     }
@@ -362,7 +362,7 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
 
         if (data_header.column_names_length != written_column_names_length)
         {
-            throw new std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
+            throw std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
         }
 
         uint32_t offset = fs.tellp();
