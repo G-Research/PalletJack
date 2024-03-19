@@ -534,7 +534,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
-        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, row_groups.size()); // one extra element for root);
+        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, row_groups.size());
         index_src = row_groups_list[1];
     }
     else
@@ -629,6 +629,5 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 #endif
 
     uint32_t length = thriftCopier.GetDataSize();
-    auto result_metadata = parquet::FileMetaData::Make(thriftCopier.GetData(), &length);
-    return result_metadata;
+    return parquet::FileMetaData::Make(thriftCopier.GetData(), &length);
 }
