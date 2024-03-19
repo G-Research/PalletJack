@@ -130,7 +130,7 @@ class ThriftCopier
     std::vector<uint8_t> dst_data;
     uint8_t *dst;
     uint8_t *dst_end;
-    size_t dst_idx = {};
+    size_t dst_idx;
     std::shared_ptr<ThriftBuffer> mem_buffer;
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
     std::shared_ptr<apache::thrift::protocol::TProtocol> tproto;
@@ -153,6 +153,7 @@ public:
                                                     dst_data(size),
                                                     dst(&dst_data[0]),
                                                     dst_end(dst + size),
+                                                    dst_idx(0),
                                                     mem_buffer(new ThriftBuffer(16))
     {
         // Protect against CPU and memory bombs
