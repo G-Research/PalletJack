@@ -135,7 +135,7 @@ class ThriftCopier
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
     std::shared_ptr<apache::thrift::protocol::TProtocol> tproto;
 
-    void Copy(const uint8_t *src, size_t to_copy)
+    inline void CopyFrom(const uint8_t *src, size_t to_copy)
     {
         if (dst + dst_idx + to_copy > dst_end)
         {
@@ -161,7 +161,7 @@ public:
         tproto = tproto_factory.getProtocol(mem_buffer);
     }
 
-    void Copy(size_t src_idx, size_t to_copy)
+    inline void CopyFrom(size_t src_idx, size_t to_copy)
     {
         if (src + src_idx + to_copy > src_end)
         {
@@ -169,14 +169,7 @@ public:
             throw std::logic_error(msg);
         }
 
-        if (dst + dst_idx + to_copy > dst_end)
-        {
-            auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_end - dst);
-            throw std::logic_error(msg);
-        }
-
-        memcpy(dst + dst_idx, src + src_idx, to_copy);
-        dst_idx += to_copy;
+        CopyFrom(src + src_idx, to_copy);
     }
 
     void WriteListBegin(const ::apache::thrift::protocol::TType elemType, uint32_t size)
@@ -186,7 +179,7 @@ public:
         uint8_t *ptr;
         uint32_t len;
         mem_buffer->getBuffer(&ptr, &len);
-        Copy(ptr, len);
+        CopyFrom(ptr, len);
     }
 
     void WriteI32(int32_t value)
@@ -196,7 +189,7 @@ public:
         uint8_t *ptr;
         uint32_t len;
         mem_buffer->getBuffer(&ptr, &len);
-        Copy(ptr, len);
+        CopyFrom(ptr, len);
     }
 
     void WriteI64(int64_t value)
@@ -206,10 +199,10 @@ public:
         uint8_t *ptr;
         uint32_t len;
         mem_buffer->getBuffer(&ptr, &len);
-        Copy(ptr, len);
+        CopyFrom(ptr, len);
     }
 
-    size_t GetSize() { return dst_idx; }
+    size_t GetDataSize() { return dst_idx; }
 
     const uint8_t *GetData() { return &dst_data[0]; }
 };
@@ -488,7 +481,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     {
         auto schema_list = &schema_offsets[0];
         toCopy = schema_list[0] - index_src;
-        thriftCopier.Copy(index_src, toCopy);
+        thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
         thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size() + 1); // one extra element for root
@@ -496,21 +489,21 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 
         auto root_schema_element = &schema_list[1];
         toCopy = root_schema_element[0] + schema_num_children_offsets[0] - index_src;
-        thriftCopier.Copy(index_src, toCopy);
+        thriftCopier.CopyFrom(index_src, toCopy);
         index_src = root_schema_element[0] + schema_num_children_offsets[1];
 
         // Update the num children in the schema
         thriftCopier.WriteI32(columns.size());
 
         toCopy = root_schema_element[1] - index_src;
-        thriftCopier.Copy(index_src, toCopy);
+        thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
         auto schema_elements = &schema_offsets[2];
         for (auto column : columns)
         {
             toCopy = schema_elements[column + 1] - schema_elements[column];
-            thriftCopier.Copy(schema_elements[column], toCopy);
+            thriftCopier.CopyFrom(schema_elements[column], toCopy);
         }
 
         index_src = schema_elements[dataHeader.columns];
@@ -525,7 +518,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         }
 
         toCopy = num_row_offsets[0] - index_src;
-        thriftCopier.Copy(index_src, toCopy);
+        thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
         thriftCopier.WriteI64(num_rows);
@@ -537,7 +530,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     {
         auto row_groups_list = &row_groups_offsets[0];
         toCopy = row_groups_list[0] - index_src;
-        thriftCopier.Copy(index_src, toCopy);
+        thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
         thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, row_groups.size()); // one extra element for root);
@@ -548,7 +541,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         // copy, including the list
         auto row_groups_list = &row_groups_offsets[0];
         toCopy = row_groups_list[1] - index_src;
-        thriftCopier.Copy(index_src, toCopy);
+        thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
     }
 
@@ -580,25 +573,25 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
 
             // START HERE
             toCopy = row_group_offset + chunks_list[0] - index_src;
-            thriftCopier.Copy(index_src, toCopy);
+            thriftCopier.CopyFrom(index_src, toCopy);
 
             thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root);
 
             for (auto column_to_copy : columns)
             {
                 toCopy = chunks[column_to_copy + 1] - chunks[column_to_copy];
-                thriftCopier.Copy(row_group_offset + chunks[column_to_copy], toCopy);
+                thriftCopier.CopyFrom(row_group_offset + chunks[column_to_copy], toCopy);
             }
 
             index_src = row_group_offset + chunks[dataHeader.columns];
             toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
-            thriftCopier.Copy(index_src, toCopy);
+            thriftCopier.CopyFrom(index_src, toCopy);
             index_src += toCopy;
         }
         else
         {
             toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
-            thriftCopier.Copy(index_src, toCopy);
+            thriftCopier.CopyFrom(index_src, toCopy);
             index_src += toCopy;
         }
     }
@@ -609,7 +602,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     {
         auto column_orders_list = &column_orders_offsets[0];
         toCopy = column_orders_list[0] - index_src;
-        thriftCopier.Copy(index_src, toCopy);
+        thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
         thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
@@ -619,14 +612,14 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         for (auto column : columns)
         {
             toCopy = column_orders[column + 1] - column_orders[column];
-            thriftCopier.Copy(column_orders[column], toCopy);
+            thriftCopier.CopyFrom(column_orders[column], toCopy);
         }
         index_src = column_orders[dataHeader.columns];
     }
 
     // Copy leftovers
     toCopy = dataHeader.metadata_length - index_src;
-    thriftCopier.Copy(index_src, toCopy);
+    thriftCopier.CopyFrom(index_src, toCopy);
 
 #ifdef DEBUG
     std::cerr << " Reading body_size: " << body_size << std::endl;
@@ -634,7 +627,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
 #endif
 
-    uint32_t length = thriftCopier.GetSize();
+    uint32_t length = thriftCopier.GetDataSize();
     auto result_metadata = parquet::FileMetaData::Make(thriftCopier.GetData(), &length);
     return result_metadata;
 }
