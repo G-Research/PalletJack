@@ -150,7 +150,7 @@ def measure_reading(max_workers, worker):
 
     tt = []
     # measure multiple times and take the fastest run
-    for _ in range(0, 3):
+    for _ in range(0, 5):
         # Create the pool and warm it up 
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
         dummy_items = [pool.submit(dummy_worker) for i in range(0, len(all_columns), batch_size)]
