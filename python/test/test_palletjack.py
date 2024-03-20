@@ -5,8 +5,10 @@ import palletjack as pj
 import pyarrow.parquet as pq
 import numpy as np
 import pyarrow as pa
-import os
+import numpy as np
 import itertools as it
+import pyarrow.fs as fs
+import os
 
 n_row_groups = 5
 n_columns = 7
@@ -42,7 +44,15 @@ class TestPalletJack(unittest.TestCase):
             # Reading using the indexed metadata
             metadata = pj.read_metadata(index_path, row_groups=row_groups, column_indices=column_indices)
             metadata_names = pj.read_metadata(index_path, row_groups=row_groups, column_names=[f'column_{i}' for i in column_indices])
+            
+            filesystem= fs.LocalFileSystem()
+            input_stream = filesystem.open_input_stream(index_path)
+            input_data = input_stream.readall()
+            a= dir(filesystem)
+            metadata_names_data = pj.read_metadata(index_data = input_data, row_groups=row_groups, column_names=[f'column_{i}' for i in column_indices])
+            
             self.assertEqual(metadata, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
+            self.assertEqual(metadata_names_data, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
 
             pr = pq.ParquetReader()
             pr.open(parquet_path, metadata=metadata)
