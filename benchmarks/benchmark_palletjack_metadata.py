@@ -213,6 +213,7 @@ print(f"Reading multiple columns using arrow (multi-threaded) {measure_reading(8
 print(f"Reading multiple columns using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_columns):.3f} seconds")
 print(".")
 
+print(f"Reading a single row group and column metadata using in-memory palletjack (single-threaded) {measure_reading(1, worker_inmemory_palletjack_row_group_column_metadata):.3f} seconds")
 print(f"Reading a single row group and column metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_column_metadata):.3f} seconds")
 print(f"Reading a single row group metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_metadata):.3f} seconds")
 print(f"Reading a single column metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_column_metadata):.3f} seconds")
