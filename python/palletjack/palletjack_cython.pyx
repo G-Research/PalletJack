@@ -9,7 +9,7 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 from pyarrow._parquet cimport *
 
-cpdef generate_metadata_index(parquet_path = None, index_file_path = None):
+cpdef generate_metadata_index(parquet_path, index_file_path = None):
     cdef string encoded_parquet_path = parquet_path.encode('utf8')
     cdef string encoded_index_file_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
     cdef vector[char] c_index_data
