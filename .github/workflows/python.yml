@@ -173,7 +173,7 @@ jobs:
     - name: Test with pytest
       run: |
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index
+        pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
         python3 python/test/test_palletjack.py
 
   benchmarks:
@@ -201,7 +201,7 @@ jobs:
     - name: Run benchmarks
       run: |
         pip install PalletJack --pre --find-links ./dist --break-system-packages --force-reinstall 
-        pip install PalletJack --pre --find-links ./dist --break-system-packages --force-reinstall --no-index
+        pip install PalletJack --pre --find-links ./dist --break-system-packages --force-reinstall --no-index --no-deps
         python3 ./benchmarks/benchmark_palletjack_metadata.py
 
   publish:
