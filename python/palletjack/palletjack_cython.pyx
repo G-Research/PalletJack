@@ -9,14 +9,27 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 from pyarrow._parquet cimport *
 
-def generate_metadata_index(parquet_path, index_file_path):
-    cpalletjack.GenerateMetadataIndex(parquet_path.encode('utf8'), index_file_path.encode('utf8'))
+cpdef generate_metadata_index(parquet_path, index_file_path = None):
+    cdef string encoded_parquet_path = parquet_path.encode('utf8')
+    cdef string encoded_index_file_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
+    cdef vector[char] c_index_data
+    cdef char[::1] mv;
+    if index_file_path is None:
+        with nogil:
+            c_index_data = cpalletjack.GenerateMetadataIndex(encoded_parquet_path.c_str())
+        mv = <char[:c_index_data.size()]>&c_index_data[0]
+        return bytearray(mv)
+    else:
+        with nogil:
+            cpalletjack.GenerateMetadataIndex(encoded_parquet_path.c_str(), encoded_index_file_path.c_str())
 
-cpdef read_metadata(index_file_path = None, index_data = None, row_groups = [], column_indices = [], column_names = []):
+    return None
+
+cpdef read_metadata(index_file_path = None, row_groups = [], column_indices = [], column_names = [], index_data = None):
 
     cdef shared_ptr[CFileMetaData] c_metadata
     cdef string encoded_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
-    cdef const unsigned char[:] mv = index_data
+    cdef const unsigned char[::1] mv = index_data
     cdef vector[uint32_t] crow_groups = row_groups
     cdef vector[uint32_t] ccolumn_indices = column_indices
     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]

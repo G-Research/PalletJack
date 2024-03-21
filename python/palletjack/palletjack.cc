@@ -230,7 +230,7 @@ palletjack::parquet::FileMetaData DeserializeFileMetadata(const void *buf, uint3
     The standard does not define any behavior for this function except that setbuf(0, 0) called before any I/O has taken place is required to set unbuffered output.
     */
 
-void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
+std::vector<char> GenerateMetadataIndex(const char *parquet_path)
 {
     std::shared_ptr<arrow::Buffer> thrift_buffer;
     DataHeader data_header = {};
@@ -323,53 +323,62 @@ void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path
         }
     }
 
+    // Use ostringstream as a binary buffer
+    std::ostringstream fs(std::ios::binary);
+
+    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+    fs.write((const char *)&data_header, sizeof(data_header));
+    fs.write((const char *)&metadata.num_rows_offsets[0], sizeof(metadata.num_rows_offsets[0]) * metadata.num_rows_offsets.size());
+    fs.write((const char *)&metadata.row_numbers[0], sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
+    fs.write((const char *)&metadata.schema_offsets[0], sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
+    for (const auto &schema_element : metadata.schema)
     {
-        std::vector<char> buf(4 * 1024 * 1024); // 4 MiB
-        std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);
-        fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-        fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
-        fs.write((const char *)&data_header, sizeof(data_header));
-        fs.write((const char *)&metadata.num_rows_offsets[0], sizeof(metadata.num_rows_offsets[0]) * metadata.num_rows_offsets.size());
-        fs.write((const char *)&metadata.row_numbers[0], sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
-        fs.write((const char *)&metadata.schema_offsets[0], sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
-        for (const auto &schema_element : metadata.schema)
-        {
-            fs.write((const char *)&schema_element.num_children_offsets[0], sizeof(schema_element.num_children_offsets[0]) * schema_element.num_children_offsets.size());
-        }
-
-        fs.write((const char *)&metadata.row_groups_offsets[0], sizeof(metadata.row_groups_offsets[0]) * metadata.row_groups_offsets.size());
-        fs.write((const char *)&metadata.column_orders_offsets[0], sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
-        for (const auto &row_group : metadata.row_groups)
-        {
-            fs.write((const char *)&row_group.column_chunks_offsets[0], sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
-        }
-
-        uint32_t written_column_names_length = 0;
-        for (uint32_t c = 1; c <= data_header.columns; c++)
-        {
-            auto name = metadata.schema[c].name;
-            auto cname = name.c_str();
-            auto to_write = name.length() + 1;
-            fs.write((const char *)cname, to_write);
-            written_column_names_length += to_write;
-        }
-
-        if (data_header.column_names_length != written_column_names_length)
-        {
-            throw std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
-        }
-
-        uint32_t offset = fs.tellp();
-#ifdef DEBUG
-        std::cerr << " Writing thrift offset: " << offset << std::endl;
-#endif
-
-        fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
+        fs.write((const char *)&schema_element.num_children_offsets[0], sizeof(schema_element.num_children_offsets[0]) * schema_element.num_children_offsets.size());
     }
+
+    fs.write((const char *)&metadata.row_groups_offsets[0], sizeof(metadata.row_groups_offsets[0]) * metadata.row_groups_offsets.size());
+    fs.write((const char *)&metadata.column_orders_offsets[0], sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
+    for (const auto &row_group : metadata.row_groups)
+    {
+        fs.write((const char *)&row_group.column_chunks_offsets[0], sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
+    }
+
+    uint32_t written_column_names_length = 0;
+    for (uint32_t c = 1; c <= data_header.columns; c++)
+    {
+        auto name = metadata.schema[c].name;
+        auto cname = name.c_str();
+        auto to_write = name.length() + 1;
+        fs.write((const char *)cname, to_write);
+        written_column_names_length += to_write;
+    }
+
+    if (data_header.column_names_length != written_column_names_length)
+    {
+        throw std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
+    }
+
+    uint32_t offset = fs.tellp();
+
+    fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
+    auto s = fs.str();
+    std::vector<char> v(s.size());
+    memcpy(&v[0], s.data(), s.size());
+    return v;
+}
+
+void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
+{
+    std::vector<char> buf(4 * 1024 * 1024); // 4 MiB
+    std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);
+    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+    fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
+    auto v = std::move(GenerateMetadataIndex(parquet_path));
+    fs.write(v.data(), v.size());
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader,
-                                                    const uint8_t* data_body,
+                                                    const uint8_t *data_body,
                                                     size_t body_size,
                                                     const std::vector<uint32_t> &row_groups,
                                                     const std::vector<uint32_t> &column_indices,
@@ -648,9 +657,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     return ReadMetadata(dataHeader, &data_body[0], data_body.size(), row_groups, column_indices, column_names);
 }
 
-
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_data,
-                                                    size_t index_data_length,                                                    
+                                                    size_t index_data_length,
                                                     const std::vector<uint32_t> &row_groups,
                                                     const std::vector<uint32_t> &column_indices,
                                                     const std::vector<std::string> &column_names)
@@ -661,7 +669,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
         throw std::logic_error(msg);
     }
 
-    const DataHeader* p_data_header = (const DataHeader*)index_data;
+    const DataHeader *p_data_header = (const DataHeader *)index_data;
     size_t expected_length = sizeof(DataHeader) + p_data_header->get_body_size();
     if (index_data_length != expected_length)
     {
