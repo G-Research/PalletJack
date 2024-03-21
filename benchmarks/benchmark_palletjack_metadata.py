@@ -2,9 +2,11 @@ import palletjack as pj
 import pyarrow.parquet as pq
 import pyarrow as pa
 import numpy as np
+import pyarrow.fs as fs
 import concurrent.futures
 import time
 import os
+
 
 row_groups = 200
 columns = 200
@@ -111,6 +113,12 @@ def worker_palletjack_column_name_metadata():
     for i in range(0, int(n_reads / work_items)):
         pj.read_metadata(index_path, column_names = [f'column_{i % columns}'])
 
+def worker_inmemory_palletjack_row_group_column_metadata():
+
+    index_data = fs.LocalFileSystem().open_input_stream(index_path).readall()
+    for i in range(0, int(n_reads / work_items)):
+        pj.read_metadata(index_data = index_data, row_groups = [i % row_groups], column_indices = [i % columns])
+
 def worker_palletjack_row_group_column_metadata():
 
     for i in range(0, int(n_reads / work_items)):
@@ -212,6 +220,7 @@ print(f"Reading a single column(name) metadata using palletjack (single-threaded
 print(f"Reading a metadata using arrow (single-threaded) {measure_reading(1, worker_arrow_metadata):.3f} seconds")
 print(".")
 
+print(f"Reading a single row group and column metadata using in-memory palletjack (multi-threaded) {measure_reading(8, worker_inmemory_palletjack_row_group_column_metadata):.3f} seconds")
 print(f"Reading a single row group and column metadata using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_row_group_column_metadata):.3f} seconds")
 print(f"Reading a single row group metadata using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_row_group_metadata):.3f} seconds")
 print(f"Reading a single column metadata using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_column_metadata):.3f} seconds")
