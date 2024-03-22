@@ -174,7 +174,7 @@ jobs:
       run: |
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        # So now make sure that local version is being installed 
+        # So now ensure that the local version is installed 
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
         python3 python/test/test_palletjack.py
 
@@ -204,7 +204,7 @@ jobs:
       run: |
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        # So now make sure that local version is being installed 
+        # So now ensure that the local version is installed 
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
         python3 ./benchmarks/benchmark_palletjack_metadata.py
 
