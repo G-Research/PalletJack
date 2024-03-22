@@ -7,7 +7,6 @@ import concurrent.futures
 import time
 import os
 
-
 row_groups = 200
 columns = 200
 chunk_size = 1000
