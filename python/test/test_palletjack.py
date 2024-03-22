@@ -3,10 +3,11 @@ import tempfile
 
 import palletjack as pj
 import pyarrow.parquet as pq
-import numpy as np
 import pyarrow as pa
-import os
+import numpy as np
 import itertools as it
+import pyarrow.fs as fs
+import os
 
 n_row_groups = 5
 n_columns = 7
@@ -42,7 +43,12 @@ class TestPalletJack(unittest.TestCase):
             # Reading using the indexed metadata
             metadata = pj.read_metadata(index_path, row_groups=row_groups, column_indices=column_indices)
             metadata_names = pj.read_metadata(index_path, row_groups=row_groups, column_names=[f'column_{i}' for i in column_indices])
+
+            metadata_names_data = pj.read_metadata(index_data = fs.LocalFileSystem().open_input_stream(index_path).readall()
+                                                   , row_groups=row_groups, column_names=[f'column_{i}' for i in column_indices])
+            
             self.assertEqual(metadata, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
+            self.assertEqual(metadata_names_data, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
 
             pr = pq.ParquetReader()
             pr.open(parquet_path, metadata=metadata)
@@ -159,6 +165,20 @@ class TestPalletJack(unittest.TestCase):
 
             res_data_index = pr.read_row_groups([0], use_threads=False)
             self.assertEqual(res_data_org, res_data_index, f"Row={r}")
+  
+    def test_inmemory_index_data(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+            index_path = path + '.index'
+            pj.generate_metadata_index(path, index_path)
+            index_data1 = pj.generate_metadata_index(path)
+            index_data2 = fs.LocalFileSystem().open_input_stream(index_path).readall()
+            # Compare the actual output to the expected output
+            self.assertEqual(index_data1, index_data2)
 
 if __name__ == '__main__':
     unittest.main()
