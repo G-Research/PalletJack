@@ -65,7 +65,7 @@ fs.LocalFileSystem().open_output_stream(index_path).write(index_data)
 index_data = fs.LocalFileSystem().open_input_stream(index_path).readall()
 ```
 
-### Reading data with help of index file:
+### Reading data with help of the index file:
 ```
 metadata = pj.read_metadata(index_path, row_groups = [5, 7])
 pr = pq.ParquetReader()
@@ -73,7 +73,7 @@ pr.open(path, metadata=metadata)
 data = pr.read_all()
 ```
 
-### Reading data with help of in-memory index:
+### Reading data with help of the in-memory index:
 ```
 metadata = pj.read_metadata(index_data = index_data, row_groups = [5, 7])
 pr = pq.ParquetReader()
@@ -81,7 +81,7 @@ pr.open(path, metadata=metadata)
 data = pr.read_all()
 ```
 
-### Reading subset of columns using column indices:
+### Reading a subset of columns using column indices:
 ```
 metadata = pj.read_metadata(index_path, column_indices = [1, 3])
 pr = pq.ParquetReader()
@@ -89,7 +89,7 @@ pr.open(path, metadata=metadata)
 data = pr.read_all()
 ```
 
-### Reading subset of columns using column names:
+### Reading a subset of columns using column names:
 ```
 metadata = pj.read_metadata(index_path, column_names = ['column_1', 'column_3'])
 pr = pq.ParquetReader()
@@ -97,7 +97,7 @@ pr.open(path, metadata=metadata)
 data = pr.read_all()
 ```
 
-### Reading subset of row groups and columns:
+### Reading a subset of row groups and columns:
 ```
 metadata = pj.read_metadata(index_path, row_groups = [5, 7], column_indices = [1, 3])
 pr = pq.ParquetReader()
