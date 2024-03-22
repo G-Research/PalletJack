@@ -470,22 +470,23 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
 
     if (columns.size() > 0)
     {
+        //> 2:required list<SchemaElement> schema;
         auto schema_list = &schema_offsets[0];
         toCopy = schema_list[0] - index_src;
         thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
-        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size() + 1); // one extra element for root
-        index_src = schema_list[1];
+        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size() + 1); // one extra schema element for root
+        index_src = schema_list[1]; // skip the list header and jump to the first schema element (which is the root element)
 
         auto root_schema_element = &schema_list[1];
         toCopy = root_schema_element[0] + schema_num_children_offsets[0] - index_src;
         thriftCopier.CopyFrom(index_src, toCopy);
-        index_src = root_schema_element[0] + schema_num_children_offsets[1];
 
-        // Update the num children in the schema
+        // Write updated num children in the root element
+        //> 5: optional i32 num_children; 
         thriftCopier.WriteI32(columns.size());
-
+        index_src = root_schema_element[0] + schema_num_children_offsets[1];
         toCopy = root_schema_element[1] - index_src;
         thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
@@ -502,6 +503,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
 
     if (row_groups.size() > 0)
     {
+        //> 3: required i64 num_rows
         int64_t num_rows = 0;
         for (auto row_group : row_groups)
         {
@@ -519,6 +521,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
     auto row_group_filtering = row_groups.size() > 0;
     if (row_group_filtering)
     {
+        //> 4: required list<RowGroup> row_groups
         auto row_groups_list = &row_groups_offsets[0];
         toCopy = row_groups_list[0] - index_src;
         thriftCopier.CopyFrom(index_src, toCopy);
@@ -529,7 +532,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
     }
     else
     {
-        // copy, including the list
+        // Copy to here, including the list header
         auto row_groups_list = &row_groups_offsets[0];
         toCopy = row_groups_list[1] - index_src;
         thriftCopier.CopyFrom(index_src, toCopy);
@@ -559,14 +562,12 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         index_src = row_groups_offsets[1 + row_group_idx];
         if (columns.size() > 0)
         {
+            //> 1: required list<ColumnChunk> columns
             auto chunks_list = &column_chunks_offsets[(1 + dataHeader.columns + 1) * row_group_idx];
             auto chunks = &chunks_list[1];
-
-            // START HERE
             toCopy = row_group_offset + chunks_list[0] - index_src;
             thriftCopier.CopyFrom(index_src, toCopy);
-
-            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root);
+            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size());
 
             for (auto column_to_copy : columns)
             {
@@ -587,10 +588,11 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         }
     }
 
-    index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size() - 1];
+    index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
 
     if (columns.size() > 0)
     {
+        //> 7: optional list<ColumnOrder> column_orders;
         auto column_orders_list = &column_orders_offsets[0];
         toCopy = column_orders_list[0] - index_src;
         thriftCopier.CopyFrom(index_src, toCopy);
