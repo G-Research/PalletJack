@@ -3,7 +3,6 @@ import tempfile
 
 import palletjack as pj
 import pyarrow.parquet as pq
-import numpy as np
 import pyarrow as pa
 import numpy as np
 import itertools as it
