@@ -1,6 +1,7 @@
 import palletjack as pj
 import pyarrow.parquet as pq
 import pyarrow as pa
+import numpy as np
 import pyarrow.fs as fs
 import concurrent.futures
 import time
