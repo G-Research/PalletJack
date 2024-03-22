@@ -1,5 +1,6 @@
 # distutils: include_dirs = .
 
+import cython
 import pyarrow as pa
 import pyarrow.parquet as pq
 from cython.cimports.palletjack import cpalletjack
@@ -35,8 +36,9 @@ cpdef read_metadata(index_file_path = None, row_groups = [], column_indices = []
     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
 
     if index_file_path is None:
-        with nogil:
-            c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names)
+        with cython.boundscheck(False):
+            with nogil:
+                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names)
     else:
         with nogil:
             c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names)
