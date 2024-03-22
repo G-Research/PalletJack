@@ -439,6 +439,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
     std::vector<uint32_t> columns = column_indices;
     if (column_names.size() > 0)
     {
+        columns.reserve(column_names.size());
+
         std::unordered_map<std::string, uint32_t> columns_map;
         for (uint32_t c = 0; c < dataHeader.columns; c++)
         {
@@ -462,7 +464,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
                 throw std::logic_error(msg);
             }
 
-            columns.push_back(kvp->second);
+            columns.emplace_back(kvp->second);
         }
     }
 
