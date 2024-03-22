@@ -62,23 +62,21 @@ struct DataHeader
 
 /* File format: (Thrift-encoded metadata stored separately for each row group)
 -----------------------------
-| 0 - 3 | PJ_2              | (char[4]) - File header in ASCI
+| 0 ... | DataHeader        |
 |---------------------------|
-| 4 - 7 | Row groups        | (uint32) - Number of row groups
+|       | 'PJ_2'            | (char[4]) - File header in ASCI
+|       --------------------|
+|       | row groups        | (uint32) - Number of row groups
+|       --------------------|
+|       | columns           | (uint32) - Number of columns
+|       --------------------|
+|       | col. names length | (uint32) - Length of column names section
+|       --------------------|
+|       | metadata length   | (uint32) - Length of metadata section
 |---------------------------|
-| 8 - 11| Columns           | (uint32) - Number of columns
+| . . . | column names      | ['col_0', '\0', 'col_1', '\0', ....] - Section with column names
 |---------------------------|
-|12 - 15| Metadata length   | (uint32) - Metadata length
-|---------------------------|
-|16 -   | Row numbers       | (uint32*) - number of rows per row group
-|---------------------------|
-| . . . | Schema offsets    | (uint32*) - offsets of schema element (1 + 1 + c + 1)
-|---------------------------|
-| . . . | Row group offsets | (uint32*) - offsets of row grpups (1 + rg + 1)
-|---------------------------|
-| . . . | Chunks offsets    | (uint32*) - offsets of column chunks rg * (1 + c + 1)
-|---------------------------|
-| . . . | Metadata          | (uint8*) - Original metadata (thrift compact protocol)
+| . . . | metadata          | [bytes] - Section with original metadata (thrift compact protocol)
 -----------------------------
 */
 
@@ -355,13 +353,17 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
 
     if (data_header.column_names_length != written_column_names_length)
     {
-        throw std::logic_error("Error when writign the index file,  data_header.column_names_length != written_column_names_length !");
+        throw std::logic_error("Error when writign the index file, data_header.column_names_length != written_column_names_length !");
     }
-
-    uint32_t offset = fs.tellp();
 
     fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
     auto s = fs.str();
+    if (sizeof(data_header) + data_header.get_body_size() != s.size())
+    {
+        auto msg = std::string("Error when writign the index file, exexted size=") + std::to_string(sizeof(data_header) + data_header.get_body_size()) + ", actual size=" + std::to_string(s.size()) + " !";
+        throw std::logic_error(msg);
+    }
+
     std::vector<char> v(s.size());
     memcpy(&v[0], s.data(), s.size());
     return v;
