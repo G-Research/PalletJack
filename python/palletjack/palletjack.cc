@@ -539,7 +539,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         index_src += toCopy;
     }
 
-    for (auto idx = 0;; idx++)
+    for (auto idx = 0u;; idx++)
     {
         size_t row_group_idx = 0;
 
