@@ -303,6 +303,12 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
             throw std::logic_error(msg);
         }
 
+        // column_orders is optional
+        if (metadata.column_orders_offsets.size() == 0)
+        {
+            metadata.column_orders_offsets.resize(data_header.get_column_orders_offsets_size());
+        }
+
         if (data_header.get_column_orders_offsets_size() != metadata.column_orders_offsets.size())
         {
             auto msg = std::string("Column orders offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", column_orders_offsets=" + std::to_string(metadata.column_orders_offsets.size()) + " !";
@@ -588,26 +594,29 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         }
     }
 
-    index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
+    index_src = row_groups_offsets[1 + dataHeader.row_groups];
 
     if (columns.size() > 0)
     {
         //> 7: optional list<ColumnOrder> column_orders;
-        auto column_orders_list = &column_orders_offsets[0];
-        toCopy = column_orders_list[0] - index_src;
-        thriftCopier.CopyFrom(index_src, toCopy);
-        index_src += toCopy;
-
-        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
-        index_src = column_orders_list[1];
-
-        auto column_orders = &column_orders_offsets[1];
-        for (auto column : columns)
+        if (column_orders_offsets[0] != 0)
         {
-            toCopy = column_orders[column + 1] - column_orders[column];
-            thriftCopier.CopyFrom(column_orders[column], toCopy);
+            auto column_orders_list = &column_orders_offsets[0];
+            toCopy = column_orders_list[0] - index_src;
+            thriftCopier.CopyFrom(index_src, toCopy);
+            index_src += toCopy;
+
+            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
+            index_src = column_orders_list[1];
+
+            auto column_orders = &column_orders_offsets[1];
+            for (auto column : columns)
+            {
+                toCopy = column_orders[column + 1] - column_orders[column];
+                thriftCopier.CopyFrom(column_orders[column], toCopy);
+            }
+            index_src = column_orders[dataHeader.columns];
         }
-        index_src = column_orders[dataHeader.columns];
     }
 
     // Copy leftovers
