@@ -97,6 +97,24 @@ class TestPalletJack(unittest.TestCase):
                 pj_metadata = pj.read_metadata(index_path, row_groups=row_groups, column_indices=columns)
                 self.assertEqual(pr.metadata, pj_metadata)
 
+    def test_reading_non_pyarrow_files(self):
+        
+            path = os.path.join(current_dir, 'data/no_column_orders.parquet')
+            pr = pq.ParquetReader()
+            pr.open(path)
+            
+            row_groups_columns = [
+                ([], []),
+                ([], range(pr.metadata.num_columns)),
+                (range(pr.metadata.num_row_groups), []),
+                (range(pr.metadata.num_row_groups), range(pr.metadata.num_columns)),
+            ]
+            
+            index_data = pj.generate_metadata_index(path)
+            for (row_groups, columns) in row_groups_columns:
+                pj_metadata = pj.read_metadata(index_data = index_data, row_groups=row_groups, column_indices=columns)
+                self.assertEqual(pr.metadata, pj_metadata)
+                
     def test_reading_invalid_row_group(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")

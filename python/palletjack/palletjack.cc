@@ -303,6 +303,12 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
             throw std::logic_error(msg);
         }
 
+        // column_orders is optional
+        if (metadata.column_orders_offsets.size() == 0)
+        {
+            metadata.column_orders_offsets.resize(data_header.get_column_orders_offsets_size());
+        }
+
         if (data_header.get_column_orders_offsets_size() != metadata.column_orders_offsets.size())
         {
             auto msg = std::string("Column orders offsets information is invalid, columns=") + std::to_string(data_header.columns) + ", column_orders_offsets=" + std::to_string(metadata.column_orders_offsets.size()) + " !";
