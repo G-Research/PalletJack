@@ -588,7 +588,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         }
     }
 
-    index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
+    index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size() - 1];
 
     if (columns.size() > 0)
     {

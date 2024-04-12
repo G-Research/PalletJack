@@ -73,6 +73,30 @@ class TestPalletJack(unittest.TestCase):
                         for cp in it.permutations(all_columns, c):
                             validate_reading(path, index_path, row_groups = rp, column_indices = cp)
 
+    def test_metadata_roundtrip(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size)
+
+            index_path = path + '.index'
+            pj.generate_metadata_index(path, index_path)
+
+            pr = pq.ParquetReader()
+            pr.open(path)
+            
+            row_groups_columns = [
+                ([], []),
+                ([], range(n_columns)),
+                (range(n_row_groups), []),
+                (range(n_row_groups), range(n_columns)),
+            ]
+            
+            for (row_groups, columns) in row_groups_columns:
+                pj_metadata = pj.read_metadata(index_path, row_groups=row_groups, column_indices=columns)
+                self.assertEqual(pr.metadata, pj_metadata)
+
     def test_reading_invalid_row_group(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
@@ -131,8 +155,8 @@ class TestPalletJack(unittest.TestCase):
     def test_index_file_golden_master(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             index_path = os.path.join(tmpdirname, 'my.parquet.index')
-            path = os.path.join(current_dir, 'data/sample.parquet')
-            expected_index_path = os.path.join(current_dir, 'data/sample.parquet.index')
+            path = os.path.join(current_dir, 'data/golden_master.parquet')
+            expected_index_path = os.path.join(current_dir, 'data/golden_master.parquet.index')
             pj.generate_metadata_index(path, index_path)
 
             # Read the expected output
