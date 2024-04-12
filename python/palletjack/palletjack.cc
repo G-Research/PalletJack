@@ -594,26 +594,29 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         }
     }
 
-    index_src = row_groups_offsets[dataHeader.get_row_groups_offsets_size() - 1];
+    index_src = row_groups_offsets[1 + dataHeader.row_groups];
 
     if (columns.size() > 0)
     {
         //> 7: optional list<ColumnOrder> column_orders;
-        auto column_orders_list = &column_orders_offsets[0];
-        toCopy = column_orders_list[0] - index_src;
-        thriftCopier.CopyFrom(index_src, toCopy);
-        index_src += toCopy;
-
-        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
-        index_src = column_orders_list[1];
-
-        auto column_orders = &column_orders_offsets[1];
-        for (auto column : columns)
+        if (column_orders_offsets[0] != 0)
         {
-            toCopy = column_orders[column + 1] - column_orders[column];
-            thriftCopier.CopyFrom(column_orders[column], toCopy);
+            auto column_orders_list = &column_orders_offsets[0];
+            toCopy = column_orders_list[0] - index_src;
+            thriftCopier.CopyFrom(index_src, toCopy);
+            index_src += toCopy;
+
+            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
+            index_src = column_orders_list[1];
+
+            auto column_orders = &column_orders_offsets[1];
+            for (auto column : columns)
+            {
+                toCopy = column_orders[column + 1] - column_orders[column];
+                thriftCopier.CopyFrom(column_orders[column], toCopy);
+            }
+            index_src = column_orders[dataHeader.columns];
         }
-        index_src = column_orders[dataHeader.columns];
     }
 
     // Copy leftovers
