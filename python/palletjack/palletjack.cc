@@ -87,18 +87,13 @@ using ThriftBuffer = apache::thrift::transport::TMemoryBuffer;
 
 std::shared_ptr<ThriftBuffer> CreateReadOnlyMemoryBuffer(uint8_t *buf, uint32_t len)
 {
-#if PARQUET_THRIFT_VERSION_MAJOR > 0 || PARQUET_THRIFT_VERSION_MINOR >= 14
     auto conf = std::make_shared<apache::thrift::TConfiguration>();
     conf->setMaxMessageSize(std::numeric_limits<int>::max());
     return std::make_shared<ThriftBuffer>(buf, len, ThriftBuffer::OBSERVE, conf);
-#else
-    return std::make_shared<ThriftBuffer>(buf, len);
-#endif
 }
 
-template <class T>
 void DeserializeUnencryptedMessage(const uint8_t *buf, uint32_t *len,
-                                   T *deserialized_msg)
+                                   palletjack::parquet::FileMetaData *deserialized_msg)
 {
     // Deserialize msg bytes into c++ thrift msg using memory transport.
     auto tmem_transport = CreateReadOnlyMemoryBuffer(const_cast<uint8_t *>(buf), *len);
@@ -107,6 +102,7 @@ void DeserializeUnencryptedMessage(const uint8_t *buf, uint32_t *len,
     tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
     tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
     auto tproto = tproto_factory.getProtocol(tmem_transport);
+
     try
     {
         deserialized_msg->read(tproto.get());
