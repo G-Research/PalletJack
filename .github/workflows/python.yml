@@ -108,6 +108,13 @@ jobs:
       env:
         VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
 
+    - name: Upload vcpkg arrow logs
+      if: success() || failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.vcpkg-info.outputs.triplet }}-vcpkg-arrow-logs
+        path: ${{ steps.vcpkg-info.outputs.root }}/buildtrees/arrow/*.log
+
     - name: Build sdist (Linux)
       if: runner.os == 'linux'
       working-directory: ./python
