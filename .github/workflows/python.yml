@@ -101,6 +101,7 @@ jobs:
         vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
       env:
         VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
+        VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
 
     - name: Build sdist (Linux)
       if: runner.os == 'linux'
