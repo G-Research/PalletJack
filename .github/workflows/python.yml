@@ -89,7 +89,13 @@ jobs:
         echo "cmake_version=$(cmake --version | head -n1 | awk '{print $3}')" >> $GITHUB_OUTPUT
         echo "runner_info=$ImageOS-$ImageVersion" >> $GITHUB_OUTPUT
       shell: bash
-
+      
+    - uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+      
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
@@ -101,7 +107,6 @@ jobs:
         vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
       env:
         VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
-        VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
 
     - name: Build sdist (Linux)
       if: runner.os == 'linux'
