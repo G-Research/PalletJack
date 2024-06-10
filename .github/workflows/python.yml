@@ -89,28 +89,13 @@ jobs:
         echo "cmake_version=$(cmake --version | head -n1 | awk '{print $3}')" >> $GITHUB_OUTPUT
         echo "runner_info=$ImageOS-$ImageVersion" >> $GITHUB_OUTPUT
       shell: bash
-
-    # Check for cached vcpkg dependencies (use these if we can).
-    - name: Get cached vcpkg dependencies
-      id: get-cached-vcpkg
-      uses: actions/cache@v3
+      
+    - uses: actions/github-script@v7
       with:
-        path: cache/vcpkg
-        # https://vcpkg.readthedocs.io/en/stable/users/binarycaching/
-        # Binary caching relies on hashing everything that contributes to a particular package build. This includes:
-        # - The triplet file and name
-        # - The C and C++ compilers executable
-        # - The version of CMake used
-        # - Every file in the port directory
-        # - & more... (subject to change without notice)
-        #
-        # We use Vcpkg and C/C++ compilers which are preinstalled on the runner, so we include the runner's image identity as part of the hash key.
-        key: vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}-vcpkg_json:${{ hashFiles('**/vcpkg*.json') }}-runner:${{ steps.vcpkg-info.outputs.runner_info }}
-        restore-keys: |
-          vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}-vcpkg_json:${{ hashFiles('**/vcpkg*.json') }}
-          vcpkg-${{ steps.vcpkg-info.outputs.triplet }}-cmake:${{ steps.vcpkg-info.outputs.cmake_version }}
-          vcpkg-${{ steps.vcpkg-info.outputs.triplet }}
-
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+      
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
@@ -121,8 +106,14 @@ jobs:
       run: |
         vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
       env:
-        VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/cache/vcpkg,readwrite
-        VCPKG_TARGET_TRIPLET: ${{ steps.vcpkg-info.outputs.triplet }}
+        VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
+
+    - name: Upload vcpkg arrow logs
+      if: success() || failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.vcpkg-info.outputs.triplet }}-vcpkg-arrow-logs
+        path: ${{ steps.vcpkg-info.outputs.root }}/buildtrees/arrow/*.log
 
     - name: Build sdist (Linux)
       if: runner.os == 'linux'
