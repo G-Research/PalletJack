@@ -6,6 +6,10 @@ name: Python
 on:
   push:
   pull_request:
+  schedule:
+    # Run daily at 00:00 so we get notified if CI is broken before a pull request is submitted. 
+    # It also notifies us about new Arrow releases for which we need to release a corresponding version of PalletJack.
+    - cron:  '0 0 * * *'
 
 permissions:
   contents: read
