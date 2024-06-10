@@ -226,6 +226,7 @@ jobs:
     if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
     needs: [all-required-checks-done]
     runs-on: ubuntu-latest
+    environment: release
     steps:
 
     - name: Download artifacts
@@ -254,6 +255,5 @@ jobs:
     - name: Publish to PyPi
       uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
       with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
         packages-dir: dist	
     
