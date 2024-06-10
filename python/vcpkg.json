@@ -4,5 +4,5 @@
   "dependencies": [
     "thrift"
   ],
-  "builtin-baseline": "01f602195983451bc83e72f4214af2cbc495aa94"
+  "builtin-baseline": "943c5ef1c8f6b5e6ced092b242c8299caae2ff01"
 }
