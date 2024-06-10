@@ -68,6 +68,28 @@ jobs:
         pip install -r requirements.txt
         pip install flake8 pytest cibuildwheel build
 
+    # Compute vcpkg triplet and root
+    - name: Compute vcpkg triplet and root
+      id: vcpkg-info
+      run: |
+        triplet="x64-"
+        case ${{ runner.os }} in
+          Linux)
+            triplet+="linux"
+            ;;
+          macOS)
+            triplet+="osx"
+            ;;
+          Windows)
+            triplet+="windows"
+            ;;
+        esac
+        echo "triplet=$triplet" >> $GITHUB_OUTPUT
+        echo "root=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_OUTPUT
+        echo "cmake_version=$(cmake --version | head -n1 | awk '{print $3}')" >> $GITHUB_OUTPUT
+        echo "runner_info=$ImageOS-$ImageVersion" >> $GITHUB_OUTPUT
+      shell: bash
+
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
