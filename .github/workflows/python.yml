@@ -5,6 +5,7 @@ name: Python
 
 on:
   push:
+  pull_request:
 
 permissions:
   contents: read
@@ -178,6 +179,19 @@ jobs:
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
         python3 python/test/test_palletjack.py
 
+  # Virtual job that can be configured as a required check before a PR can be merged.
+  # As GitHub considers a check as successful if it is skipped, we need to check its status in
+  # another workflow (check-required.yml) and create a check there.
+  all-required-checks-done:
+    name: All required checks done
+    needs:
+      - test
+      - build
+      - test-binary
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All required checks done"
+
   benchmarks:
     needs: build
     strategy:
@@ -210,7 +224,7 @@ jobs:
 
   publish:
     if: ${{ !github.event.repository.fork && startsWith(github.ref, 'refs/tags/v') }}
-    needs: [test-binary]
+    needs: [all-required-checks-done]
     runs-on: ubuntu-latest
     steps:
 
