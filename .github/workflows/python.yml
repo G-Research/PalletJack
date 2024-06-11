@@ -222,6 +222,9 @@ jobs:
     needs: [all-required-checks-done]
     runs-on: ubuntu-latest
     environment: release
+    permissions:
+      id-token: write
+
     steps:
 
     - name: Download artifacts
