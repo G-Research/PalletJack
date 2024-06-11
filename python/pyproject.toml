@@ -30,5 +30,5 @@ include = ['palletjack*']
 "*" = ["*.pxd", "*.h", "*.pyx"]
 
 [project.urls]
-Homepage = "https://github.com/g-research/PalletJack"
-Issues = "https://github.com/g-research/PalletJack/issues"
+Homepage = "https://github.com/G-Research/PalletJack"
+Issues = "https://github.com/G-Research/PalletJack/issues"

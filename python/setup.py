@@ -96,7 +96,7 @@ setup(
     ext_modules=extensions,
     test_suite = 'test',
     project_urls={
-        "Documentation": "https://github.com/g-research/PalletJack",
-        "Source": "https://github.com/g-research/PalletJack",
+        "Documentation": "https://github.com/G-Research/PalletJack",
+        "Source": "https://github.com/G-Research/PalletJack",
     },
 )
