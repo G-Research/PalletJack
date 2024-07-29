@@ -5,7 +5,6 @@ from codecs import open
 
 from setuptools import setup, find_packages
 from distutils.extension import Extension
-from setuptools.command.test import test as TestCommand
 from Cython.Build import cythonize
 import pyarrow
 import numpy
@@ -25,29 +24,6 @@ def no_cythonize(extensions, **_ignore):
             sources.append(sfile)
         extension.sources[:] = sources
     return extensions
-
-class PyTest(TestCommand):
-    user_options = [("pytest-args=", "a", "Arguments to pass into py.test")]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        try:
-            from multiprocessing import cpu_count
-
-            self.pytest_args = ["-n", str(cpu_count()), "--boxed"]
-        except (ImportError, NotImplementedError):
-            self.pytest_args = ["-n", "1", "--boxed"]
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
 
 vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed', os.getenv('VCPKG_TARGET_TRIPLET', ''))
 include_dirs = [os.path.join(vcpkg_installed, 'include'), pyarrow.get_include(), numpy.get_include()]
@@ -94,7 +70,6 @@ setup(
     package_dir={"": "."},
     zip_safe=False,
     ext_modules=extensions,
-    test_suite = 'test',
     project_urls={
         "Documentation": "https://github.com/G-Research/PalletJack",
         "Source": "https://github.com/G-Research/PalletJack",
