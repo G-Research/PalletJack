@@ -22,7 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
         
@@ -60,7 +60,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
         
@@ -155,7 +155,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
@@ -198,7 +198,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
 
@@ -251,7 +251,7 @@ jobs:
         }
     
     - name: Publish to PyPi
-      uses: pypa/gh-action-pypi-publish@c12cc61414480c03e10ea76e2a0a1a17d6c764e2
+      uses: pypa/gh-action-pypi-publish@fb9fc6a4e67ca27a7a76b17bbf90be83c2d3c716
       with:
         packages-dir: dist	
     
