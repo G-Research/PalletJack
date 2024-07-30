@@ -20,7 +20,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyarrow~=16.0",
+  "pyarrow~=17.0",
 ]
 
 [tool.setuptools.packages.find]
