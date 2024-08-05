@@ -33,7 +33,7 @@ jobs:
         sudo apt-get install -y libthrift-dev libboost-all-dev
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install flake8 pytest build pytest
+        pip install flake8 pytest
 
     - name: Lint with flake8
       run: |
