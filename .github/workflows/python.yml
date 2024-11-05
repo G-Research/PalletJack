@@ -147,7 +147,7 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: dist-${{ matrix.os }}
+        name: dist-${{ matrix.runner }}
         path: ./python/dist/*
 
   test-binary:
