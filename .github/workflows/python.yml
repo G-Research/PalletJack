@@ -142,6 +142,7 @@ jobs:
         # We use manylinux_2_28 for ABI compatibility with pyarrow
         # With the default image we were getting "undefined symbol: _ZNK5arrow6Status8ToStringEv" error (e.g https://github.com/ray-project/ray/issues/24566) 
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
+        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
         # Disable unsupported builds
         CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32 cp313-*"
 
