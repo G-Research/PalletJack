@@ -57,6 +57,8 @@ jobs:
         include:
           - runner: ubuntu-latest
             arch: x64
+          - runner: windows-latest
+            arch: x64
           - runner: ubuntu-22.04-arm64
             arch: arm64
       fail-fast: false
@@ -80,7 +82,7 @@ jobs:
     - name: Compute vcpkg triplet and root
       id: vcpkg-info
       run: |
-        triplet="${{ runner.arch }}-"
+        triplet="${{ matrix.arch }}-"
         case ${{ runner.os }} in
           Linux)
             triplet+="linux"
