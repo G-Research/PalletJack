@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 from distutils.extension import Extension
 from Cython.Build import cythonize
 import pyarrow
+import numpy
 
 # https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#distributing-cython-modules
 def no_cythonize(extensions, **_ignore):
@@ -25,7 +26,7 @@ def no_cythonize(extensions, **_ignore):
     return extensions
 
 vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed', os.getenv('VCPKG_TARGET_TRIPLET', ''))
-include_dirs = [os.path.join(vcpkg_installed, 'include'), pyarrow.get_include()]
+include_dirs = [os.path.join(vcpkg_installed, 'include'), pyarrow.get_include(), numpy.get_include()]
 library_dirs = [os.path.join(vcpkg_installed, 'lib')] + pyarrow.get_library_dirs()
 
 print ("VCPKG_ROOT=", vcpkg_installed)
