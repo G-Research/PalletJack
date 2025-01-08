@@ -34,7 +34,7 @@ class TestPalletJack(unittest.TestCase):
 
         def validate_reading(parquet_path, index_path, row_groups, column_indices):
 
-            # Passing empty list to the read_row_groups method is an invalid operation since Arrow 18.0
+            # Passing an empty list to the read_row_groups method is an invalid operation since Arrow 18.0.
             if (len(row_groups) == 0): return
 
             # Reading using the original metadata
