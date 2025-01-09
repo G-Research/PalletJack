@@ -136,7 +136,7 @@ jobs:
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
       env:
-        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.1700 --exclude libparquet.so.1700 -w {dest_dir} {wheel}
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.1801 --exclude libparquet.so.1801 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
         CIBW_BUILD_VERBOSITY: 1
         # We use manylinux_2_28 for ABI compatibility with pyarrow
@@ -181,6 +181,7 @@ jobs:
           
     - name: Test with pytest
       run: |
+        pip install -r python/requirements.txt
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
         # So now ensure that the local version is installed 
@@ -230,6 +231,7 @@ jobs:
 
     - name: Run benchmarks
       run: |
+        pip install -r python/requirements.txt
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
         # So now ensure that the local version is installed 
