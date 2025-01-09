@@ -22,7 +22,6 @@ classifiers = [
 ]
 dependencies = [
   "pyarrow~=18.0",
-  "numpy>=1.16.6",
 ]
 
 [tool.setuptools.packages.find]

@@ -1,4 +1,1 @@
-setuptools>=55.0
-Cython>=3
-pyarrow~=18.0
 numpy
