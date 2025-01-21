@@ -3,7 +3,7 @@ requires = [
   "setuptools>=55.0",
   "Cython>=3",
   "numpy>=1.16.6",
-  "pyarrow~=18.1.0",
+  "pyarrow~=19.0.0",
   "thrift",
 ]
 
@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "palletjack"
-version = "2.4.0"
+version = "2.5.0"
 description = "Faster parquet metadata reading"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -21,7 +21,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyarrow~=18.1.0",
+  "pyarrow~=19.0.0",
 ]
 
 [tool.setuptools.packages.find]
