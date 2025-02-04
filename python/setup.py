@@ -3,7 +3,8 @@ import os
 import sys
 from codecs import open
 
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools.command.build_py import build_py
 from distutils.extension import Extension
 from Cython.Build import cythonize
 import pyarrow
@@ -62,6 +63,37 @@ if CYTHONIZE:
 else:
     extensions = no_cythonize(extensions)
 
+# Custom build command to dynamically generate metadata file
+class GenerateMetadata(build_py):
+    def run(self):
+        # Call the original build_py command
+        super().run()
+
+        # Get the distribution object
+        dist = self.distribution
+
+        package_name = dist.get_name()
+        package_version = dist.get_version()
+        package_dependencies = dist.install_requires
+        
+        print (f"package_name = {package_name}")
+        print (f"package_version = {package_version}")
+        print (f"package_dependencies = {package_dependencies}")
+        
+        output_dir = os.path.join(package_name)
+        os.makedirs(output_dir, exist_ok=True)
+        metadata_file = os.path.join(output_dir, "package_metadata.py")
+
+        # Write metadata to the file
+        with open(metadata_file, "w") as f:
+            f.write("# Auto-generated package metadata\n")
+            f.write(f"__package__ = '{package_name}'\n")
+            f.write(f"__version__ = '{package_version}'\n")
+            f.write(f"__dependencies__ = {package_dependencies}\n")
+
+        print(f"Generated metadata file: {metadata_file}")
+        print (os.listdir(output_dir))
+		
 # Make default named pyarrow shared libs available.
 pyarrow.create_library_symlinks()
 
@@ -73,5 +105,8 @@ setup(
     project_urls={
         "Documentation": "https://github.com/G-Research/PalletJack",
         "Source": "https://github.com/G-Research/PalletJack",
+    },
+    cmdclass={
+        "build_py": GenerateMetadata,  # Use the custom build command
     },
 )

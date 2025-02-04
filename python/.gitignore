@@ -6,4 +6,5 @@ __pycache__
 vcpkg_installed
 .vscode
 /palletjack/palletjack_cython.cpp
+/palletjack/package_metadata.py
 cython_debug
