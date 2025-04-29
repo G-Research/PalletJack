@@ -3,7 +3,7 @@ requires = [
   "setuptools>=55.0",
   "Cython>=3",
   "numpy>=1.16.6",
-  "pyarrow~=19.0.0",
+  "pyarrow~=20.0.0",
   "thrift",
 ]
 
@@ -21,7 +21,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyarrow~=19.0.0",
+  "pyarrow~=20.0.0",
 ]
 
 [tool.setuptools.packages.find]

@@ -136,7 +136,7 @@ jobs:
       run: python -m cibuildwheel --output-dir dist
       # to supply options, put them in 'env', like:
       env:
-        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.1900 --exclude libparquet.so.1900 -w {dest_dir} {wheel}
+        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.2000 --exclude libparquet.so.2000 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
         CIBW_BUILD_VERBOSITY: 1
         # We use manylinux_2_28 for ABI compatibility with pyarrow
