@@ -173,7 +173,7 @@ jobs:
         python-version: "3.10"
 
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: dist-*
         path: dist
@@ -223,7 +223,7 @@ jobs:
         python-version: "3.10"
 
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: dist-*
         path: dist
@@ -249,7 +249,7 @@ jobs:
     steps:
 
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: dist-*
         path: dist
