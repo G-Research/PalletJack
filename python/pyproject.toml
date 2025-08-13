@@ -14,10 +14,12 @@ version = "2.7.0"
 description = "Faster parquet metadata reading"
 readme = "README.md"
 requires-python = ">=3.9"
+license = "Apache-2.0"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License",
 ]
+
+
 dependencies = [
   "pyarrow~=21.0.0",
 ]
