@@ -37,7 +37,7 @@ manylinux-aarch64-image = "manylinux_2_28"
 
 # Run multiple commands using an array
 before-all = [
-  "yum install bzip2 -y",
+  "yum install thrift-devel -y",
 ]
 
 [tool.setuptools.packages.find]
