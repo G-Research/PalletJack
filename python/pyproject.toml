@@ -4,6 +4,7 @@ requires = [
   "Cython>=3",
   "numpy>=1.16.6",
   "pyarrow~=21.0.0",
+  auditwheel,
 ]
 
 build-backend = "setuptools.build_meta"
