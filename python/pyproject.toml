@@ -30,7 +30,7 @@ repair-wheel-command = "auditwheel repair --exclude libarrow.so.2100 --exclude l
 # With the default image we were getting "undefined symbol: _ZNK5arrow6Status8ToStringEv" error (e.g https://github.com/ray-project/ray/issues/24566)       
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
-        
+
 [tool.setuptools.packages.find]
 include = ['palletjack*']
 
