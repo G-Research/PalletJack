@@ -110,7 +110,27 @@ jobs:
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install bison
-           
+
+    - name: Install thrift
+      working-directory: ./python
+      run: |
+        vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
+      env:
+        VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
+
+    - name: Upload vcpkg arrow logs
+      if: success() || failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.vcpkg-info.outputs.triplet }}-vcpkg-arrow-logs
+        path: ${{ steps.vcpkg-info.outputs.root }}/buildtrees/arrow/*.log
+
+    - name: Build sdist (Linux)
+      if: runner.os == 'linux'
+      working-directory: ./python
+      run: |
+        python -m build --sdist         
+        
     - name: Build wheels
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
@@ -118,7 +138,7 @@ jobs:
       env:
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
-        CIBW_BUILD_VERBOSITY: 3
+        CIBW_BUILD_VERBOSITY: 1
         # We use manylinux_2_28 for ABI compatibility with pyarrow
         # With the default image we were getting "undefined symbol: _ZNK5arrow6Status8ToStringEv" error (e.g https://github.com/ray-project/ray/issues/24566) 
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
@@ -255,4 +275,4 @@ jobs:
       uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc
       with:
         packages-dir: dist	
-
+    

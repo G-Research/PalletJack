@@ -4,7 +4,6 @@ requires = [
   "Cython>=3",
   "numpy>=1.16.6",
   "pyarrow~=21.0.0",
-  "thrift",
 ]
 
 build-backend = "setuptools.build_meta"
@@ -18,7 +17,6 @@ requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
 ]
 dependencies = [
   "pyarrow~=21.0.0",
