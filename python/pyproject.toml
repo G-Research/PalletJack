@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [tool.cibuildwheel]
-skip = "*_i686 *-musllinux_* *win32 cp314-*"
+skip = "*_i686 *-musllinux_* *win32 cp314-* cp314t-*"
 before-build = "pip install auditwheel"
 repair-wheel-command = "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}"
 
