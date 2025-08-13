@@ -22,6 +22,9 @@ dependencies = [
   "pyarrow~=21.0.0",
 ]
 
+[tool.cibuildwheel]
+skip = "pp* *_i686 *-musllinux_* *win32 cp313-*"
+
 [tool.setuptools.packages.find]
 include = ['palletjack*']
 
