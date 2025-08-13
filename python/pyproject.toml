@@ -40,10 +40,10 @@ before-all = [
   "git clone --depth 1 --branch v0.19.0 https://github.com/apache/thrift.git",
   "yum -y update",
   "yum -y groupinstall 'Development Tools'",
-  "yum -y install libevent-devel zlib-devel openssl-devel",
+  "yum -y install libevent-devel zlib-devel openssl-devel boost-devel",
   "cd thrift",
   "./bootstrap.sh",
-  "./configure --with-lua=no",
+  "./configure --with-cpp=yes --with-python=no --with-py3=no",
   "make",
   "make install",
 ]
