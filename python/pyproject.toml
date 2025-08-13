@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [tool.cibuildwheel]
-skip = "pp* *_i686 *-musllinux_* *win32 cp313-*"
+skip = "*_i686 *-musllinux_* *win32 cp313-*"
 before-build = "pip install auditwheel"
 repair-wheel-command = "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}"
 
@@ -31,6 +31,14 @@ repair-wheel-command = "auditwheel repair --exclude libarrow.so.2100 --exclude l
 # With the default image we were getting "undefined symbol: _ZNK5arrow6Status8ToStringEv" error (e.g https://github.com/ray-project/ray/issues/24566)       
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
+
+# Install system library
+[tool.cibuildwheel.linux]
+
+# Run multiple commands using an array
+before-all = [
+  "yum install bzip2 -y",
+]
 
 [tool.setuptools.packages.find]
 include = ['palletjack*']
