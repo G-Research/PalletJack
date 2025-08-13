@@ -19,7 +19,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 
-
 dependencies = [
   "pyarrow~=21.0.0",
 ]
@@ -47,6 +46,12 @@ before-all = [
   "./configure --with-cpp=yes --with-python=no --with-py3=no",
   "make",
   "make install",
+]
+
+# Install system library
+[tool.cibuildwheel.windows]
+before-all = [
+  "vcpkg install --x-manifest-root . --feature-flags=versions"
 ]
 
 [tool.setuptools.packages.find]
