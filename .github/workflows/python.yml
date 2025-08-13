@@ -118,7 +118,7 @@ jobs:
       env:
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}
         CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
-        CIBW_BUILD_VERBOSITY: 1
+        CIBW_BUILD_VERBOSITY: 3
         # We use manylinux_2_28 for ABI compatibility with pyarrow
         # With the default image we were getting "undefined symbol: _ZNK5arrow6Status8ToStringEv" error (e.g https://github.com/ray-project/ray/issues/24566) 
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
