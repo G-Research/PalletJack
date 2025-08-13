@@ -38,6 +38,14 @@ manylinux-aarch64-image = "manylinux_2_28"
 # Run multiple commands using an array
 before-all = [
   "git clone --depth 1 --branch v0.19.0 https://github.com/apache/thrift.git",
+  "yum -y update",
+  "yum -y groupinstall 'Development Tools'",
+  "yum -y install libevent-devel zlib-devel openssl-devel",
+  "cd thrift",
+  "./bootstrap.sh",
+  "./configure --with-lua=no",
+  "make",
+  "make install",
 ]
 
 [tool.setuptools.packages.find]
