@@ -49,7 +49,7 @@ jobs:
         pytest
 
   build:
-    needs: test
+    # needs: test
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -79,57 +79,57 @@ jobs:
         pip install flake8 pytest cibuildwheel build
 
     # Compute vcpkg triplet and root
-    - name: Compute vcpkg triplet and root
-      id: vcpkg-info
-      run: |
-        triplet="${{ matrix.arch }}-"
-        case ${{ runner.os }} in
-          Linux)
-            triplet+="linux"
-            ;;
-          macOS)
-            triplet+="osx"
-            ;;
-          Windows)
-            triplet+="windows"
-            ;;
-        esac
-        echo "triplet=$triplet" >> $GITHUB_OUTPUT
-        echo "root=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_OUTPUT
-        echo "cmake_version=$(cmake --version | head -n1 | awk '{print $3}')" >> $GITHUB_OUTPUT
-        echo "runner_info=$ImageOS-$ImageVersion" >> $GITHUB_OUTPUT
-      shell: bash
-      
-    - uses: actions/github-script@v7
-      with:
-        script: |
-          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-      
+    # - name: Compute vcpkg triplet and root
+    #   id: vcpkg-info
+    #   run: |
+    #     triplet="${{ matrix.arch }}-"
+    #     case ${{ runner.os }} in
+    #       Linux)
+    #         triplet+="linux"
+    #         ;;
+    #       macOS)
+    #         triplet+="osx"
+    #         ;;
+    #       Windows)
+    #         triplet+="windows"
+    #         ;;
+    #     esac
+    #     echo "triplet=$triplet" >> $GITHUB_OUTPUT
+    #     echo "root=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_OUTPUT
+    #     echo "cmake_version=$(cmake --version | head -n1 | awk '{print $3}')" >> $GITHUB_OUTPUT
+    #     echo "runner_info=$ImageOS-$ImageVersion" >> $GITHUB_OUTPUT
+    #   shell: bash
+    #   
+    # - uses: actions/github-script@v7
+    #   with:
+    #     script: |
+    #       core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+    #       core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+    #   
     # Install vcpkg dependencies
-    - name: Install vcpkg build dependencies (macOS)
-      if: runner.os == 'macOS'
-      run: brew install bison
-
-    - name: Install thrift
-      working-directory: ./python
-      run: |
-        vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
-      env:
-        VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
-
-    - name: Upload vcpkg arrow logs
-      if: success() || failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.vcpkg-info.outputs.triplet }}-vcpkg-arrow-logs
-        path: ${{ steps.vcpkg-info.outputs.root }}/buildtrees/arrow/*.log
-
-    - name: Build sdist (Linux)
-      if: runner.os == 'linux'
-      working-directory: ./python
-      run: |
-        python -m build --sdist         
+    # - name: Install vcpkg build dependencies (macOS)
+    #   if: runner.os == 'macOS'
+    #   run: brew install bison
+    # 
+    # - name: Install thrift
+    #   working-directory: ./python
+    #   run: |
+    #     vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
+    #   env:
+    #     VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
+    # 
+    # - name: Upload vcpkg arrow logs
+    #   if: success() || failure()
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: ${{ steps.vcpkg-info.outputs.triplet }}-vcpkg-arrow-logs
+    #     path: ${{ steps.vcpkg-info.outputs.root }}/buildtrees/arrow/*.log
+    # 
+    # - name: Build sdist (Linux)
+    #   if: runner.os == 'linux'
+    #   working-directory: ./python
+    #   run: |
+    #     python -m build --sdist         
         
     - name: Build wheels
       working-directory: ./python
@@ -137,7 +137,7 @@ jobs:
       # to supply options, put them in 'env', like:
       env:
         CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}
-        CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
+        # CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
         CIBW_BUILD_VERBOSITY: 3
 
 
