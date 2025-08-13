@@ -49,7 +49,7 @@ before-all = [
 ]
 
 # Install system library
-[tool.cibuildwheel]
+[tool.cibuildwheel.windows]
 before-all = [
   "vcpkg install --x-manifest-root . --feature-flags=versions"
 ]
