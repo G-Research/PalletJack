@@ -51,14 +51,12 @@ before-all = [
 # Install system library
 [tool.cibuildwheel.windows]
 before-all = [
-  "vcpkg triplet list",
   "vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
 
 # Install system library
 [tool.cibuildwheel.macos]
 before-all = [
-  "vcpkg triplet list",
   "vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
 
