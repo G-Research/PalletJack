@@ -71,8 +71,8 @@ before-all = [
 ########################### cibuildwheel MacOS #####################
 [tool.cibuildwheel.macos]
 before-build = "pip install delocate"
-repair-wheel-command = [
-  "delocate-wheel --require-archs {delocate_archs} -e libarrow.2100 -w {dest_dir} -v {wheel}",
+repair-wheel-command = [ "", 
+  # "delocate-wheel --require-archs {delocate_archs} -e libarrow.2100.dylib -w {dest_dir} -v {wheel}",
 ]
 before-all = [
   "vcpkg install --x-manifest-root . --feature-flags=versions",
