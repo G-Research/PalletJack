@@ -55,7 +55,7 @@ before-all = [
   "yum -y install libevent-devel zlib-devel openssl-devel boost-devel boost-static",
   "cd thrift",
   "./bootstrap.sh",
-  "./configure --with-cpp=yes --with-python=no --with-py3=no --enable-tests=no --enable-tutorial=no",
+  "./configure --with-cpp=yes --with-python=no --with-py3=no --enable-tests=no --enable-tutorial=no --enable-shared=no",
   "make",
   "make install",
 ]
