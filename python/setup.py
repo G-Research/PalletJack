@@ -31,14 +31,15 @@ for key, value in os.environ.items():
     print(f"{key}: {value}")
 
 include_dirs = [pyarrow.get_include(), numpy.get_include()]
-library_dirs = [pyarrow.get_library_dirs()]
+library_dirs = pyarrow.get_library_dirs()
 
 VCPKG_ROOT = os.getenv('VCPKG_ROOT')
+
 if VCPKG_ROOT:
     all_entries = os.listdir(VCPKG_ROOT)
     for entry in all_entries:
-        include_dirs.append(os.path.join(entry, 'include'))
-        library_dirs.append(os.path.join(entry, 'lib'))
+        include_dirs.append(os.path.join(VCPKG_ROOT, entry, 'include'))
+        library_dirs.append(os.path.join(VCPKG_ROOT, entry, 'lib'))
 
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)
