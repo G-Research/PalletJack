@@ -72,7 +72,7 @@ before-all = [
 [tool.cibuildwheel.macos]
 before-build = "pip install delocate"
 repair-wheel-command = [
-  "delocate-wheel --require-archs {delocate_archs} --exclude arrow --exclude libparquet -w {dest_dir} -v {wheel}",
+  "delocate-wheel --require-archs {delocate_archs} --exclude arrow.2100 --exclude libparquet.2100 -w {dest_dir} -v {wheel}",
 ]
 before-all = [
   "vcpkg install --x-manifest-root . --feature-flags=versions",
