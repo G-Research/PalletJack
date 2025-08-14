@@ -45,7 +45,9 @@ manylinux-aarch64-image = "manylinux_2_28"
 ########################### cibuildwheel Linux #####################
 [tool.cibuildwheel.linux]
 before-build = "pip install auditwheel"
-repair-wheel-command = "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}"
+repair-wheel-command = [ "",
+# "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}"
+]
 
 # Run multiple commands using an array
 before-all = [
