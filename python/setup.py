@@ -34,8 +34,7 @@ include_dirs = [pyarrow.get_include(), numpy.get_include()]
 library_dirs = pyarrow.get_library_dirs()
 
 vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed')
-
-if vcpkg_installed:
+if os.path.exists(vcpkg_installed):
     all_entries = os.listdir(vcpkg_installed)
     for entry in all_entries:
         include_dirs.append(os.path.join(vcpkg_installed, entry, 'include'))
