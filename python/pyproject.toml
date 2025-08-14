@@ -50,7 +50,7 @@ manylinux-aarch64-image = "manylinux_2_28"
 
 ########################### cibuildwheel Linux #####################
 [tool.cibuildwheel.linux]
-before-build = before-build = [
+before-build = [
   "pip install auditwheel",
   "ldd --version", # This will show the glibc version being used
   "python -c 'import sysconfig; print(sysconfig.get_config_var(\"CC\"))'", # Show the C compiler used
