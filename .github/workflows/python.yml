@@ -101,7 +101,7 @@ jobs:
         pip install cibuildwheel
         cibuildwheel --output-dir dist
       env:
-        CIBW_BUILD_VERBOSITY: 1
+        CIBW_BUILD_VERBOSITY: 2
 
     - uses: actions/upload-artifact@v4
       with:
