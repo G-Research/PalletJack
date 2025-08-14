@@ -64,7 +64,7 @@ jobs:
           - runner: macos-latest
             arch: arm64
           - runner: macos-13 
-            arch: arm64
+            arch: x64
       fail-fast: false
 
     steps:
