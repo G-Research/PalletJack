@@ -36,7 +36,13 @@ Issues = "https://github.com/G-Research/PalletJack/issues"
 
 ########################### cibuildwheel ###########################
 [tool.cibuildwheel]
-skip = "*_i686 *-musllinux_* *win32 cp314-* cp314t-*"
+skip = [
+ "*_i686", 
+ "*-musllinux_*",
+ "*win32",
+ "cp314-*",
+ "cp314t-*",
+]
 
 # We use manylinux_2_28 for ABI compatibility with pyarrow
 manylinux-x86_64-image = "manylinux_2_28"
