@@ -98,7 +98,6 @@ jobs:
       working-directory: ./python
       run: python -m cibuildwheel --output-dir dist
       env:
-        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}
         CIBW_BUILD_VERBOSITY: 1
 
     - uses: actions/upload-artifact@v4
