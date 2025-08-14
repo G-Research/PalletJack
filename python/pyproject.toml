@@ -58,8 +58,8 @@ before-build = [
   "ls -l /lib64/libc.so.6", # Another way to see glibc
 ]
 
-repair-wheel-command = ["",
-# "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}",
+repair-wheel-command = [
+ "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}",
 ]
 
 # Run multiple commands using an array
