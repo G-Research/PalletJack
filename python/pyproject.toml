@@ -23,17 +23,29 @@ dependencies = [
   "pyarrow~=21.0.0",
 ]
 
+
+[tool.setuptools.packages.find]
+include = ['palletjack*']
+
+[tool.setuptools.package-data]
+"*" = ["*.pxd", "*.h", "*.pyx"]
+
+[project.urls]
+Homepage = "https://github.com/G-Research/PalletJack"
+Issues = "https://github.com/G-Research/PalletJack/issues"
+
+########################### cibuildwheel ###########################
 [tool.cibuildwheel]
 skip = "*_i686 *-musllinux_* *win32 cp314-* cp314t-*"
-before-build = "pip install auditwheel"
-repair-wheel-command = "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}"
 
 # We use manylinux_2_28 for ABI compatibility with pyarrow
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
 
-# Install system library
+########################### cibuildwheel Linux #####################
 [tool.cibuildwheel.linux]
+before-build = "pip install auditwheel"
+repair-wheel-command = "auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}"
 
 # Run multiple commands using an array
 before-all = [
@@ -48,24 +60,20 @@ before-all = [
   "make install",
 ]
 
-# Install system library
+########################### cibuildwheel Windows ###################
 [tool.cibuildwheel.windows]
+before-build = "pip install delvewheel"
+repair-wheel-command = "delvewheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}"
 before-all = [
   "vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
 
-# Install system library
+########################### cibuildwheel MacOS #####################
 [tool.cibuildwheel.macos]
+before-build = "pip install delocate"
+repair-wheel-command = [
+  "delocate-wheel --require-archs {delocate_archs} --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} -v {wheel}",
+]
 before-all = [
   "vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
-
-[tool.setuptools.packages.find]
-include = ['palletjack*']
-
-[tool.setuptools.package-data]
-"*" = ["*.pxd", "*.h", "*.pyx"]
-
-[project.urls]
-Homepage = "https://github.com/G-Research/PalletJack"
-Issues = "https://github.com/G-Research/PalletJack/issues"
