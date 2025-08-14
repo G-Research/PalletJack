@@ -34,6 +34,9 @@ print("All Environment Variables:")
 for key, value in os.environ.items():
     print(f"{key}: {value}")
 
+
+VCPKG_ROOT = os.getenv('VCPKG_ROOT') 
+
 print ("VCPKG_ROOT=", vcpkg_installed)
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)

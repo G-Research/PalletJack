@@ -43,7 +43,7 @@ before-all = [
   "yum -y install libevent-devel zlib-devel openssl-devel boost-devel boost-static",
   "cd thrift",
   "./bootstrap.sh",
-  "./configure --with-cpp=yes --with-python=no --with-py3=no",
+  "./configure --with-cpp=yes --with-python=no --with-py3=no --enable-tests=no --enable-tutorial=no",
   "make",
   "make install",
 ]
@@ -51,13 +51,15 @@ before-all = [
 # Install system library
 [tool.cibuildwheel.windows]
 before-all = [
-  "vcpkg install --x-manifest-root . --feature-flags=versions"
+  "vcpkg triplet list",
+  "vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
 
 # Install system library
 [tool.cibuildwheel.macos]
 before-all = [
-  "vcpkg install --x-manifest-root . --feature-flags=versions"
+  "vcpkg triplet list",
+  "vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
 
 [tool.setuptools.packages.find]
