@@ -33,13 +33,13 @@ for key, value in os.environ.items():
 include_dirs = [pyarrow.get_include(), numpy.get_include()]
 library_dirs = pyarrow.get_library_dirs()
 
-VCPKG_ROOT = os.getenv('VCPKG_ROOT')
+vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed')
 
-if VCPKG_ROOT:
-    all_entries = os.listdir(VCPKG_ROOT)
+if vcpkg_installed:
+    all_entries = os.listdir(vcpkg_installed)
     for entry in all_entries:
-        include_dirs.append(os.path.join(VCPKG_ROOT, entry, 'include'))
-        library_dirs.append(os.path.join(VCPKG_ROOT, entry, 'lib'))
+        include_dirs.append(os.path.join(vcpkg_installed, entry, 'include'))
+        library_dirs.append(os.path.join(vcpkg_installed, entry, 'lib'))
 
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)
