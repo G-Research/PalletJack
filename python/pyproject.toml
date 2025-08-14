@@ -63,7 +63,7 @@ before-all = [
 ########################### cibuildwheel Windows ###################
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel"
-repair-wheel-command = "delvewheel repair --exclude libarrow.2100.dylib --exclude libparquet.2100.dylib -w {dest_dir} {wheel}"
+repair-wheel-command = "delvewheel repair --exclude arrow.dll --exclude parquet.dll -w {dest_dir} {wheel}"
 before-all = [
   "vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
