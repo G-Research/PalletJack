@@ -26,23 +26,19 @@ def no_cythonize(extensions, **_ignore):
         extension.sources[:] = sources
     return extensions
 
-print("All Environment Variables:")
-for key, value in os.environ.items():
-    print(f"{key}: {value}")
-
 include_dirs = [pyarrow.get_include(), numpy.get_include()]
 library_dirs = pyarrow.get_library_dirs()
 
 vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed')
 if os.path.exists(vcpkg_installed):
     all_entries = os.listdir(vcpkg_installed)
-    for entry in all_entries:
+    for entry in [entry for entry in all_entries if entry != "vcpkg"]:
         include_dirs.append(os.path.join(vcpkg_installed, entry, 'include'))
         library_dirs.append(os.path.join(vcpkg_installed, entry, 'lib'))
 
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)
-
+vcpkg
 extra_compile_args = []
 extra_link_args = []
 debug = False,
