@@ -179,6 +179,51 @@ jobs:
 
         # Run the Docker container
         docker run palletjack-test
+  test-binary-manylinux:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["cp39-cp39", "cp310-cp310", "cp311-cp311", "cp312-cp312", "cp313-cp313"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+  
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+  
+      - name: Build and Run Docker Container for Tests
+        run: |
+          # Create a temporary Dockerfile for our testing environment
+          cat <<EOF > Dockerfile.test
+          FROM quay.io/pypa/manylinux2014_x86_64
+  
+          # Set a working directory
+          WORKDIR /app
+          COPY . .
+  
+          # Install and test with Python ${{ matrix.python-version }}
+          RUN /opt/python/${{ matrix.python-version }}/bin/pip install -r python/requirements.txt && \
+              # Install the package from local dist directory
+              /opt/python/${{ matrix.python-version }}bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: && \
+              # Force reinstall to ensure local version is used
+              /opt/python/${{ matrix.python-version }}bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps && \
+              # Print the GLIBC version
+              ldd --version && \
+           
+          # Define the command to run tests
+          CMD ["/opt/python/${{ matrix.python-version }}bin/python", "python/test/test_palletjack.py"]
+          EOF
+  
+          # Build the Docker image
+          docker build -t palletjack-test-py${{ matrix.python-version }} -f Dockerfile.test .
+  
+          # Run the Docker container
+          docker run palletjack-test-py${{ matrix.python-version }}
 
   # Virtual job that can be configured as a required check before a PR can be merged.
   # As GitHub considers a check as successful if it is skipped, we need to check its status in
