@@ -164,7 +164,7 @@ jobs:
 
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all:
-        
+
         # So now ensure that the local version is installed 
         RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps
 
