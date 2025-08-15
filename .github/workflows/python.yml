@@ -7,7 +7,7 @@ on:
   push:
   pull_request:
   schedule:
-    # Run daily at 00:00 so we get notified if CI is broken before a pull request is submitted. 
+    # Run daily at 00:00 so we get notified if CI is broken before a pull request is submitted.
     # It also notifies us about new Arrow releases for which we need to release a corresponding version of PalletJack.
     - cron:  '0 0 * * *'
 
@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-        
+
   test:
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     runs-on: ubuntu-latest
@@ -25,7 +25,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
-        
+
     - name: Install dependencies
       working-directory: ./python
       shell: bash
@@ -45,7 +45,7 @@ jobs:
     - name: Test with pytest
       working-directory: ./python
       run: |
-        pip install --editable . 
+        pip install --editable .
         pytest
 
   build:
@@ -53,7 +53,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        # macos-13 doesn't work 
+        # macos-13 doesn't work
         runner: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
@@ -63,7 +63,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.12"
-        
+
     - name: Install dependencies
       working-directory: ./python
       shell: bash
@@ -71,7 +71,7 @@ jobs:
         python -m pip install --upgrade pip
         # pip install -r requirements.txt
         pip install flake8 pytest build
-    
+
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
@@ -81,8 +81,8 @@ jobs:
       if: runner.os == 'linux'
       working-directory: ./python
       run: |
-        python -m build --sdist         
-        
+        python -m build --sdist
+
     - name: Build wheels
       working-directory: ./python
       run: |
@@ -100,7 +100,7 @@ jobs:
     needs: build
     runs-on: ${{ matrix.runner }}
     strategy:
-      matrix:        
+      matrix:
         runner: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
@@ -117,18 +117,19 @@ jobs:
         pattern: dist-*
         path: dist
         merge-multiple: true
-          
-    - name: Test with pytest
+
+    - name: Test binary
       run: |
         pip install -r python/requirements.txt
-        
+
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        
-        # So now ensure that the local version is installed 
+
+        # So now ensure that the local version is installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
+
         python3 python/test/test_palletjack.py
-  
+
   test-binary-debian:
     needs: build
     runs-on: ubuntu-latest
@@ -165,7 +166,7 @@ jobs:
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all:
 
-        # So now ensure that the local version is installed 
+        # So now ensure that the local version is installed
         RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps
 
         # Define the command to run tests
@@ -217,13 +218,13 @@ jobs:
     - name: Run benchmarks
       run: |
         pip install -r python/requirements.txt
-        
+
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        
-        # So now ensure that the local version is installed 
+
+        # So now ensure that the local version is installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
-        
+
         python3 ./benchmarks/benchmark_palletjack_metadata.py
 
   publish:
@@ -242,25 +243,24 @@ jobs:
         pattern: dist-*
         path: dist
         merge-multiple: true
-    
+
     - name: Display structure of downloaded files
       run: ls -R dist
-    
+
     - name: Validate tag
       shell: pwsh
       run: |
         $tag = "${{ github.ref }}".SubString(11)
         $expectedFile = "dist/palletjack-$tag.tar.gz"
-    
+
         # Check whether the tag and the package version match together
         if (-not (Test-Path -Path $expectedFile)) {
             echo "::error ::Expected file $expectedFile doesn't exist"
             Get-ChildItem -Path dist
             exit 1
         }
-    
+
     - name: Publish to PyPi
       uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc
       with:
-        packages-dir: dist	
-    
+        packages-dir: dist
