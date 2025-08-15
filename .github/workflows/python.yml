@@ -54,19 +54,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        include:
-          - runner: ubuntu-latest
-            arch: x64
-          # - runner: windows-latest
-          #   arch: x64
-          # - runner: ubuntu-22.04-arm64
-          #   arch: arm64
-          # - runner: macos-latest
-          #   arch: arm64
-          
-          # Doesn't work
-          # - runner: macos-13 
-          #   arch: x64
+        # macos-13 doesn't work 
+        os: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
     steps:
@@ -112,14 +101,8 @@ jobs:
     needs: build
     runs-on: ${{ matrix.runner }}
     strategy:
-      matrix:
-        include:
-          - runner: ubuntu-latest
-            arch: x64
-          - runner: windows-latest
-            arch: x64
-          - runner: ubuntu-22.04-arm64
-            arch: arm64
+      matrix:        
+        os: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
     steps:
@@ -216,13 +199,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        include:
-          - runner: ubuntu-latest
-            arch: x64
-          - runner: windows-latest
-            arch: x64
-          - runner: ubuntu-22.04-arm64
-            arch: arm64
+        os: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
     steps:
