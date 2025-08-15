@@ -186,8 +186,8 @@ jobs:
         # Install PalletJack from the local dist directory
         # We need to install it twice because of the same local/remote version issue
         # as noted in your original script.
-        RUN pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        RUN pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
+        RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all:
+        RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps
 
         # Define the command to run your tests
         CMD ["python3", "python/test/test_palletjack.py"]
