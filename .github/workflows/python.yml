@@ -89,7 +89,7 @@ jobs:
         pip install cibuildwheel
         cibuildwheel --output-dir dist
       env:
-        CIBW_BUILD_VERBOSITY: 2
+        CIBW_BUILD_VERBOSITY: 1
 
     - uses: actions/upload-artifact@v4
       with:
@@ -130,7 +130,7 @@ jobs:
 
         python3 python/test/test_palletjack.py
 
-  test-binary-debian:
+  test-binary-debian-bullseye:
     needs: build
     runs-on: ubuntu-latest
 
@@ -188,7 +188,7 @@ jobs:
       - test
       - build
       - test-binary
-      - test-binary-debian
+      - test-binary-debian-bullseye
     runs-on: ubuntu-latest
     steps:
       - run: echo "All required checks done"
