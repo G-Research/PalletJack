@@ -38,7 +38,7 @@ if os.path.exists(vcpkg_installed):
 
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)
-vcpkg
+
 extra_compile_args = []
 extra_link_args = []
 debug = False,
