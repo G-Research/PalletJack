@@ -51,7 +51,7 @@ jobs:
   build:
     # needs: test
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # macos-13 doesn't work 
@@ -99,7 +99,7 @@ jobs:
 
   test-binary:
     needs: build
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:        
         os: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
@@ -196,7 +196,7 @@ jobs:
 
   benchmarks:
     needs: build
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
