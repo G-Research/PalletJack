@@ -66,8 +66,6 @@ else:
 # Custom build command to dynamically generate metadata file
 class GenerateMetadata(build_py):
     def run(self):
-        # Call the original build_py command
-        super().run()
 
         # Get the distribution object
         dist = self.distribution
@@ -93,6 +91,9 @@ class GenerateMetadata(build_py):
 
         print(f"Generated metadata file: {metadata_file}")
         print (os.listdir(output_dir))
+
+        # Call the original build_py command
+        super().run()
 		
 # Make default named pyarrow shared libs available.
 pyarrow.create_library_symlinks()

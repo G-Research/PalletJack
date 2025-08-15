@@ -187,7 +187,60 @@ jobs:
         # So now ensure that the local version is installed 
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
         python3 python/test/test_palletjack.py
+  
+  test-binary-debian:
+    needs: build
+    runs-on: ubuntu-latest
 
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v5
+      with:
+        pattern: dist-*
+        path: dist
+        merge-multiple: true
+
+    - name: Build and Run Docker Container for Tests
+      run: |
+        # Create a temporary Dockerfile for our testing environment
+        cat <<EOF > Dockerfile.test
+        FROM debian:bullseye
+
+        # Install Python and pip
+        RUN apt-get update && apt-get install -y \
+            python3 \
+            python3-pip \
+            --no-install-recommends && \
+            rm -rf /var/lib/apt/lists/*
+
+        # Set a working directory
+        WORKDIR /app
+
+        # Copy your project files into the container
+        # This includes your Python project and the downloaded artifacts
+        COPY . .
+
+        # Install Python dependencies
+        RUN pip install -r python/requirements.txt
+
+        # Install PalletJack from the local dist directory
+        # We need to install it twice because of the same local/remote version issue
+        # as noted in your original script.
+        RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all:
+        RUN pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps
+
+        # Define the command to run your tests
+        CMD ["python3", "python/test/test_palletjack.py"]
+        EOF
+
+        # Build the Docker image
+        docker build -t palletjack-test -f Dockerfile.test .
+
+        # Run the Docker container
+        docker run palletjack-test
   # Virtual job that can be configured as a required check before a PR can be merged.
   # As GitHub considers a check as successful if it is skipped, we need to check its status in
   # another workflow (check-required.yml) and create a check there.
