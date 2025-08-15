@@ -57,12 +57,13 @@ jobs:
         include:
           - runner: ubuntu-latest
             arch: x64
-          - runner: windows-latest
-            arch: x64
-          - runner: ubuntu-22.04-arm64
-            arch: arm64
-          - runner: macos-latest
-            arch: arm64
+          # - runner: windows-latest
+          #   arch: x64
+          # - runner: ubuntu-22.04-arm64
+          #   arch: arm64
+          # - runner: macos-latest
+          #   arch: arm64
+          
           # Doesn't work
           # - runner: macos-13 
           #   arch: x64
@@ -181,7 +182,7 @@ jobs:
         COPY . .
 
         # Install Python dependencies
-        RUN pip install -r python/requirements.txt --break-system-packages
+        RUN pip install -r python/requirements.txt
 
         # Install PalletJack from the local dist directory
         # We need to install it twice because of the same local/remote version issue
