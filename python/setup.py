@@ -26,11 +26,16 @@ def no_cythonize(extensions, **_ignore):
         extension.sources[:] = sources
     return extensions
 
-vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed', os.getenv('VCPKG_TARGET_TRIPLET', ''))
-include_dirs = [os.path.join(vcpkg_installed, 'include'), pyarrow.get_include(), numpy.get_include()]
-library_dirs = [os.path.join(vcpkg_installed, 'lib')] + pyarrow.get_library_dirs()
+include_dirs = [pyarrow.get_include(), numpy.get_include()]
+library_dirs = pyarrow.get_library_dirs()
 
-print ("VCPKG_ROOT=", vcpkg_installed)
+vcpkg_installed = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'vcpkg_installed')
+if os.path.exists(vcpkg_installed):
+    all_entries = os.listdir(vcpkg_installed)
+    for entry in [entry for entry in all_entries if entry != "vcpkg"]:
+        include_dirs.append(os.path.join(vcpkg_installed, entry, 'include'))
+        library_dirs.append(os.path.join(vcpkg_installed, entry, 'lib'))
+
 print ("include_dirs=", include_dirs)
 print ("library_dirs=", library_dirs)
 
@@ -66,8 +71,6 @@ else:
 # Custom build command to dynamically generate metadata file
 class GenerateMetadata(build_py):
     def run(self):
-        # Call the original build_py command
-        super().run()
 
         # Get the distribution object
         dist = self.distribution
@@ -93,6 +96,9 @@ class GenerateMetadata(build_py):
 
         print(f"Generated metadata file: {metadata_file}")
         print (os.listdir(output_dir))
+
+        # Call the original build_py command
+        super().run()
 		
 # Make default named pyarrow shared libs available.
 pyarrow.create_library_symlinks()

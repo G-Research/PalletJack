@@ -60,7 +60,7 @@ class TestPalletJack(unittest.TestCase):
             pj_data = pr.read_row_groups(list(range(0, len(row_groups))))
             self.assertEqual(org_data, pj_data, f"row_groups={row_groups}, column_indices={column_indices}")
 
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+        with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
             table = get_table()
 
@@ -78,7 +78,7 @@ class TestPalletJack(unittest.TestCase):
                             validate_reading(path, index_path, row_groups = rp, column_indices = cp)
 
     def test_metadata_roundtrip(self):
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+        with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
             table = get_table()
 
@@ -213,7 +213,7 @@ class TestPalletJack(unittest.TestCase):
             self.assertEqual(res_data_org, res_data_index, f"Row={r}")
   
     def test_inmemory_index_data(self):
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+        with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
             table = get_table()
 
