@@ -160,9 +160,9 @@ jobs:
             python3 \
             python3-pip \
             --no-install-recommends && \
-            rm -rf /var/lib/apt/lists/* && \
-
-            pip install -r python/requirements.txt && \
+            rm -rf /var/lib/apt/lists/*
+       
+        RUN pip install -r python/requirements.txt && \
             # Keep in mind that if the local and remote versions are the same, the remote version will be installed
             pip install PalletJack --pre --find-links ./dist --only-binary=:all: && \
             # So now ensure that the local version is installed
@@ -209,9 +209,9 @@ jobs:
           # Install and test with Python ${{ matrix.python-version }}
           RUN /opt/python/${{ matrix.python-version }}/bin/pip install -r python/requirements.txt && \
               # Install the package from local dist directory
-              /opt/python/${{ matrix.python-version }}bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: && \
+              /opt/python/${{ matrix.python-version }}/bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: && \
               # Force reinstall to ensure local version is used
-              /opt/python/${{ matrix.python-version }}bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps && \
+              /opt/python/${{ matrix.python-version }}/bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps && \
               # Print the GLIBC version
               ldd --version && \
            
