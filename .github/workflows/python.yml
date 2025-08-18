@@ -7,7 +7,7 @@ on:
   push:
   pull_request:
   schedule:
-    # Run daily at 00:00 so we get notified if CI is broken before a pull request is submitted. 
+    # Run daily at 00:00 so we get notified if CI is broken before a pull request is submitted.
     # It also notifies us about new Arrow releases for which we need to release a corresponding version of PalletJack.
     - cron:  '0 0 * * *'
 
@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-        
+
   test:
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     runs-on: ubuntu-latest
@@ -25,7 +25,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.10"
-        
+
     - name: Install dependencies
       working-directory: ./python
       shell: bash
@@ -45,106 +45,44 @@ jobs:
     - name: Test with pytest
       working-directory: ./python
       run: |
-        pip install --editable . 
+        pip install --editable .
         pytest
 
   build:
-    needs: test
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        include:
-          - runner: ubuntu-latest
-            arch: x64
-          - runner: windows-latest
-            arch: x64
-          - runner: ubuntu-22.04-arm64
-            arch: arm64
+        # macos-13 doesn't work
+        runner: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
     steps:
     - uses: actions/checkout@v5
-    - name: Set up Python 3.10
+    - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
-        
-    - name: Install dependencies
-      working-directory: ./python
-      shell: bash
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install flake8 pytest cibuildwheel build
+        python-version: "3.12"
 
-    # Compute vcpkg triplet and root
-    - name: Compute vcpkg triplet and root
-      id: vcpkg-info
-      run: |
-        triplet="${{ matrix.arch }}-"
-        case ${{ runner.os }} in
-          Linux)
-            triplet+="linux"
-            ;;
-          macOS)
-            triplet+="osx"
-            ;;
-          Windows)
-            triplet+="windows"
-            ;;
-        esac
-        echo "triplet=$triplet" >> $GITHUB_OUTPUT
-        echo "root=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_OUTPUT
-        echo "cmake_version=$(cmake --version | head -n1 | awk '{print $3}')" >> $GITHUB_OUTPUT
-        echo "runner_info=$ImageOS-$ImageVersion" >> $GITHUB_OUTPUT
-      shell: bash
-      
-    - uses: actions/github-script@v7
-      with:
-        script: |
-          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-      
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
       run: brew install bison
 
-    - name: Install thrift
-      working-directory: ./python
-      run: |
-        vcpkg install --triplet ${{ steps.vcpkg-info.outputs.triplet }} --x-manifest-root . --feature-flags=versions
-      env:
-        VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
-
-    - name: Upload vcpkg arrow logs
-      if: success() || failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.vcpkg-info.outputs.triplet }}-vcpkg-arrow-logs
-        path: ${{ steps.vcpkg-info.outputs.root }}/buildtrees/arrow/*.log
-
     - name: Build sdist (Linux)
       if: runner.os == 'linux'
       working-directory: ./python
       run: |
-        python -m build --sdist         
-        
+        pip install build
+        python -m build --sdist
+
     - name: Build wheels
       working-directory: ./python
-      run: python -m cibuildwheel --output-dir dist
-      # to supply options, put them in 'env', like:
+      run: |
+        pip install cibuildwheel
+        cibuildwheel --output-dir dist
       env:
-        CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel repair --exclude libarrow.so.2100 --exclude libparquet.so.2100 -w {dest_dir} {wheel}
-        CIBW_ENVIRONMENT: VCPKG_TARGET_TRIPLET="${{ steps.vcpkg-info.outputs.triplet }}"
         CIBW_BUILD_VERBOSITY: 1
-        # We use manylinux_2_28 for ABI compatibility with pyarrow
-        # With the default image we were getting "undefined symbol: _ZNK5arrow6Status8ToStringEv" error (e.g https://github.com/ray-project/ray/issues/24566) 
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28 
-        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
-        # Disable unsupported builds
-        CIBW_SKIP: "pp* *_i686 *-musllinux_* *win32 cp313-*"
 
     - uses: actions/upload-artifact@v4
       with:
@@ -156,13 +94,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        include:
-          - runner: ubuntu-latest
-            arch: x64
-          - runner: windows-latest
-            arch: x64
-          - runner: ubuntu-22.04-arm64
-            arch: arm64
+        runner: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
     steps:
@@ -178,15 +110,68 @@ jobs:
         pattern: dist-*
         path: dist
         merge-multiple: true
-          
-    - name: Test with pytest
+
+    - name: Test binary
       run: |
         pip install -r python/requirements.txt
+
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        # So now ensure that the local version is installed 
+
+        # So now ensure that the local version is installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
+
         python3 python/test/test_palletjack.py
+
+  test-binary-manylinux:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["cp39-cp39", "cp310-cp310", "cp311-cp311", "cp312-cp312", "cp313-cp313"]
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+  
+      - name: Download artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+  
+      - name: Build and Run Docker Container for Tests
+        run: |
+          # Create a temporary Dockerfile for our testing environment
+          cat <<EOF > Dockerfile.test
+          FROM quay.io/pypa/manylinux_2_28
+  
+          # Set a working directory
+          WORKDIR /app
+          COPY . .
+
+          # Install and test with Python ${{ matrix.python-version }}
+          RUN /opt/python/${{ matrix.python-version }}/bin/pip install -r python/requirements.txt
+
+          # Install the package from local dist directory
+          RUN /opt/python/${{ matrix.python-version }}/bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all:
+
+          # Force reinstall to ensure local version is used
+          RUN /opt/python/${{ matrix.python-version }}/bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps
+
+          # Print the GLIBC version
+          RUN ldd --version
+
+          # Define the command to run tests
+          CMD ["/opt/python/${{ matrix.python-version }}/bin/python", "python/test/test_palletjack.py"]
+          EOF
+
+          # Build the Docker image
+          docker build -t palletjack-test-py${{ matrix.python-version }} -f Dockerfile.test .
+
+          # Run the Docker container
+          docker run palletjack-test-py${{ matrix.python-version }}
 
   # Virtual job that can be configured as a required check before a PR can be merged.
   # As GitHub considers a check as successful if it is skipped, we need to check its status in
@@ -197,6 +182,7 @@ jobs:
       - test
       - build
       - test-binary
+      - test-binary-manylinux
     runs-on: ubuntu-latest
     steps:
       - run: echo "All required checks done"
@@ -206,13 +192,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        include:
-          - runner: ubuntu-latest
-            arch: x64
-          - runner: windows-latest
-            arch: x64
-          - runner: ubuntu-22.04-arm64
-            arch: arm64
+        runner: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
     steps:
@@ -232,10 +212,13 @@ jobs:
     - name: Run benchmarks
       run: |
         pip install -r python/requirements.txt
+
         # Keep in mind that if the local and remote versions are the same, the remote version will be installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all:
-        # So now ensure that the local version is installed 
+
+        # So now ensure that the local version is installed
         pip install PalletJack --pre --find-links ./dist --break-system-packages --only-binary=:all: --force-reinstall --no-index --no-deps
+
         python3 ./benchmarks/benchmark_palletjack_metadata.py
 
   publish:
@@ -254,25 +237,24 @@ jobs:
         pattern: dist-*
         path: dist
         merge-multiple: true
-    
+
     - name: Display structure of downloaded files
       run: ls -R dist
-    
+
     - name: Validate tag
       shell: pwsh
       run: |
         $tag = "${{ github.ref }}".SubString(11)
         $expectedFile = "dist/palletjack-$tag.tar.gz"
-    
+
         # Check whether the tag and the package version match together
         if (-not (Test-Path -Path $expectedFile)) {
             echo "::error ::Expected file $expectedFile doesn't exist"
             Get-ChildItem -Path dist
             exit 1
         }
-    
+
     - name: Publish to PyPi
       uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc
       with:
-        packages-dir: dist	
-    
+        packages-dir: dist
