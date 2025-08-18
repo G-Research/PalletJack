@@ -97,7 +97,7 @@ class GenerateMetadata(build_py):
         print(f"Generated metadata file: {metadata_file}")
         print (os.listdir(output_dir))
 
-        # Call the original build_py command
+        # Finally, call the original build_py command
         super().run()
 		
 # Make default named pyarrow shared libs available.
