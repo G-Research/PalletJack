@@ -48,7 +48,7 @@ jobs:
         pip install --editable .
         pytest
 
-  build-binary:
+  build-wheels:
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -89,7 +89,7 @@ jobs:
         path: ./python/dist/*
 
   test-binary:
-    needs: build
+    needs: build-wheels
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
@@ -123,7 +123,7 @@ jobs:
         python3 python/test/test_palletjack.py
 
   test-binary-manylinux:
-    needs: build
+    needs: build-wheels
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -180,7 +180,7 @@ jobs:
     name: All required checks done
     needs:
       - test
-      - build-binary
+      - build-wheels
       - test-binary
       - test-binary-manylinux
     runs-on: ubuntu-latest
@@ -188,7 +188,7 @@ jobs:
       - run: echo "All required checks done"
 
   benchmarks:
-    needs: build
+    needs: build-wheels
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
