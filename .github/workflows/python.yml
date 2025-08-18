@@ -48,7 +48,7 @@ jobs:
         pip install --editable .
         pytest
 
-  build:
+  build-binary:
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -180,7 +180,7 @@ jobs:
     name: All required checks done
     needs:
       - test
-      - build
+      - build-binary
       - test-binary
       - test-binary-manylinux
     runs-on: ubuntu-latest
