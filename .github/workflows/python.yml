@@ -24,7 +24,7 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.12"
 
     - name: Install dependencies
       working-directory: ./python
@@ -53,7 +53,6 @@ jobs:
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        # macos-13 doesn't work
         runner: [ubuntu-latest, windows-latest, ubuntu-22.04-arm64, macos-latest]
       fail-fast: false
 
@@ -130,6 +129,7 @@ jobs:
       matrix:
         python-version: ["cp39-cp39", "cp310-cp310", "cp311-cp311", "cp312-cp312", "cp313-cp313"]
       fail-fast: false
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -230,7 +230,6 @@ jobs:
       id-token: write
 
     steps:
-
     - name: Download artifacts
       uses: actions/download-artifact@v5
       with:
