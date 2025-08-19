@@ -54,6 +54,8 @@ class TestPalletJack(unittest.TestCase):
             self.assertEqual(metadata, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
             self.assertEqual(metadata_names_data, metadata_names, f"row_groups={row_groups}, column_indices={column_indices}")
 
+            pr.close()
+
             pr = pq.ParquetReader()
             pr.open(parquet_path, metadata=metadata)
 
@@ -202,6 +204,7 @@ class TestPalletJack(unittest.TestCase):
             pr.open(path)
             metadata = pr.metadata
             row_groups = metadata.num_row_groups
+            pr.close()
 
             for r in range(0, row_groups):
 
@@ -209,6 +212,7 @@ class TestPalletJack(unittest.TestCase):
                 pr = pq.ParquetReader()
                 pr.open(path)
                 res_data_org = pr.read_row_groups([r], use_threads=False)
+                pr.close()
 
                 # Reading using the indexed metadata
                 metadata = pj.read_metadata(expected_index_path, row_groups = [r])
@@ -217,8 +221,7 @@ class TestPalletJack(unittest.TestCase):
 
                 res_data_index = pr.read_row_groups([0], use_threads=False)
                 self.assertEqual(res_data_org, res_data_index, f"Row={r}")
-
-            pr.close()
+                pr.close()
 
     def test_inmemory_index_data(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
