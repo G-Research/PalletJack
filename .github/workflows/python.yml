@@ -150,6 +150,7 @@ jobs:
             -t palletjack-test-py${{ matrix.python-version }} \
             --progress plain \
             -f Dockerfile.test .
+          docker run palletjack-test-py${{ matrix.python-version }}
 
   # Virtual job that can be configured as a required check before a PR can be merged.
   # As GitHub considers a check as successful if it is skipped, we need to check its status in
