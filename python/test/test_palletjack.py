@@ -60,7 +60,7 @@ class TestPalletJack(unittest.TestCase):
             pj_data = pr.read_row_groups(list(range(0, len(row_groups))))
             self.assertEqual(org_data, pj_data, f"row_groups={row_groups}, column_indices={column_indices}")
 
-            # pr.close()
+            pr.close()
 
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
