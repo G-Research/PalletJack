@@ -6,6 +6,10 @@ COPY . .
 
 ARG PYTHON_VERSION="cp39-cp39"
 
+# Set PYTHON_VERSION as an environment variable.
+£ See https://stackoverflow.com/questions/35560894/is-docker-arg-allowed-within-cmd-instruction (Environment variables are accessible within the CMD instruction at runtime.)
+ENV PYTHON_VERSION=${PYTHON_VERSION}
+
 # Print the GLIBC version
 RUN ldd --version && \
 
