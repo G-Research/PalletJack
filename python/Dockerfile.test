@@ -19,4 +19,4 @@ RUN ldd --version && \
    /opt/python/${PYTHON_VERSION}/bin/pip install PalletJack --pre --find-links ./dist --only-binary=:all: --force-reinstall --no-index --no-deps
 
 # Define the command to run tests
-CMD ["/opt/python/${PYTHON_VERSION}/bin/python", "./test/test_palletjack.py "]
+CMD ["/opt/python/${PYTHON_VERSION}/bin/python", "./test/test_palletjack.py"]
