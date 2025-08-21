@@ -63,6 +63,18 @@ jobs:
       with:
         python-version: "3.12"
 
+    - name: Restore cached vcpkg
+      uses: actions/cache@v4
+      with:
+        path: |
+          ./python/vcpkg_installed
+          ./python/vcpkg
+        # We use a key which is unique for every run and use restore-keys to restore the nearest cache.
+        # That makes sure the cache is always updated.
+        key: vcpkg-${{ matrix.runner }}-${{ github.run_id }} 
+        restore-keys: |
+          vcpkg-${{ matrix.runner }}
+
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
@@ -82,6 +94,13 @@ jobs:
         cibuildwheel --output-dir dist
       env:
         CIBW_BUILD_VERBOSITY: 1
+
+    - name: Post cibuildwheel - move vcpkg to cached location
+      if: runner.os == 'linux'
+      working-directory: ./python
+      run: |
+        rm -rf vcpkg && mv ./dist/vcpkg vcpkg
+        rm -rf vcpkg_installed &&  mv ./dist/vcpkg_installed vcpkg_installed
 
     - uses: actions/upload-artifact@v4
       with:
