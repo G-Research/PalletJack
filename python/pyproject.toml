@@ -64,15 +64,14 @@ repair-wheel-command = [
 
 # Run multiple commands using an array
 before-all = [
-  "git clone --depth 1 --branch v0.19.0 https://github.com/apache/thrift.git",
-  "yum -y update",
-  "yum -y groupinstall 'Development Tools'",
-  "yum -y install libevent-devel zlib-devel openssl-devel boost-devel boost-static",
-  "cd thrift",
-  "./bootstrap.sh",
-  "CFLAGS='-fPIC' CXXFLAGS='-fPIC' ./configure --with-cpp=yes --with-python=no --with-py3=no --enable-tests=no --enable-tutorial=no --enable-shared=no",
-  "make",
-  "make install",
+  "yum -y install curl zip unzip tar perl-IPC-Cmd flex",
+  "if ! ./vcpkg/bootstrap-vcpkg.sh; then rm -rf vcpkg; git clone https://github.com/microsoft/vcpkg.git vcpkg; ./vcpkg/bootstrap-vcpkg.sh; fi",
+  "./vcpkg/vcpkg install --x-manifest-root . --feature-flags=versions",
+  # Copy vcpkg and its installed packages to the output directory on the host.
+  # This allows for persistent caching with 'actions/cache'.
+  "mkdir -p /output",
+  "cp -r vcpkg /output/vcpkg",
+  "cp -r vcpkg_installed /output/vcpkg_installed",
 ]
 
 ########################### cibuildwheel Windows ###################
