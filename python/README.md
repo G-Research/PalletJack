@@ -10,7 +10,7 @@ PalletJack reduces the amount of metadata bytes that need to be read and decoded
 
 ## Required:
 
-- pyarrow  ~= 21.0.0
+- pyarrow  ~= 22.0.0
  
 PalletJack operates on top of pyarrow, making it an essential requirement for both building and using PalletJack. While our source package is compatible with recent versions of pyarrow, the binary distribution package specifically requires the latest major version of pyarrow.
 
