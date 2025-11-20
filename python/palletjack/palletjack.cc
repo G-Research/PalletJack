@@ -1,6 +1,7 @@
 #include "arrow/api.h"
 #include "arrow/io/api.h"
 #include "arrow/result.h"
+#include "arrow/buffer.h"
 #include "arrow/util/type_fwd.h"
 #include "parquet/arrow/reader.h"
 #include "parquet/arrow/writer.h"
@@ -634,38 +635,45 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
                                                     const std::vector<uint32_t> &column_indices,
                                                     const std::vector<std::string> &column_names)
 {
-    auto f = std::unique_ptr<FILE, decltype(&fclose)>(fopen(index_file_path, "rb"), &fclose);
-    if (!f)
+    std::shared_ptr<arrow::io::ReadableFile> infile;
+    arrow::Status status = arrow::io::ReadableFile::Open(index_file_path).Value(&infile);
+    if (!status.ok())
     {
         auto msg = std::string("I/O error when opening '") + index_file_path + "'";
         throw std::logic_error(msg);
     }
 
     DataHeader dataHeader;
-    size_t read_bytes = fread(&dataHeader, 1, sizeof(dataHeader), f.get());
-    if (read_bytes != sizeof(dataHeader))
+    int64_t bytes_read;
+
+    // Read the DataHeader
+    status = infile->Read(sizeof(dataHeader), (uint8_t*)&dataHeader).Value(&bytes_read);
+    if (!status.ok())
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
         throw std::logic_error(msg);
     }
 
-    if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
-    {
-        auto msg = std::string("File '") + index_file_path + "' has unexpected format!";
-        throw std::logic_error(msg);
+    if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0) {
+        throw std::runtime_error("File '" + std::string(index_file_path) + "' has unexpected format!");
     }
 
     auto body_size = dataHeader.get_body_size();
-    std::vector<uint8_t> data_body(body_size);
+    std::unique_ptr<arrow::Buffer> buffer;
+    status = arrow::AllocateBuffer(body_size).Value(&buffer);
+    if (!status.ok()) {
+      throw std::logic_error("Failed to allocate buffer: " + status.message());
+    }
 
-    read_bytes = fread(&data_body[0], 1, data_body.size(), f.get());
-    if (read_bytes != data_body.size())
+    // Read the data body
+    status = infile->Read(body_size, buffer->mutable_data()).Value(&bytes_read);
+    if (!status.ok())
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
         throw std::logic_error(msg);
     }
 
-    return ReadMetadata(dataHeader, &data_body[0], data_body.size(), row_groups, column_indices, column_names);
+    return ReadMetadata(dataHeader, buffer->mutable_data(), body_size, row_groups, column_indices, column_names);
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_data,
