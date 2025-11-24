@@ -656,16 +656,16 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     }
 
     auto body_size = dataHeader.get_body_size();
-    std::vector<uint8_t> data_body(body_size);
+    auto data_body = std::unique_ptr<uint8_t[]>(new uint8_t[body_size]);
 
-    read_bytes = fread(&data_body[0], 1, data_body.size(), f.get());
-    if (read_bytes != data_body.size())
+    read_bytes = fread(&data_body[0], 1, body_size, f.get());
+    if (read_bytes != body_size)
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
         throw std::logic_error(msg);
     }
 
-    return ReadMetadata(dataHeader, &data_body[0], data_body.size(), row_groups, column_indices, column_names);
+    return ReadMetadata(dataHeader, &data_body[0], body_size, row_groups, column_indices, column_names);
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_data,
