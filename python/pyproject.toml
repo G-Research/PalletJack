@@ -58,7 +58,7 @@ before-build = [
 ]
 
 repair-wheel-command = [
- "auditwheel repair --exclude libarrow.so.2200 --exclude libparquet.so.2200 -w {dest_dir} {wheel}",
+ "auditwheel repair --exclude libarrow.so.2300 --exclude libparquet.so.2300 -w {dest_dir} {wheel}",
 ]
 
 # Run multiple commands using an array
