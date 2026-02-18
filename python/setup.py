@@ -55,7 +55,7 @@ extensions = [
         library_dirs = library_dirs,
         libraries=["arrow", "parquet", "thriftmd" if sys.platform.startswith('win') else "thrift"], 
         language = "c++",
-        extra_compile_args = extra_compile_args + (['/std:c++17'] if sys.platform.startswith('win') else ['-std=c++17']),
+        extra_compile_args = extra_compile_args + (['/std:c++20'] if sys.platform.startswith('win') else ['-std=c++20']),
         extra_link_args = extra_link_args,
     )
 ]
