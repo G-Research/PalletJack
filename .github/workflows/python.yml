@@ -103,7 +103,7 @@ jobs:
         rm -rf vcpkg && mv ./dist/vcpkg vcpkg
         rm -rf vcpkg_installed &&  mv ./dist/vcpkg_installed vcpkg_installed
 
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: dist-${{ matrix.runner }}
         path: ./python/dist/*
