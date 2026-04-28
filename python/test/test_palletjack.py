@@ -223,6 +223,80 @@ class TestPalletJack(unittest.TestCase):
                 self.assertEqual(res_data_org, res_data_index, f"Row={r}")
                 pr.close()
 
+    def test_read_schema(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+            index_path = path + '.index'
+            pj.generate_metadata_index(path, index_path)
+            index_data = pj.generate_metadata_index(path)
+
+            pr = pq.ParquetReader()
+            pr.open(path)
+            expected_schema = pr.metadata.schema.to_arrow_schema()
+            pr.close()
+
+            # Full schema from file
+            schema = pj.read_schema(index_path)
+            self.assertEqual(schema, expected_schema)
+
+            # Full schema from in-memory data
+            schema_mem = pj.read_schema(index_data=index_data)
+            self.assertEqual(schema_mem, expected_schema)
+
+            # Schema filtered by column_indices
+            for c in range(n_columns):
+                schema_col = pj.read_schema(index_path, column_indices=[c])
+                self.assertEqual(len(schema_col), 1)
+                self.assertEqual(schema_col.field(0), expected_schema.field(c))
+
+            # Schema filtered by column_names
+            for c in range(n_columns):
+                name = f'column_{c}'
+                schema_name = pj.read_schema(index_path, column_names=[name])
+                self.assertEqual(len(schema_name), 1)
+                self.assertEqual(schema_name.field(0).name, name)
+
+            # Schema with multiple columns
+            indices = [0, 2, 4]
+            schema_multi = pj.read_schema(index_path, column_indices=indices)
+            self.assertEqual(len(schema_multi), len(indices))
+            for i, idx in enumerate(indices):
+                self.assertEqual(schema_multi.field(i), expected_schema.field(idx))
+
+    def test_read_schema_errors(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+
+            pq.write_table(table, path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, store_schema=False)
+
+            index_path = path + '.index'
+            pj.generate_metadata_index(path, index_path)
+
+            with self.assertRaises(RuntimeError):
+                pj.read_schema(index_path, column_indices=[n_columns])
+
+            with self.assertRaises(RuntimeError):
+                pj.read_schema(index_path, column_names=["no_such_column"])
+
+            with self.assertRaises(RuntimeError):
+                pj.read_schema(index_path, column_indices=[0], column_names=["column_0"])
+
+    def test_read_schema_non_pyarrow_files(self):
+            path = os.path.join(current_dir, 'data/no_column_orders.parquet')
+            pr = pq.ParquetReader()
+            pr.open(path)
+            expected_schema = pr.metadata.schema.to_arrow_schema()
+            pr.close()
+
+            index_data = pj.generate_metadata_index(path)
+            schema = pj.read_schema(index_data=index_data)
+            self.assertEqual(schema, expected_schema)
+
     def test_inmemory_index_data(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "my.parquet")
