@@ -690,3 +690,211 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
 
     return ReadMetadata(*p_data_header, &index_data[sizeof(DataHeader)], index_data_length - sizeof(DataHeader), row_groups, column_indices, column_names);
 }
+
+std::shared_ptr<parquet::FileMetaData> ReadSchema(const DataHeader &dataHeader,
+                                                   const uint8_t *data_body,
+                                                   size_t body_size,
+                                                   const std::vector<uint32_t> &column_indices,
+                                                   const std::vector<std::string> &column_names)
+{
+    if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
+    {
+        auto msg = std::string("Index file has unexpected format!");
+        throw std::logic_error(msg);
+    }
+
+    if (column_indices.size() > 0)
+    {
+        if (column_names.size() > 0)
+        {
+            auto msg = std::string("Cannot specify both column indices and column names at the same time!");
+            throw std::logic_error(msg);
+        }
+
+        for (auto column : column_indices)
+        {
+            if (column >= dataHeader.columns)
+            {
+                auto msg = std::string("Requested column=") + std::to_string(column) + ", but only 0-" + std::to_string(dataHeader.columns - 1) + " are available!";
+                throw std::logic_error(msg);
+            }
+        }
+    }
+
+    auto num_row_offsets = (uint32_t *)&data_body[0];
+    auto row_numbers = (uint32_t *)&num_row_offsets[dataHeader.get_num_rows_offsets_size()];
+    auto schema_offsets = (uint32_t *)&row_numbers[dataHeader.get_row_numbers_size()];
+    auto schema_num_children_offsets = (uint32_t *)&schema_offsets[dataHeader.get_schema_offsets_size()];
+    auto row_groups_offsets = (uint32_t *)&schema_num_children_offsets[dataHeader.get_schema_num_children_offsets_size()];
+    auto column_orders_offsets = (uint32_t *)&row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
+    auto column_chunks_offsets = (uint32_t *)&column_orders_offsets[dataHeader.get_column_orders_offsets_size()];
+    auto column_names_ptr = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
+    auto src = (uint8_t *)&column_names_ptr[dataHeader.column_names_length];
+    ThriftCopier thriftCopier(src, dataHeader.metadata_length);
+
+    uint32_t index_src = 0;
+    size_t toCopy = 0;
+
+    std::vector<uint32_t> columns = column_indices;
+    if (column_names.size() > 0)
+    {
+        columns.reserve(column_names.size());
+
+        std::unordered_map<std::string, uint32_t> columns_map;
+        auto cn_ptr = column_names_ptr;
+        for (uint32_t c = 0; c < dataHeader.columns; c++)
+        {
+            std::string s = (const char *)cn_ptr;
+            cn_ptr += s.length() + 1;
+            columns_map[s] = c;
+        }
+
+        for (const auto &column_name : column_names)
+        {
+            auto kvp = columns_map.find(column_name);
+            if (kvp == columns_map.end())
+            {
+                auto msg = std::string("Couldn't find a column with a name '") + column_name + "'!";
+                throw std::logic_error(msg);
+            }
+
+            columns.emplace_back(kvp->second);
+        }
+    }
+
+    // Schema filtering
+    if (columns.size() > 0)
+    {
+        auto schema_list = &schema_offsets[0];
+        toCopy = schema_list[0] - index_src;
+        thriftCopier.CopyFrom(index_src, toCopy);
+        index_src += toCopy;
+
+        thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size() + 1);
+        index_src = schema_list[1];
+
+        auto root_schema_element = &schema_list[1];
+        toCopy = root_schema_element[0] + schema_num_children_offsets[0] - index_src;
+        thriftCopier.CopyFrom(index_src, toCopy);
+
+        thriftCopier.WriteI32(columns.size());
+        index_src = root_schema_element[0] + schema_num_children_offsets[1];
+        toCopy = root_schema_element[1] - index_src;
+        thriftCopier.CopyFrom(index_src, toCopy);
+        index_src += toCopy;
+
+        auto schema_elements = &schema_offsets[2];
+        for (auto column : columns)
+        {
+            toCopy = schema_elements[column + 1] - schema_elements[column];
+            thriftCopier.CopyFrom(schema_elements[column], toCopy);
+        }
+
+        index_src = schema_elements[dataHeader.columns];
+    }
+
+    // num_rows: set to 0
+    toCopy = num_row_offsets[0] - index_src;
+    thriftCopier.CopyFrom(index_src, toCopy);
+    index_src += toCopy;
+    thriftCopier.WriteI64(0);
+    index_src = num_row_offsets[1];
+
+    // row_groups: write empty list
+    auto row_groups_list = &row_groups_offsets[0];
+    toCopy = row_groups_list[0] - index_src;
+    thriftCopier.CopyFrom(index_src, toCopy);
+    index_src += toCopy;
+    thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, 0);
+    index_src = row_groups_offsets[1 + dataHeader.row_groups];
+
+    // column_orders filtering
+    if (columns.size() > 0)
+    {
+        if (column_orders_offsets[0] != 0)
+        {
+            auto column_orders_list = &column_orders_offsets[0];
+            toCopy = column_orders_list[0] - index_src;
+            thriftCopier.CopyFrom(index_src, toCopy);
+            index_src += toCopy;
+
+            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size());
+            index_src = column_orders_list[1];
+
+            auto column_orders = &column_orders_offsets[1];
+            for (auto column : columns)
+            {
+                toCopy = column_orders[column + 1] - column_orders[column];
+                thriftCopier.CopyFrom(column_orders[column], toCopy);
+            }
+            index_src = column_orders[dataHeader.columns];
+        }
+    }
+
+    // Copy leftovers
+    toCopy = dataHeader.metadata_length - index_src;
+    thriftCopier.CopyFrom(index_src, toCopy);
+
+    uint32_t length = thriftCopier.GetDataSize();
+    return parquet::FileMetaData::Make(thriftCopier.GetData(), &length);
+}
+
+std::shared_ptr<parquet::FileMetaData> ReadSchema(const char *index_file_path,
+                                                   const std::vector<uint32_t> &column_indices,
+                                                   const std::vector<std::string> &column_names)
+{
+    auto f = std::unique_ptr<FILE, decltype(&fclose)>(fopen(index_file_path, "rb"), &fclose);
+    if (!f)
+    {
+        auto msg = std::string("I/O error when opening '") + index_file_path + "'";
+        throw std::logic_error(msg);
+    }
+
+    DataHeader dataHeader;
+    size_t read_bytes = fread(&dataHeader, 1, sizeof(dataHeader), f.get());
+    if (read_bytes != sizeof(dataHeader))
+    {
+        auto msg = std::string("I/O error when reading '") + index_file_path + "'";
+        throw std::logic_error(msg);
+    }
+
+    if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
+    {
+        auto msg = std::string("File '") + index_file_path + "' has unexpected format!";
+        throw std::logic_error(msg);
+    }
+
+    auto body_size = dataHeader.get_body_size();
+    auto data_body = std::unique_ptr<uint8_t[]>(new uint8_t[body_size]);
+
+    read_bytes = fread(&data_body[0], 1, body_size, f.get());
+    if (read_bytes != body_size)
+    {
+        auto msg = std::string("I/O error when reading '") + index_file_path + "'";
+        throw std::logic_error(msg);
+    }
+
+    return ReadSchema(dataHeader, &data_body[0], body_size, column_indices, column_names);
+}
+
+std::shared_ptr<parquet::FileMetaData> ReadSchema(const unsigned char *index_data,
+                                                   size_t index_data_length,
+                                                   const std::vector<uint32_t> &column_indices,
+                                                   const std::vector<std::string> &column_names)
+{
+    if (index_data_length < sizeof(DataHeader))
+    {
+        auto msg = std::string("Index data is too small, length=") + std::to_string(index_data_length);
+        throw std::logic_error(msg);
+    }
+
+    const DataHeader *p_data_header = (const DataHeader *)index_data;
+    size_t expected_length = sizeof(DataHeader) + p_data_header->get_body_size();
+    if (index_data_length != expected_length)
+    {
+        auto msg = std::string("Index data has unexpected length, length=") + std::to_string(index_data_length) + ", expected=" + std::to_string(expected_length);
+        throw std::logic_error(msg);
+    }
+
+    return ReadSchema(*p_data_header, &index_data[sizeof(DataHeader)], index_data_length - sizeof(DataHeader), column_indices, column_names);
+}

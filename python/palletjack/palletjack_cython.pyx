@@ -46,3 +46,23 @@ cpdef read_metadata(index_file_path = None, row_groups = [], column_indices = []
     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
     m.init(c_metadata)
     return m
+
+cpdef read_schema(index_file_path = None, column_indices = [], column_names = [], index_data = None):
+
+    cdef shared_ptr[CFileMetaData] c_metadata
+    cdef string encoded_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
+    cdef const unsigned char[::1] mv = index_data
+    cdef vector[uint32_t] ccolumn_indices = column_indices
+    cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
+
+    if index_file_path is None:
+        with cython.boundscheck(False):
+            with nogil:
+                c_metadata = cpalletjack.ReadSchema(&mv[0], len(mv), ccolumn_indices, ccolumn_names)
+    else:
+        with nogil:
+            c_metadata = cpalletjack.ReadSchema(encoded_path.c_str(), ccolumn_indices, ccolumn_names)
+
+    cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
+    m.init(c_metadata)
+    return m.schema.to_arrow_schema()
