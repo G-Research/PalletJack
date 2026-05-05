@@ -80,7 +80,7 @@ repair-wheel-command = "delvewheel repair --exclude arrow.dll --exclude parquet.
 before-all = [
   "rename vcpkg-binary-cache vcpkg-binary-cache-old || echo no previous cache",
   "mkdir vcpkg-binary-cache",
-  "vcpkg install --x-manifest-root . --feature-flags=versions --binarysource=files,vcpkg-binary-cache-old,read",
+  "vcpkg install --x-manifest-root . --feature-flags=versions --binarysource=files,%CD%/vcpkg-binary-cache-old,read",
   "if exist vcpkg-binary-cache-old rmdir /s /q vcpkg-binary-cache-old",
 ]
 
@@ -92,6 +92,6 @@ repair-wheel-command = ""
 before-all = [
   "mv vcpkg-binary-cache vcpkg-binary-cache-old || true",
   "mkdir -p vcpkg-binary-cache",
-  "vcpkg install --x-manifest-root . --feature-flags=versions --binarysource=files,vcpkg-binary-cache-old,read",
+  "vcpkg install --x-manifest-root . --feature-flags=versions --binarysource=files,$PWD/vcpkg-binary-cache-old,read",
   "rm -rf vcpkg-binary-cache-old",
 ]
