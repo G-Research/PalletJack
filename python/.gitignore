@@ -4,6 +4,7 @@
 __pycache__
 *.so
 vcpkg_installed
+vcpkg-binary-cache
 .vscode
 /palletjack/palletjack_cython.cpp
 /palletjack/package_metadata.py

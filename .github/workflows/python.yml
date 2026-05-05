@@ -67,14 +67,14 @@ jobs:
     - name: Restore cached vcpkg
       uses: actions/cache@v5
       with:
-        path: |
-          ./python/vcpkg_installed
-          ./python/vcpkg
-        # We use a key which is unique for every run and use restore-keys to restore the nearest cache.
-        # That makes sure the cache is always updated.
-        key: vcpkg-${{ matrix.runner }}-${{ github.run_id }} 
+        path: ./python/vcpkg-binary-cache
+        key: vcpkg-${{ matrix.runner }}-${{ github.run_id }}
         restore-keys: |
           vcpkg-${{ matrix.runner }}
+
+    - name: Setup vcpkg binary cache
+      shell: bash
+      run: mkdir -p ./python/vcpkg-binary-cache
 
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
@@ -95,13 +95,13 @@ jobs:
         cibuildwheel --output-dir dist
       env:
         CIBW_BUILD_VERBOSITY: 1
+        VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/python/vcpkg-binary-cache
 
-    - name: Post cibuildwheel - move vcpkg to cached location
+    - name: Post cibuildwheel - move vcpkg binary cache to cached location
       if: runner.os == 'linux'
       working-directory: ./python
       run: |
-        rm -rf vcpkg && mv ./dist/vcpkg vcpkg
-        rm -rf vcpkg_installed &&  mv ./dist/vcpkg_installed vcpkg_installed
+        rm -rf vcpkg-binary-cache && mv ./dist/vcpkg-binary-cache vcpkg-binary-cache
 
     - uses: actions/upload-artifact@v7
       with:
