@@ -78,9 +78,8 @@ before-all = [
 before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair --exclude arrow.dll --exclude parquet.dll -w {dest_dir} {wheel}"
 before-all = [
-  "rename vcpkg-binary-cache vcpkg-binary-cache-old || echo no previous cache",
-  "mkdir vcpkg-binary-cache",
-  "vcpkg install --x-manifest-root . --feature-flags=versions --binarysource=files,%CD%/vcpkg-binary-cache-old,read",
+  "(if exist vcpkg-binary-cache rename vcpkg-binary-cache vcpkg-binary-cache-old) & mkdir vcpkg-binary-cache",
+  "vcpkg install --x-manifest-root . --feature-flags=versions --binarysource=files,%CD%\\vcpkg-binary-cache-old,read",
   "if exist vcpkg-binary-cache-old rmdir /s /q vcpkg-binary-cache-old",
 ]
 
