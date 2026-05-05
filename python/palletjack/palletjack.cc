@@ -20,7 +20,6 @@
 #include "parquet_types_palletjack.h"
 
 #include <iostream>
-#include <fstream>
 #include <chrono>
 #include <memory>
 
@@ -121,9 +120,7 @@ class ThriftCopier
 {
     const uint8_t *src;
     const uint8_t *src_end;
-    std::vector<uint8_t> dst_data;
-    uint8_t *dst;
-    uint8_t *dst_end;
+    std::shared_ptr<arrow::ResizableBuffer> dst_buffer;
     size_t dst_idx;
     std::shared_ptr<ThriftBuffer> mem_buffer;
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
@@ -131,26 +128,23 @@ class ThriftCopier
 
     inline void CopyFrom(const uint8_t *src, size_t to_copy)
     {
-        if (dst + dst_idx + to_copy > dst_end)
+        if (dst_idx + to_copy > static_cast<size_t>(dst_buffer->size()))
         {
-            auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_end - dst);
+            auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_buffer->size());
             throw std::logic_error(msg);
         }
 
-        memcpy(&dst_data[dst_idx], src, to_copy);
+        memcpy(dst_buffer->mutable_data() + dst_idx, src, to_copy);
         dst_idx += to_copy;
     }
 
 public:
     ThriftCopier(const uint8_t *src, size_t size) : src(src),
                                                     src_end(src + size),
-                                                    dst_data(size),
-                                                    dst(&dst_data[0]),
-                                                    dst_end(dst + size),
                                                     dst_idx(0),
                                                     mem_buffer(new ThriftBuffer(16))
     {
-        // Protect against CPU and memory bombs
+        PARQUET_ASSIGN_OR_THROW(dst_buffer, arrow::AllocateResizableBuffer(size));
         tproto_factory.setStringSizeLimit(kDefaultThriftStringSizeLimit);
         tproto_factory.setContainerSizeLimit(kDefaultThriftContainerSizeLimit);
         tproto = tproto_factory.getProtocol(mem_buffer);
@@ -199,7 +193,7 @@ public:
 
     size_t GetDataSize() { return dst_idx; }
 
-    const uint8_t *GetData() { return &dst_data[0]; }
+    const uint8_t *GetData() { return dst_buffer->data(); }
 };
 
 palletjack::parquet::FileMetaData DeserializeFileMetadata(const void *buf, uint32_t len)
@@ -209,22 +203,7 @@ palletjack::parquet::FileMetaData DeserializeFileMetadata(const void *buf, uint3
     return fileMetaData;
 }
 
-/*  Notes (https://en.cppreference.com/w/cpp/io/basic_filebuf/setbuf):
-
-    The conditions when this function may be used and the way in which the provided buffer is used is implementation-defined.
-
-    GCC 4.6 libstdc++
-    setbuf() may only be called when the std::basic_filebuf is not associated with a file (has no effect otherwise). With a user-provided buffer, reading from file reads n-1 bytes at a time.
-
-    Clang++3.0 libc++
-    setbuf() may be called after opening the file, but before any I/O (may crash otherwise). With a user-provided buffer, reading from file reads largest multiples of 4096 that fit in the buffer.
-
-    Visual Studio 2010
-    setbuf() may be called at any time, even after some I/O took place. Current contents of the buffer, if any, are lost.
-    The standard does not define any behavior for this function except that setbuf(0, 0) called before any I/O has taken place is required to set unbuffered output.
-    */
-
-std::vector<char> GenerateMetadataIndex(const char *parquet_path)
+std::shared_ptr<arrow::Buffer> GenerateMetadataIndex(const char *parquet_path)
 {
     std::shared_ptr<arrow::Buffer> thrift_buffer;
     DataHeader data_header = {};
@@ -323,24 +302,24 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
         }
     }
 
-    // Use ostringstream as a binary buffer
-    std::ostringstream fs(std::ios::binary);
+    auto total_size = sizeof(data_header) + data_header.get_body_size();
+    std::shared_ptr<arrow::io::BufferOutputStream> fs;
+    PARQUET_ASSIGN_OR_THROW(fs, arrow::io::BufferOutputStream::Create(total_size, arrow::default_memory_pool()));
 
-    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-    fs.write((const char *)&data_header, sizeof(data_header));
-    fs.write((const char *)&metadata.num_rows_offsets[0], sizeof(metadata.num_rows_offsets[0]) * metadata.num_rows_offsets.size());
-    fs.write((const char *)&metadata.row_numbers[0], sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size());
-    fs.write((const char *)&metadata.schema_offsets[0], sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size());
+    PARQUET_THROW_NOT_OK(fs->Write(&data_header, sizeof(data_header)));
+    PARQUET_THROW_NOT_OK(fs->Write(&metadata.num_rows_offsets[0], sizeof(metadata.num_rows_offsets[0]) * metadata.num_rows_offsets.size()));
+    PARQUET_THROW_NOT_OK(fs->Write(&metadata.row_numbers[0], sizeof(metadata.row_numbers[0]) * metadata.row_numbers.size()));
+    PARQUET_THROW_NOT_OK(fs->Write(&metadata.schema_offsets[0], sizeof(metadata.schema_offsets[0]) * metadata.schema_offsets.size()));
     for (const auto &schema_element : metadata.schema)
     {
-        fs.write((const char *)&schema_element.num_children_offsets[0], sizeof(schema_element.num_children_offsets[0]) * schema_element.num_children_offsets.size());
+        PARQUET_THROW_NOT_OK(fs->Write(&schema_element.num_children_offsets[0], sizeof(schema_element.num_children_offsets[0]) * schema_element.num_children_offsets.size()));
     }
 
-    fs.write((const char *)&metadata.row_groups_offsets[0], sizeof(metadata.row_groups_offsets[0]) * metadata.row_groups_offsets.size());
-    fs.write((const char *)&metadata.column_orders_offsets[0], sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size());
+    PARQUET_THROW_NOT_OK(fs->Write(&metadata.row_groups_offsets[0], sizeof(metadata.row_groups_offsets[0]) * metadata.row_groups_offsets.size()));
+    PARQUET_THROW_NOT_OK(fs->Write(&metadata.column_orders_offsets[0], sizeof(metadata.column_orders_offsets[0]) * metadata.column_orders_offsets.size()));
     for (const auto &row_group : metadata.row_groups)
     {
-        fs.write((const char *)&row_group.column_chunks_offsets[0], sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size());
+        PARQUET_THROW_NOT_OK(fs->Write(&row_group.column_chunks_offsets[0], sizeof(row_group.column_chunks_offsets[0]) * row_group.column_chunks_offsets.size()));
     }
 
     uint32_t written_column_names_length = 0;
@@ -349,7 +328,7 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
         auto name = metadata.schema[c].name;
         auto cname = name.c_str();
         auto to_write = name.length() + 1;
-        fs.write((const char *)cname, to_write);
+        PARQUET_THROW_NOT_OK(fs->Write(cname, to_write));
         written_column_names_length += to_write;
     }
 
@@ -358,27 +337,26 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
         throw std::logic_error("Error when writign the index file, data_header.column_names_length != written_column_names_length !");
     }
 
-    fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
-    auto s = fs.str();
-    if (sizeof(data_header) + data_header.get_body_size() != s.size())
+    PARQUET_THROW_NOT_OK(fs->Write(thrift_buffer->data(), thrift_buffer->size()));
+
+    std::shared_ptr<arrow::Buffer> result;
+    PARQUET_ASSIGN_OR_THROW(result, fs->Finish());
+    if (total_size != static_cast<size_t>(result->size()))
     {
-        auto msg = std::string("Error when writign the index file, exexted size=") + std::to_string(sizeof(data_header) + data_header.get_body_size()) + ", actual size=" + std::to_string(s.size()) + " !";
+        auto msg = std::string("Error when writign the index file, exexted size=") + std::to_string(total_size) + ", actual size=" + std::to_string(result->size()) + " !";
         throw std::logic_error(msg);
     }
 
-    std::vector<char> v(s.size());
-    memcpy(&v[0], s.data(), s.size());
-    return v;
+    return result;
 }
 
 void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path)
 {
-    std::vector<char> buf(4 * 1024 * 1024); // 4 MiB
-    std::ofstream fs(index_file_path, std::ios::out | std::ios::binary);
-    fs.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-    fs.rdbuf()->pubsetbuf(&buf[0], buf.size());
-    auto v = std::move(GenerateMetadataIndex(parquet_path));
-    fs.write(v.data(), v.size());
+    auto buffer = GenerateMetadataIndex(parquet_path);
+    std::shared_ptr<arrow::io::FileOutputStream> outfile;
+    PARQUET_ASSIGN_OR_THROW(outfile, arrow::io::FileOutputStream::Open(std::string(index_file_path)));
+    PARQUET_THROW_NOT_OK(outfile->Write(buffer->data(), buffer->size()));
+    PARQUET_THROW_NOT_OK(outfile->Close());
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader,
@@ -634,20 +612,18 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
                                                     const std::vector<uint32_t> &column_indices,
                                                     const std::vector<std::string> &column_names)
 {
-    auto f = std::unique_ptr<FILE, decltype(&fclose)>(fopen(index_file_path, "rb"), &fclose);
-    if (!f)
-    {
-        auto msg = std::string("I/O error when opening '") + index_file_path + "'";
-        throw std::logic_error(msg);
-    }
+    std::shared_ptr<arrow::io::ReadableFile> infile;
+    PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(index_file_path)));
 
-    DataHeader dataHeader;
-    size_t read_bytes = fread(&dataHeader, 1, sizeof(dataHeader), f.get());
-    if (read_bytes != sizeof(dataHeader))
+    std::shared_ptr<arrow::Buffer> header_buffer;
+    PARQUET_ASSIGN_OR_THROW(header_buffer, infile->Read(sizeof(DataHeader)));
+    if (static_cast<size_t>(header_buffer->size()) != sizeof(DataHeader))
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
         throw std::logic_error(msg);
     }
+
+    const DataHeader &dataHeader = *reinterpret_cast<const DataHeader *>(header_buffer->data());
 
     if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
     {
@@ -656,16 +632,15 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     }
 
     auto body_size = dataHeader.get_body_size();
-    auto data_body = std::unique_ptr<uint8_t[]>(new uint8_t[body_size]);
-
-    read_bytes = fread(&data_body[0], 1, body_size, f.get());
-    if (read_bytes != body_size)
+    std::shared_ptr<arrow::Buffer> body_buffer;
+    PARQUET_ASSIGN_OR_THROW(body_buffer, infile->Read(body_size));
+    if (static_cast<size_t>(body_buffer->size()) != body_size)
     {
         auto msg = std::string("I/O error when reading '") + index_file_path + "'";
         throw std::logic_error(msg);
     }
 
-    return ReadMetadata(dataHeader, &data_body[0], body_size, row_groups, column_indices, column_names);
+    return ReadMetadata(dataHeader, body_buffer->data(), body_size, row_groups, column_indices, column_names);
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_data,
