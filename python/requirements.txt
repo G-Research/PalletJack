@@ -1,1 +1,4 @@
-numpy
+
+pyarrow~=24.0.0
+pydantic_settings
+humanize
