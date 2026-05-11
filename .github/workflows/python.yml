@@ -80,8 +80,7 @@ jobs:
         # Since the binary cache accumulates all different binary versions over time, we rotate the cache key
         # on a monthly basis to keep the binary cache size within reasonable limits.
         key: vcpkg-${{ matrix.runner }}-${{ steps.month.outputs.value }}-${{ github.run_id }}
-        restore-keys: |
-          vcpkg-${{ matrix.runner }}-${{ steps.month.outputs.value }}
+        restore-keys: vcpkg-${{ matrix.runner }}-${{ steps.month.outputs.value }}
 
     - name: Setup vcpkg cache directories
       shell: bash
