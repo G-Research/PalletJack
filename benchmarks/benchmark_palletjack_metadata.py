@@ -4,226 +4,202 @@ import pyarrow as pa
 import numpy as np
 import pyarrow.fs as fs
 import concurrent.futures
+import tempfile
+import humanize
 import time
 import os
 
-row_groups = 200
-columns = 200
-chunk_size = 1000
-rows = row_groups * chunk_size
-work_items = 32
-batch_size = 40
-n_reads = 10
+from pydantic import computed_field
+from pydantic_settings import BaseSettings, EnvSettingsSource, SettingsConfigDict
 
-all_columns = list(range(columns))
-all_row_groups = list(range(row_groups))
-columns_batches = [all_columns[i:i+batch_size] for i in range(0, len(all_columns), batch_size)]
-row_groups_batches = [all_row_groups[i:i+batch_size] for i in range(0, len(all_row_groups), batch_size)]
 
-parquet_path = "my.parquet"
-index_path = parquet_path + '.index'
+class CommaSeparatedEnvSource(EnvSettingsSource):
+    def decode_complex_value(self, field_name, field, value):
+        try:
+            return super().decode_complex_value(field_name, field, value)
+        except Exception:
+            return value.split(",")
 
-def get_table():
-    # Generate a random 2D array of floats using NumPy
-    # Each column in the array represents a column in the final table
-    data = np.random.rand(rows, columns)
 
-    # Convert the NumPy array to a list of PyArrow Arrays, one for each column
-    pa_arrays = [pa.array(data[:, i]) for i in range(columns)]
+class BenchmarkSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="PJB_")
 
-    # Optionally, create column names
-    column_names = [f'column_{i}' for i in range(columns)]
+    row_groups: int = 200
+    columns: int = 400
+    chunk_size: int = 1000
+    n_repeats: int = 1000
+    measure_iterations: int = 5
+    worker_counts: list[int] = [1, 2]
+    dtype: str = "float32"
+    parquet_path: str = os.path.join(tempfile.gettempdir(), "my.parquet")
 
-    # Create a PyArrow Table from the Arrays
-    return pa.Table.from_arrays(pa_arrays, names=column_names)
+    @computed_field
+    @property
+    def rows(self) -> int:
+        return self.row_groups * self.chunk_size
+
+    @computed_field
+    @property
+    def index_path(self) -> str:
+        return self.parquet_path + '.index'
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls,
+        init_settings,
+        env_settings,
+        dotenv_settings,
+        file_secret_settings,
+    ):
+        return (
+            init_settings,
+            CommaSeparatedEnvSource(settings_cls),
+            dotenv_settings,
+            file_secret_settings,
+        )
+
+
+cfg = BenchmarkSettings()
 
 def worker_arrow_row_group():
-    
-    for i in range(n_reads):
-        pr = pq.ParquetReader()
-        pr.open(parquet_path)
-        pr.read_row_groups([i % row_groups], use_threads=False)
+
+    pr = pq.ParquetReader()
+    pr.open(cfg.parquet_path)
+    pr.read_row_groups([0], use_threads=False)
 
 def worker_palletjack_row_group():
-    
-    for i in range(n_reads):
-        metadata = pj.read_metadata(index_path, row_groups = [i % row_groups])
-        pr = pq.ParquetReader()
-        pr.open(parquet_path, metadata = metadata)
-        pr.read_row_groups([0], use_threads=False)
 
-def worker_arrow_column():
-    
-    for i in range(n_reads):
-        pr = pq.ParquetReader()
-        pr.open(parquet_path)        
-        pr.read_all(column_indices = [i % columns], use_threads=False)
-
-def worker_palletjack_column():
-    
-    for i in range(n_reads):
-        metadata = pj.read_metadata(index_path, column_indices = [i % columns])
-        pr = pq.ParquetReader()
-        pr.open(parquet_path, metadata = metadata)
-        pr.read_all(use_threads=False)
-
-def worker_arrow_row_groups():
-
-    for row_groups_batch in row_groups_batches:
-        pr = pq.ParquetReader()
-        pr.open(parquet_path)        
-        pr.read_row_groups(row_groups_batch, use_threads=False)
-
-def worker_palletjack_rowgroups():
-    
-    for row_groups_batch in row_groups_batches:
-        metadata = pj.read_metadata(index_path, row_groups = row_groups_batch)
-        pr = pq.ParquetReader()
-        pr.open(parquet_path, metadata=metadata)
-        pr.read_row_groups(range(len(row_groups_batch)), use_threads=False)
-
-def worker_arrow_columns():
-
-    for columns_batch in columns_batches:
-        pr = pq.ParquetReader()
-        pr.open(parquet_path)
-        pr.read_all(column_indices = columns_batch, use_threads=False)
-
-def worker_palletjack_columns():
-
-    for columns_batch in columns_batches:
-        metadata = pj.read_metadata(index_path, column_indices = columns_batch)
-        pr = pq.ParquetReader()
-        pr.open(parquet_path, metadata=metadata)
-        pr.read_all(use_threads=False)
+    metadata = pj.read_metadata(cfg.index_path, row_groups = [0])
+    pr = pq.ParquetReader()
+    pr.open(cfg.parquet_path, metadata = metadata)
+    pr.read_row_groups([0], use_threads=False)
 
 def worker_palletjack_row_group_metadata():
-    
-    for i in range(n_reads):
-       pj.read_metadata(index_path, row_groups =  [i % row_groups])
+
+    pj.read_metadata(cfg.index_path, row_groups = [0])
 
 def worker_palletjack_column_metadata():
-    
-    for i in range(n_reads):
-        pj.read_metadata(index_path, column_indices = [i % columns])
+
+    pj.read_metadata(cfg.index_path, column_indices = [0])
 
 def worker_palletjack_column_name_metadata():
 
-    for i in range(n_reads):
-        pj.read_metadata(index_path, column_names = [f'column_{i % columns}'])
+    pj.read_metadata(cfg.index_path, column_names = ['column_0'])
 
 def worker_inmemory_palletjack_row_group_column_metadata(index_data):
 
-    for i in range(n_reads):
-        pj.read_metadata(index_data = index_data, row_groups = [i % row_groups], column_indices = [i % columns])
+    pj.read_metadata(index_data = index_data, row_groups = [0], column_indices = [0])
 
 def worker_palletjack_row_group_column_metadata():
 
-    for i in range(n_reads):
-        pj.read_metadata(index_path, row_groups = [i % row_groups], column_indices = [i % columns])
+    pj.read_metadata(cfg.index_path, row_groups = [0], column_indices = [0])
 
 def worker_arrow_metadata():
-    
-    for i in range(n_reads):
-        pr = pq.ParquetReader()
-        pr.open(parquet_path)
-        metadata = pr.metadata
 
-def genrate_data(table):
+    pr = pq.ParquetReader()
+    pr.open(cfg.parquet_path)
+    metadata = pr.metadata
+
+def parquet_matches(path, n_columns, n_row_groups, chunk_size, dtype):
+    if not os.path.exists(path):
+        return False
+    try:
+        meta = pq.read_metadata(path)
+        schema = pq.read_schema(path)
+    except Exception:
+        return False
+    return (
+        meta.num_columns == n_columns
+        and meta.num_row_groups == n_row_groups
+        and meta.row_group(0).num_rows == chunk_size
+        and schema[0].type == dtype
+    )
+
+def generate_data():
+
+    dtype = pa.from_numpy_dtype(cfg.dtype)
+
+    if (
+        parquet_matches(cfg.parquet_path, cfg.columns, cfg.row_groups, cfg.chunk_size, dtype)
+        and os.path.exists(cfg.index_path)
+    ):
+        print(f"Reusing existing parquet file: {cfg.parquet_path}")
+        parquet_size = os.stat(cfg.parquet_path).st_size
+        index_size = os.stat(cfg.index_path).st_size
+        index_size_percentage = 100 * index_size / parquet_size
+        print(f"Parquet size={humanize.naturalsize(parquet_size)}, index size={humanize.naturalsize(index_size)}({index_size_percentage:.2f}%)")
+        print("")
+        return
+
+    schema = pa.schema([pa.field(f'column_{i}', dtype) for i in range(cfg.columns)])
+    data = np.random.rand(cfg.rows, cfg.columns).astype(cfg.dtype)
+    pa_arrays = [pa.array(data[:, i], type=dtype) for i in range(cfg.columns)]
+    table = pa.Table.from_arrays(pa_arrays, schema=schema)
 
     t = time.time()
-    print(f"writing parquet file, columns={columns}, row_groups={row_groups}, rows={rows}")
-    pq.write_table(table, parquet_path, row_group_size=chunk_size, use_dictionary=False, write_statistics=False, compression=None, store_schema=False)
+    print(f"writing parquet file, columns={cfg.columns}, row_groups={cfg.row_groups}, rows={cfg.rows}")
+    pq.write_table(table, cfg.parquet_path, row_group_size=cfg.chunk_size, use_dictionary=False, write_statistics=False, compression=None, store_schema=False)
     dt = time.time() - t
     print(f"finished writing parquet file in {dt:.2f} seconds")
 
     t = time.time()
     print("Generating metadata index")
-    pj.generate_metadata_index(parquet_path, index_path)
+    pj.generate_metadata_index(cfg.parquet_path, cfg.index_path)
     dt = time.time() - t
     print(f"Metadata index generated in {dt:.2f} seconds")
 
-    parquet_size = os.stat(parquet_path).st_size
-    index_size = os.stat(index_path).st_size
-    index_size_percentage = 100 * index_size / parquet_size
-    print(f"Parquet size={parquet_size}, index size={index_size}({index_size_percentage:.2f}%)")
+    parquet_size = os.stat(cfg.parquet_path).st_size
+    index_size = os.stat(cfg.index_path).st_size
+    index_size_percentage = 100 * index_size / parquet_size   
+    print(f"Parquet size={humanize.naturalsize(parquet_size)}, index size={humanize.naturalsize(index_size)}({index_size_percentage:.2f}%)")
+    
     print("")
 
 def measure_reading(max_workers, worker):
 
-    def dummy_worker():
-        time.sleep(0.01)
-
     tt = []
-    # measure multiple times and take the fastest run
-    for _ in range(0, 5):
-        # Create the pool and warm it up 
-        pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
-        dummy_items = [pool.submit(dummy_worker) for i in range(0, len(all_columns), batch_size)]
-        for dummy_item in dummy_items: 
-            dummy_item.result()
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+
+    for _ in range(cfg.measure_iterations):
 
         # warm up the OS cache
         worker()
 
         # Submit the work
         t = time.time()
-        for i in range(0, work_items):
-            pool.submit(worker)
-
-        pool.shutdown(wait=True)
+        futures = [pool.submit(worker) for i in range(cfg.n_repeats)]
+        for f in futures:
+            f.result()
         tt.append(time.time() - t)
 
-    return min (tt)
+    pool.shutdown(wait=True)
 
-table = get_table()
-genrate_data(table)
-index_data = fs.LocalFileSystem().open_input_stream(index_path).readall()
+    tts = [f"{t:.2f}" for t in tt]
+    tts = f"[{', '.join(tts)}]"
+    return f"{min(tt):.2f}s -> {tts}"
 
-print(f"Reading a single row group using arrow (single-threaded) {measure_reading(1, worker_arrow_row_group):.2f} seconds")
-print(f"Reading a single row group using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group):.2f} seconds")
+print(".")
+print(f"palletjack.version = {pj.__version__}")
+print(f"pyarrow.version = {pa.__version__}")
+print(".")
+for name, value in cfg.model_dump().items():
+    print(f"{name} = {value}")
 print(".")
 
-print(f"Reading a single row group using arrow (multi-threaded) {measure_reading(8, worker_arrow_row_group):.2f} seconds")
-print(f"Reading a single row group using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_row_group):.2f} seconds")
-print(".")
+generate_data()
+index_data = fs.LocalFileSystem().open_input_stream(cfg.index_path).readall()
 
-print(f"Reading a single column using arrow (single-threaded) {measure_reading(1, worker_arrow_column):.2f} seconds")
-print(f"Reading a single column using palletjack (single-threaded) {measure_reading(1, worker_palletjack_column):.2f} seconds")
-print(".")
+for n_workers in cfg.worker_counts:
 
-print(f"Reading a single column using arrow (multi-threaded) {measure_reading(8, worker_arrow_column):.2f} seconds")
-print(f"Reading a single column using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_column):.2f} seconds")
-print(".")
-
-print(f"Reading multiple row groups using arrow (single-threaded) {measure_reading(1, worker_arrow_row_groups):.2f} seconds")
-print(f"Reading multiple row groups using palletjack (single-threaded) {measure_reading(1, worker_palletjack_rowgroups):.2f} seconds")
-print(".")
-
-print(f"Reading multiple row groups using arrow (multi-threaded) {measure_reading(8, worker_arrow_row_groups):.3f} seconds")
-print(f"Reading multiple row groups using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_rowgroups):.3f} seconds")
-print(".")
-
-print(f"Reading multiple columns using arrow (single-threaded) {measure_reading(1, worker_arrow_columns):.3f} seconds")
-print(f"Reading multiple columns using palletjack (single-threaded) {measure_reading(1, worker_palletjack_columns):.3f} seconds")
-print(".")
-
-print(f"Reading multiple columns using arrow (multi-threaded) {measure_reading(8, worker_arrow_columns):.3f} seconds")
-print(f"Reading multiple columns using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_columns):.3f} seconds")
-print(".")
-
-print(f"Reading a single row group and column metadata using in-memory palletjack (single-threaded) {measure_reading(1, lambda:worker_inmemory_palletjack_row_group_column_metadata(index_data)):.3f} seconds")
-print(f"Reading a single row group and column metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_column_metadata):.3f} seconds")
-print(f"Reading a single row group metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_row_group_metadata):.3f} seconds")
-print(f"Reading a single column metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_column_metadata):.3f} seconds")
-print(f"Reading a single column(name) metadata using palletjack (single-threaded) {measure_reading(1, worker_palletjack_column_name_metadata):.3f} seconds")
-print(f"Reading a metadata using arrow (single-threaded) {measure_reading(1, worker_arrow_metadata):.3f} seconds")
-print(".")
-
-print(f"Reading a single row group and column metadata using in-memory palletjack (multi-threaded) {measure_reading(8, lambda:worker_inmemory_palletjack_row_group_column_metadata(index_data)):.3f} seconds")
-print(f"Reading a single row group and column metadata using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_row_group_column_metadata):.3f} seconds")
-print(f"Reading a single row group metadata using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_row_group_metadata):.3f} seconds")
-print(f"Reading a single column metadata using palletjack (multi-threaded) {measure_reading(8, worker_palletjack_column_metadata):.3f} seconds")
-print(f"Reading a single column(name) metadata using palletjack (single-threaded) {measure_reading(8, worker_palletjack_column_name_metadata):.3f} seconds")
-print(f"Reading a metadata using arrow (multi-threaded) {measure_reading(8, worker_arrow_metadata):.3f} seconds")
-print(".")
+    print(".")
+    print(f"pj.read_metadata(in_memory, row_groups[0]+columns[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, lambda:worker_inmemory_palletjack_row_group_column_metadata(index_data))}")
+    print(f"pj.read_metadata(row_groups[0]+columns[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_row_group_column_metadata)}")
+    print(f"pj.read_metadata(row_groups[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_row_group_metadata)}")
+    print(f"pj.read_metadata(column[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_column_metadata)}")
+    print(f"pj.read_metadata(column['column_0']) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_column_name_metadata)}")
+    print(".")
+    print(f"pq.ParquetReader.metadata n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_arrow_metadata)}")
+    print(".")
+    print(f"pq.read_row_groups[0] n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_arrow_row_group)}")
+    print(f"pj.read_row_groups[0] n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_row_group)}")
