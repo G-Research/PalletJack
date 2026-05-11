@@ -11,7 +11,7 @@ import os
 
 n_row_groups = 5
 n_columns = 7
-chunk_size = 1 # A row group per
+chunk_size = 1 # One row group per chunk
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
 def get_table():
