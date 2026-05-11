@@ -83,9 +83,9 @@ jobs:
         restore-keys: |
           vcpkg-${{ matrix.runner }}-${{ steps.month.outputs.value }}
 
-    - name: Setup vcpkg binary cache
+    - name: Setup vcpkg cache directories
       shell: bash
-      run: mkdir -p ./python/vcpkg-binary-cache
+      run: mkdir -p ./python/vcpkg-binary-cache ./python/vcpkg
 
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
@@ -107,13 +107,7 @@ jobs:
       env:
         CIBW_BUILD_VERBOSITY: 1
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/python/vcpkg-binary-cache
-
-    - name: Post cibuildwheel - move vcpkg binary cache to cached location
-      if: runner.os == 'linux'
-      working-directory: ./python
-      run: |
-        rm -rf vcpkg && mv ./dist/vcpkg vcpkg
-        rm -rf vcpkg-binary-cache && mv ./dist/vcpkg-binary-cache vcpkg-binary-cache
+        CIBW_CONTAINER_ENGINE: "docker; create_args: -v ${{ github.workspace }}/python/vcpkg:/project/vcpkg -v ${{ github.workspace }}/python/vcpkg-binary-cache:/project/vcpkg-binary-cache"
 
     - uses: actions/upload-artifact@v7
       with:

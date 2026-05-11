@@ -67,11 +67,6 @@ before-all = [
   "mkdir -p vcpkg-binary-cache",
   "if ! ./vcpkg/bootstrap-vcpkg.sh; then rm -rf vcpkg; git clone https://github.com/microsoft/vcpkg.git vcpkg; ./vcpkg/bootstrap-vcpkg.sh; fi",
   "VCPKG_DEFAULT_BINARY_CACHE=$PWD/vcpkg-binary-cache ./vcpkg/vcpkg install --x-manifest-root . --feature-flags=versions",
-  # Copy vcpkg and its installed packages to the output directory on the host.
-  # This allows for persistent caching with 'actions/cache'.
-  "mkdir -p /output",
-  "cp -r vcpkg /output/vcpkg",
-  "cp -r vcpkg-binary-cache /output/vcpkg-binary-cache",
 ]
 
 ########################### cibuildwheel Windows ###################
