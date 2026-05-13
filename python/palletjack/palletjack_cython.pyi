@@ -1,12 +1,11 @@
-from typing import Optional, Sequence
+from typing import Optional, Sequence, overload
 
 import pyarrow.parquet as pq
 
-
+@overload
 def generate_metadata_index(
     parquet_path: str,
-    index_file_path: Optional[str] = None,
-) -> Optional[bytearray]:
+) -> bytearray:
     """Generate a metadata index for a Parquet file.
 
     Args:
@@ -21,7 +20,11 @@ def generate_metadata_index(
     """
     ...
 
-
+@overload
+def generate_metadata_index(
+    parquet_path: str,
+    index_file_path: str,
+) -> None: ...
 def read_metadata(
     index_file_path: Optional[str] = None,
     row_groups: Sequence[int] = [],
