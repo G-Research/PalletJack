@@ -257,17 +257,17 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
         if (data_header.columns == 0)
             throw std::logic_error("Number of columns is not set!");
         if (data_header.metadata_length == 0)
-            throw std::logic_error("Number of metadata length is not set!");
+            throw std::logic_error("Metadata length is not set!");
 
         if (data_header.get_num_rows_offsets_size() != metadata.num_rows_offsets.size())
         {
-            auto msg = std::string("Number of rows offset information is invalid ") + std::to_string(data_header.get_num_rows_offsets_size()) + " != " + std::to_string(metadata.num_rows_offsets.size()) + " !";
+            auto msg = std::string("Number of rows offset information is invalid, ") + std::to_string(data_header.get_num_rows_offsets_size()) + " != " + std::to_string(metadata.num_rows_offsets.size()) + " !";
             throw std::logic_error(msg);
         }
 
         if (data_header.row_groups != metadata.row_numbers.size())
         {
-            auto msg = std::string("Row numbers information is invalid ") + std::to_string(data_header.row_groups) + " != " + std::to_string(metadata.row_numbers.size()) + " !";
+            auto msg = std::string("Row numbers information is invalid, ") + std::to_string(data_header.row_groups) + " != " + std::to_string(metadata.row_numbers.size()) + " !";
             throw std::logic_error(msg);
         }
 
@@ -277,16 +277,16 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
             throw std::logic_error(msg);
         }
 
-        for (auto &schema_elemnt : metadata.schema)
+        for (auto &schema_element : metadata.schema)
         {
-            if (schema_elemnt.num_children_offsets.size() == 0)
+            if (schema_element.num_children_offsets.size() == 0)
             {
-                schema_elemnt.num_children_offsets.push_back(0);
-                schema_elemnt.num_children_offsets.push_back(0);
+                schema_element.num_children_offsets.push_back(0);
+                schema_element.num_children_offsets.push_back(0);
             }
-            else if (schema_elemnt.num_children_offsets.size() != 2)
+            else if (schema_element.num_children_offsets.size() != 2)
             {
-                auto msg = std::string("Num children offsets information is invalid, num_children_offsets=") + std::to_string(schema_elemnt.num_children_offsets.size()) + " !";
+                auto msg = std::string("Num children offsets information is invalid, num_children_offsets=") + std::to_string(schema_element.num_children_offsets.size()) + " !";
 
                 throw std::logic_error(msg);
             }
@@ -355,14 +355,14 @@ std::vector<char> GenerateMetadataIndex(const char *parquet_path)
 
     if (data_header.column_names_length != written_column_names_length)
     {
-        throw std::logic_error("Error when writign the index file, data_header.column_names_length != written_column_names_length !");
+        throw std::logic_error("Error when writing the index file, data_header.column_names_length != written_column_names_length !");
     }
 
     fs.write((const char *)thrift_buffer.get()->data(), thrift_buffer.get()->size());
     auto s = fs.str();
     if (sizeof(data_header) + data_header.get_body_size() != s.size())
     {
-        auto msg = std::string("Error when writign the index file, exexted size=") + std::to_string(sizeof(data_header) + data_header.get_body_size()) + ", actual size=" + std::to_string(s.size()) + " !";
+        auto msg = std::string("Error when writing the index file, expected size=") + std::to_string(sizeof(data_header) + data_header.get_body_size()) + ", actual size=" + std::to_string(s.size()) + " !";
         throw std::logic_error(msg);
     }
 
