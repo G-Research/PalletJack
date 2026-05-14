@@ -63,7 +63,7 @@ repair-wheel-command = [
 
 # Run multiple commands using an array
 before-all = [
-  "yum -y install curl zip unzip tar perl-IPC-Cmd flex",
+  "yum -y install curl zip unzip tar perl-IPC-Cmd flex ninja-build",
   "ls -al $VCPKG_INSTALLATION_ROOT",
   "if [ -n \"$VCPKG_INSTALLATION_ROOT\" ]; then \"$VCPKG_INSTALLATION_ROOT/vcpkg\" install --x-manifest-root . --feature-flags=versions; else if ! ./vcpkg/bootstrap-vcpkg.sh; then rm -rf vcpkg; git clone https://github.com/microsoft/vcpkg.git vcpkg; ./vcpkg/bootstrap-vcpkg.sh; fi; ./vcpkg/vcpkg install --x-manifest-root . --feature-flags=versions; fi",
 ]
