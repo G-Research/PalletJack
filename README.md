@@ -7,3 +7,4 @@ PalletJack reduces the amount of metadata bytes that need to be read and decoded
 
 - Storing parquet metadata in an indexed format
 - Reading parquet metadata for a subset of row groups and columns
+
