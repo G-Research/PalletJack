@@ -82,6 +82,11 @@ jobs:
       if: runner.os == 'macOS'
       run: brew install bison
 
+    - name: Export VCPKG_INSTALLATION_ROOT
+      if: runner.os == 'Linux'
+      shell: bash
+      run: echo "VCPKG_INSTALLATION_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
+
     - name: Build sdist (Linux)
       if: runner.os == 'linux'
       working-directory: ./python
@@ -97,7 +102,8 @@ jobs:
       env:
         CIBW_BUILD_VERBOSITY: 1
         CIBW_CONTAINER_ENGINE: "docker; create_args: --network=host -v ${{ env.VCPKG_INSTALLATION_ROOT }}:${{ env.VCPKG_INSTALLATION_ROOT }}"
-        CIBW_ENVIRONMENT_PASS_LINUX: "VCPKG_BINARY_SOURCES VCPKG_INSTALLATION_ROOT"
+        CIBW_ENVIRONMENT_PASS_LINUX: "VCPKG_BINARY_SOURCES VCPKG_INSTALLATION_ROOT VCPKG_FORCE_SYSTEM_BINARIES"
+        VCPKG_FORCE_SYSTEM_BINARIES: "1"
 
     - uses: actions/upload-artifact@v7
       with:
