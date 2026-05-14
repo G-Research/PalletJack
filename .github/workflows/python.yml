@@ -96,6 +96,7 @@ jobs:
         cibuildwheel --output-dir dist
       env:
         CIBW_BUILD_VERBOSITY: 1
+        CIBW_CONTAINER_ENGINE: "docker; create_args: --network=host"
         VCPKG_BINARY_SOURCES: ${{ env.VCPKG_BINARY_SOURCES }}
 
     - uses: actions/upload-artifact@v7
