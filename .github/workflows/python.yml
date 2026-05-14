@@ -91,6 +91,7 @@ jobs:
 
     - name: Build wheels
       working-directory: ./python
+      shell: bash
       run: |
         pip install cibuildwheel
         export CIBW_CONTAINER_ENGINE="docker; create_args: --network=host -v $VCPKG_INSTALLATION_ROOT:$VCPKG_INSTALLATION_ROOT"
