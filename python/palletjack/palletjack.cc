@@ -386,7 +386,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
                                                     size_t body_size,
                                                     const std::vector<uint32_t> &row_groups,
                                                     const std::vector<uint32_t> &column_indices,
-                                                    const std::vector<std::string> &column_names)
+                                                    const std::vector<std::string> &column_names,
+                                                    bool schema_only)
 {
     if (memcmp(HEADER_V1, dataHeader.header, HEADER_V1_LENGTH) != 0)
     {
@@ -503,7 +504,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         index_src = schema_elements[dataHeader.columns];
     }
 
-    if (row_groups.size() > 0)
+    auto row_group_filtering = row_groups.size() > 0 || schema_only;
+    if (row_group_filtering)
     {
         //> 3: required i64 num_rows
         int64_t num_rows = 0;
@@ -520,7 +522,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
         index_src = num_row_offsets[1];
     }
 
-    auto row_group_filtering = row_groups.size() > 0;
     if (row_group_filtering)
     {
         //> 4: required list<RowGroup> row_groups
@@ -632,7 +633,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeader &dataHeader
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
                                                     const std::vector<uint32_t> &row_groups,
                                                     const std::vector<uint32_t> &column_indices,
-                                                    const std::vector<std::string> &column_names)
+                                                    const std::vector<std::string> &column_names,
+                                                    bool schema_only)
 {
     auto f = std::unique_ptr<FILE, decltype(&fclose)>(fopen(index_file_path, "rb"), &fclose);
     if (!f)
@@ -665,14 +667,15 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
         throw std::logic_error(msg);
     }
 
-    return ReadMetadata(dataHeader, &data_body[0], body_size, row_groups, column_indices, column_names);
+    return ReadMetadata(dataHeader, &data_body[0], body_size, row_groups, column_indices, column_names, schema_only);
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_data,
                                                     size_t index_data_length,
                                                     const std::vector<uint32_t> &row_groups,
                                                     const std::vector<uint32_t> &column_indices,
-                                                    const std::vector<std::string> &column_names)
+                                                    const std::vector<std::string> &column_names,
+                                                    bool schema_only)
 {
     if (index_data_length < sizeof(DataHeader))
     {
@@ -688,5 +691,5 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
         throw std::logic_error(msg);
     }
 
-    return ReadMetadata(*p_data_header, &index_data[sizeof(DataHeader)], index_data_length - sizeof(DataHeader), row_groups, column_indices, column_names);
+    return ReadMetadata(*p_data_header, &index_data[sizeof(DataHeader)], index_data_length - sizeof(DataHeader), row_groups, column_indices, column_names, schema_only);
 }

@@ -38,11 +38,32 @@ cpdef read_metadata(index_file_path = None, row_groups = [], column_indices = []
     if index_file_path is None:
         with cython.boundscheck(False):
             with nogil:
-                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names)
+                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names, False)
     else:
         with nogil:
-            c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names)
+            c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names, False)
 
     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
     m.init(c_metadata)
     return m
+
+cpdef read_schema(index_file_path = None, column_indices = [], column_names = [], index_data = None):
+
+    cdef shared_ptr[CFileMetaData] c_metadata
+    cdef string encoded_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
+    cdef const unsigned char[::1] mv = index_data
+    cdef vector[uint32_t] crow_groups
+    cdef vector[uint32_t] ccolumn_indices = column_indices
+    cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
+
+    if index_file_path is None:
+        with cython.boundscheck(False):
+            with nogil:
+                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names, True)
+    else:
+        with nogil:
+            c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names, True)
+
+    cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
+    m.init(c_metadata)
+    return m.schema.to_arrow_schema()
