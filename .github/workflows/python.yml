@@ -69,18 +69,9 @@ jobs:
       run: echo "value=$(date +'%Y-%m')" >> $GITHUB_OUTPUT
       shell: bash
 
-    - name: Restore cached vcpkg
-      uses: actions/cache@v5
-      with:
-        path: |
-          ./python/vcpkg
-          ./python/vcpkg-binary-cache
-        # We use a unique key for every run and rely on restore-keys to restore the nearest available cache,
-        # which ensures the cache is always kept up to date.
-        # Since the binary cache accumulates all different binary versions over time, we rotate the cache key
-        # on a monthly basis to keep the binary cache size within reasonable limits.
-        key: vcpkg-${{ matrix.runner }}-${{ steps.month.outputs.value }}-${{ github.run_id }}
-        restore-keys: vcpkg-${{ matrix.runner }}-${{ steps.month.outputs.value }}
+    # Setup vcpkg caching
+    - name: Setup vcpkg caching
+      uses: G-Research/ParquetSharp/.github/actions/my-action@main
 
     - name: Setup vcpkg cache directories
       shell: bash
@@ -105,8 +96,7 @@ jobs:
         cibuildwheel --output-dir dist
       env:
         CIBW_BUILD_VERBOSITY: 1
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/python/vcpkg-binary-cache
-        CIBW_CONTAINER_ENGINE: "docker; create_args: -v ${{ github.workspace }}/python/vcpkg:/project/vcpkg -v ${{ github.workspace }}/python/vcpkg-binary-cache:/project/vcpkg-binary-cache"
+        VCPKG_BINARY_SOURCES: ${{ env.VCPKG_BINARY_SOURCES }}
 
     - uses: actions/upload-artifact@v7
       with:

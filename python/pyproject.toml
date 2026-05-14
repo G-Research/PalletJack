@@ -65,7 +65,7 @@ repair-wheel-command = [
 before-all = [
   "yum -y install curl zip unzip tar perl-IPC-Cmd flex",
   "if ! ./vcpkg/bootstrap-vcpkg.sh; then rm -rf vcpkg; git clone https://github.com/microsoft/vcpkg.git vcpkg; ./vcpkg/bootstrap-vcpkg.sh; fi",
-  "VCPKG_DEFAULT_BINARY_CACHE=$PWD/vcpkg-binary-cache ./vcpkg/vcpkg install --x-manifest-root . --feature-flags=versions",
+  ./vcpkg/vcpkg install --x-manifest-root . --feature-flags=versions",
 ]
 
 ########################### cibuildwheel Windows ###################
