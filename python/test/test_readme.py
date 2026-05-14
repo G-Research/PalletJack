@@ -80,3 +80,14 @@ pr.open(path, metadata=metadata)
 
 data = pr.read_all()
 # ```
+
+### Reading the schema
+# ```
+schema = pj.read_schema(index_path)
+# ```
+
+### Reading the schema for a subset of columns:
+# ```
+schema = pj.read_schema(index_path, column_indices = [1, 3])
+schema = pj.read_schema(index_path, column_names = ['column_1', 'column_3'])
+# ```
