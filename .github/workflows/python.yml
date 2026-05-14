@@ -64,18 +64,9 @@ jobs:
       with:
         python-version: "3.12"
 
-    - name: Get current month (for restore key rotation)
-      id: month
-      run: echo "value=$(date +'%Y-%m')" >> $GITHUB_OUTPUT
-      shell: bash
-
     # Setup vcpkg caching
     - name: Setup vcpkg caching
       uses: G-Research/ParquetSharp/.github/actions/vcpkg-cache-action@master
-
-    - name: Setup vcpkg cache directories
-      shell: bash
-      run: mkdir -p ./python/vcpkg-binary-cache ./python/vcpkg
 
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
