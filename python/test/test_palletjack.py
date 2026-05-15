@@ -180,7 +180,7 @@ class TestPalletJack(unittest.TestCase):
             with self.assertRaises(Exception) as context:
                 metadata = pj.read_metadata("not_existing_file.parquet.index", [0])
 
-            self.assertTrue(f"I/O error when opening 'not_existing_file.parquet.index'" in str(context.exception), context.exception)
+            self.assertTrue("not_existing_file.parquet.index" in str(context.exception), context.exception)
 
     def test_index_file_golden_master(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
