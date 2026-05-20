@@ -344,7 +344,7 @@ std::shared_ptr<arrow::Buffer> GenerateMetadataIndex(const char *parquet_path)
     PARQUET_ASSIGN_OR_THROW(result, fs->Finish());
     if (total_size != static_cast<size_t>(result->size()))
     {
-        auto msg = std::string("Error when writign the index file, expected size=") + std::to_string(total_size) + ", actual size=" + std::to_string(result->size()) + " !";
+        auto msg = std::string("Error when writing the index file, expected size=") + std::to_string(total_size) + ", actual size=" + std::to_string(result->size()) + " !";
         throw std::logic_error(msg);
     }
 
