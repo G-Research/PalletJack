@@ -64,17 +64,9 @@ jobs:
       with:
         python-version: "3.12"
 
-    - name: Restore cached vcpkg
-      uses: actions/cache@v5
-      with:
-        path: |
-          ./python/vcpkg_installed
-          ./python/vcpkg
-        # We use a key which is unique for every run and use restore-keys to restore the nearest cache.
-        # That makes sure the cache is always updated.
-        key: vcpkg-${{ matrix.runner }}-${{ github.run_id }} 
-        restore-keys: |
-          vcpkg-${{ matrix.runner }}
+    # Setup vcpkg caching
+    - name: Setup vcpkg caching
+      uses: G-Research/vcpkg-cache-action@main
 
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
@@ -90,18 +82,15 @@ jobs:
 
     - name: Build wheels
       working-directory: ./python
+      shell: bash
       run: |
         pip install cibuildwheel
+        export CIBW_CONTAINER_ENGINE="docker; create_args: --network=host -v $VCPKG_INSTALLATION_ROOT:$VCPKG_INSTALLATION_ROOT"
         cibuildwheel --output-dir dist
       env:
         CIBW_BUILD_VERBOSITY: 1
-
-    - name: Post cibuildwheel - move vcpkg to cached location
-      if: runner.os == 'linux'
-      working-directory: ./python
-      run: |
-        rm -rf vcpkg && mv ./dist/vcpkg vcpkg
-        rm -rf vcpkg_installed &&  mv ./dist/vcpkg_installed vcpkg_installed
+        CIBW_ENVIRONMENT_PASS_LINUX: "VCPKG_BINARY_SOURCES VCPKG_INSTALLATION_ROOT VCPKG_FORCE_SYSTEM_BINARIES"
+        VCPKG_FORCE_SYSTEM_BINARIES: "1"
 
     - uses: actions/upload-artifact@v7
       with:
