@@ -13,13 +13,11 @@ from pyarrow._parquet cimport *
 cpdef generate_metadata_index(parquet_path, index_file_path = None):
     cdef string encoded_parquet_path = parquet_path.encode('utf8')
     cdef string encoded_index_file_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
-    cdef vector[char] c_index_data
-    cdef char[::1] mv;
+    cdef shared_ptr[cpalletjack.CArrowBuffer] c_buffer
     if index_file_path is None:
         with nogil:
-            c_index_data = cpalletjack.GenerateMetadataIndex(encoded_parquet_path.c_str())
-        mv = <char[:c_index_data.size()]>&c_index_data[0]
-        return bytearray(mv)
+            c_buffer = cpalletjack.GenerateMetadataIndex(encoded_parquet_path.c_str())
+        return bytearray((<const char*>c_buffer.get().data())[:c_buffer.get().size()])
     else:
         with nogil:
             cpalletjack.GenerateMetadataIndex(encoded_parquet_path.c_str(), encoded_index_file_path.c_str())
