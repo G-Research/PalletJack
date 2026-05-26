@@ -7,10 +7,12 @@ import pyarrow.parquet as pq
 def generate_metadata_index(
     parquet_path: str,
     index_file_path: str,
+    decryption_properties: Optional[pq.FileDecryptionProperties] = None,
 ) -> None: ...
 @overload
 def generate_metadata_index(
     parquet_path: str,
+    decryption_properties: Optional[pq.FileDecryptionProperties] = None,
 ) -> bytearray:
     """Generate a metadata index for a Parquet file.
 
@@ -19,6 +21,10 @@ def generate_metadata_index(
         index_file_path: If provided, the index is written to this path and
             ``None`` is returned.  If omitted, the index is returned as a
             ``bytearray``.
+        decryption_properties: Decryption properties for encrypted Parquet
+            files. Required for files with encrypted footers (PARE magic).
+            Not needed for plaintext-footer files with encrypted column
+            metadata.
 
     Returns:
         The serialized index when *index_file_path* is ``None``, otherwise
@@ -32,6 +38,7 @@ def read_metadata(
     column_indices: Sequence[int] = [],
     column_names: Sequence[str] = [],
     index_data: Optional[bytes] = None,
+    decryption_properties: Optional[pq.FileDecryptionProperties] = None,
 ) -> pq.FileMetaData:
     """Read Parquet metadata from a previously generated index.
 
@@ -45,6 +52,9 @@ def read_metadata(
         column_names: Subset of column names to read.
         index_data: In-memory index bytes (e.g. from
             :func:`generate_metadata_index`).
+        decryption_properties: Decryption properties for indexes generated
+            from encrypted Parquet files. Currently unused (reserved for
+            future encrypted-footer index support).
 
     Returns:
         A :class:`pyarrow.parquet.FileMetaData` instance containing only the
@@ -57,6 +67,7 @@ def read_schema(
     column_indices: Sequence[int] = [],
     column_names: Sequence[str] = [],
     index_data: Optional[bytes] = None,
+    decryption_properties: Optional[pq.FileDecryptionProperties] = None,
 ) -> pa.Schema:
     """Read the Arrow schema from a previously generated index.
 
@@ -71,6 +82,9 @@ def read_schema(
         column_names: Subset of column names to read.
         index_data: In-memory index bytes (e.g. from
             :func:`generate_metadata_index`).
+        decryption_properties: Decryption properties for indexes generated
+            from encrypted Parquet files. Currently unused (reserved for
+            future encrypted-footer index support).
 
     Returns:
         A :class:`pyarrow.Schema` instance.

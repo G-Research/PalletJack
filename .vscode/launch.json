@@ -15,8 +15,7 @@
             "name": "(gdb) Attach",
             "type": "cppdbg",
             "request": "attach",
-            "program": "/bin/python3",
-            "processId": "",
+            "program": "/usr/bin/python3",
             "MIMode": "gdb"
             // ,
             // "setupCommands": [
@@ -29,7 +28,7 @@
         },
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",

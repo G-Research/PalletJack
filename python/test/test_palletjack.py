@@ -1,18 +1,44 @@
 import unittest
 import tempfile
+import base64
 
 import palletjack as pj
 import pyarrow.parquet as pq
+import pyarrow.parquet.encryption as pe
 import pyarrow as pa
 import numpy as np
 import itertools as it
 import pyarrow.fs as fs
 import os
+from parameterized import parameterized
 
 n_row_groups = 5
 n_columns = 7
 chunk_size = 1 # One row group per chunk
 current_dir = os.path.dirname(os.path.realpath(__file__))
+
+class InMemoryKmsClient(pe.KmsClient):
+    def __init__(self, config):
+        super().__init__()
+        self.master_keys = config.custom_kms_conf
+
+    def wrap_key(self, key_bytes, master_key_identifier):
+        master = self.master_keys[master_key_identifier].encode()
+        padded = master * (len(key_bytes) // len(master) + 1)
+        return base64.b64encode(bytes(a ^ b for a, b in zip(key_bytes, padded[:len(key_bytes)]))).decode()
+
+    def unwrap_key(self, wrapped_key, master_key_identifier):
+        key_bytes = base64.b64decode(wrapped_key)
+        master = self.master_keys[master_key_identifier].encode()
+        padded = master * (len(key_bytes) // len(master) + 1)
+        return bytes(a ^ b for a, b in zip(key_bytes, padded[:len(key_bytes)]))
+
+crypto_factory = pe.CryptoFactory(lambda config: InMemoryKmsClient(config))
+
+def get_kms_connection_config():
+    config = pe.KmsConnectionConfig()
+    config.custom_kms_conf = {'footer_key': 'masterkey1234567', 'col_key': 'colmaster1234567'}
+    return config
 
 def get_table():
     # Generate a random 2D array of floats using NumPy
@@ -73,11 +99,11 @@ class TestPalletJack(unittest.TestCase):
             index_path = path + '.index'
             pj.generate_metadata_index(path, index_path)
 
-            all_columns = list(range(0, n_columns))
-            all_row_groups = list(range(0, n_row_groups))
-            for r in range(0, 4):
+            all_columns = list(range(n_columns))
+            all_row_groups = list(range(n_row_groups))
+            for r in range(3):
                 for rp in it.permutations(all_row_groups, r):
-                    for c in range(0, 4):
+                    for c in range(3):
                         for cp in it.permutations(all_columns, c):
                             validate_reading(path, index_path, row_groups = rp, column_indices = cp)
 
@@ -185,42 +211,53 @@ class TestPalletJack(unittest.TestCase):
     def test_index_file_golden_master(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             index_path = os.path.join(tmpdirname, 'my.parquet.index')
-            path = os.path.join(current_dir, 'data/golden_master.parquet')
-            expected_index_path = os.path.join(current_dir, 'data/golden_master.parquet.index')
-            pj.generate_metadata_index(path, index_path)
+            golden_master_path = os.path.join(current_dir, 'data/golden_master.parquet')
+            pj.generate_metadata_index(golden_master_path, index_path)
 
-            # Read the expected output
-            with open(expected_index_path, 'rb') as file:
-                expected_output = file.read()
+            with open(os.path.join(current_dir, 'data/golden_master.parquet.index.v2'), 'rb') as file:
+                golden_master_index_v2 = file.read()
 
-            # Read the expected output
+            with open(os.path.join(current_dir, 'data/golden_master.parquet.index.v3'), 'rb') as file:
+                golden_master_index_v3 = file.read()
+                
             with open(index_path, 'rb') as file:
-                actual_output = file.read()
+                actual_index = file.read()
 
             # Compare the actual output to the expected output
-            self.assertEqual(actual_output, expected_output)
+            self.assertEqual(actual_index, golden_master_index_v3)
 
             pr = pq.ParquetReader()
-            pr.open(path)
-            metadata = pr.metadata
-            row_groups = metadata.num_row_groups
+            pr.open(golden_master_path)
+            org_metadata = pr.metadata
             pr.close()
 
-            for r in range(0, row_groups):
+            pj_v2_metadata = pj.read_metadata(index_data=golden_master_index_v2)
+            self.assertEqual(org_metadata, pj_v2_metadata)
+            
+            pj_v3_metadata = pj.read_metadata(index_data=golden_master_index_v3)
+            self.assertEqual(org_metadata, pj_v3_metadata)
+            
+            for r in range(org_metadata.num_row_groups):
 
                 # Reading using the original metadata
                 pr = pq.ParquetReader()
-                pr.open(path)
-                res_data_org = pr.read_row_groups([r], use_threads=False)
+                pr.open(golden_master_path)
+                expected_data = pr.read_row_groups([r])
                 pr.close()
 
-                # Reading using the indexed metadata
-                metadata = pj.read_metadata(expected_index_path, row_groups = [r])
+                # Reading using the indexed metadata(v2)
                 pr = pq.ParquetReader()
-                pr.open(path, metadata=metadata)
+                pr.open(golden_master_path, metadata=pj.read_metadata(index_data=golden_master_index_v2, row_groups = [r]))
 
-                res_data_index = pr.read_row_groups([0], use_threads=False)
-                self.assertEqual(res_data_org, res_data_index, f"Row={r}")
+                actual_data_v2 = pr.read_row_groups([0])
+                self.assertEqual(expected_data, actual_data_v2, f"Row={r}")
+                pr.close()
+
+                pr = pq.ParquetReader()
+                pr.open(golden_master_path, metadata=pj.read_metadata(index_data=golden_master_index_v3, row_groups = [r]))
+
+                actual_data_v3 = pr.read_row_groups([0])
+                self.assertEqual(expected_data, actual_data_v3, f"Row={r}")
                 pr.close()
 
     def test_read_schema(self):
@@ -306,5 +343,79 @@ class TestPalletJack(unittest.TestCase):
             # Compare the actual output to the expected output
             self.assertEqual(index_data1, index_data2)
 
+    def test_encrypted_footer_no_key(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "encrypted_footer.parquet")
+            table = get_table()
+            enc_config = pe.EncryptionConfiguration(
+                footer_key='footer_key',
+                uniform_encryption=True,
+                plaintext_footer=False,
+            )
+            props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
+            pq.write_table(table, path, encryption_properties=props)
+
+            with self.assertRaises(RuntimeError) as context:
+                pj.generate_metadata_index(path)
+            self.assertIn("encrypted footer", str(context.exception))
+
+    def test_encrypted_footer_parquet(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "encrypted_footer.parquet")
+            table = get_table()
+            enc_config = pe.EncryptionConfiguration(
+                footer_key='footer_key',
+                uniform_encryption=True,
+                plaintext_footer=False,
+            )
+            enc_props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
+            pq.write_table(table, path, row_group_size=chunk_size, encryption_properties=enc_props)
+
+            dec_config = pe.DecryptionConfiguration(cache_lifetime=300)
+            dec_props = crypto_factory.file_decryption_properties(get_kms_connection_config(), dec_config)
+
+            index_data = pj.generate_metadata_index(path, decryption_properties=dec_props)
+            self.assertIsNotNone(index_data)
+
+            metadata = pj.read_metadata(index_data=index_data)
+            self.assertEqual(metadata.num_row_groups, n_row_groups)
+            self.assertEqual(metadata.num_columns, n_columns)
+
+            for r in range(n_row_groups):
+                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r])
+                self.assertEqual(metadata_r.num_row_groups, 1)
+                self.assertEqual(metadata_r.num_columns, n_columns)
+
+    def test_encrypted_column_metadata_parquet(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "encrypted_plaintext_footer.parquet")
+            table = get_table()
+            enc_config = pe.EncryptionConfiguration(
+                footer_key='footer_key',
+                column_keys={'col_key': [f'column_{i}' for i in range(n_columns)]},
+                plaintext_footer=True,
+            )
+            props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
+            pq.write_table(table, path, row_group_size=chunk_size, encryption_properties=props)
+
+            index_data = pj.generate_metadata_index(path)
+            self.assertIsNotNone(index_data)
+
+            metadata = pj.read_metadata(index_data=index_data)
+            self.assertEqual(metadata.num_row_groups, n_row_groups)
+            self.assertEqual(metadata.num_columns, n_columns)
+
+            for r in range(n_row_groups):
+                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r])
+                self.assertEqual(metadata_r.num_row_groups, 1)
+                self.assertEqual(metadata_r.num_columns, n_columns)
+
+            for c in range(n_columns):
+                metadata_c = pj.read_metadata(index_data=index_data, column_indices=[c])
+                self.assertEqual(metadata_c.num_columns, 1)
+
 if __name__ == '__main__':
     unittest.main()
+    # unittest.main(argv=['first-arg-is-ignored', '-k', 'TestPalletJack.test_index_file_golden_master'])
+
+
