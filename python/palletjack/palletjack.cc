@@ -823,7 +823,7 @@ const DataHeaderV3 *ReadAndParseHeader(const unsigned char *data, size_t data_le
     header_size = sizeof(DataHeaderV3);
     if (data_length < sizeof(DataHeaderV3))
     {
-        throw std::logic_error("Index data is too small for V2 header, length=" + std::to_string(data_length));
+        throw std::logic_error("Index data is too small for V3 header, length=" + std::to_string(data_length));
     }
     return reinterpret_cast<const DataHeaderV3 *>(data);
 }
