@@ -416,15 +416,20 @@ class TestPalletJack(unittest.TestCase):
             props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
             pq.write_table(table, path, row_group_size=chunk_size, encryption_properties=props)
 
+            dec_config = pe.DecryptionConfiguration(cache_lifetime=300)
+            dec_props = crypto_factory.file_decryption_properties(get_kms_connection_config(), dec_config)
+
             index_data = pj.generate_metadata_index(path)
             self.assertIsNotNone(index_data)
 
-            metadata = pj.read_metadata(index_data=index_data)
+            metadata = pj.read_metadata(index_data=index_data, decryption_properties=dec_props)
             self.assertEqual(metadata.num_row_groups, n_row_groups)
             self.assertEqual(metadata.num_columns, n_columns)
 
             for r in range(n_row_groups):
-                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r])
+                dec_props_r = crypto_factory.file_decryption_properties(
+                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
+                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r], decryption_properties=dec_props_r)
                 self.assertEqual(metadata_r.num_row_groups, 1)
                 self.assertEqual(metadata_r.num_columns, n_columns)
 
@@ -447,7 +452,9 @@ class TestPalletJack(unittest.TestCase):
                 self.assertEqual(expected_data, actual_data, f"Row group {r} data mismatch")
 
             for c in range(n_columns):
-                metadata_c = pj.read_metadata(index_data=index_data, column_indices=[c])
+                dec_props_c = crypto_factory.file_decryption_properties(
+                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
+                metadata_c = pj.read_metadata(index_data=index_data, column_indices=[c], decryption_properties=dec_props_c)
                 self.assertEqual(metadata_c.num_columns, 1)
 
                 # Read actual column data using PalletJack metadata
