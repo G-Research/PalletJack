@@ -787,7 +787,12 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
 #endif
 
     uint32_t length = thriftCopier.GetDataSize();
-    return parquet::FileMetaData::Make(thriftCopier.GetData(), &length);
+    parquet::ReaderProperties reader_props;
+    if (decryption_properties)
+    {
+        reader_props.file_decryption_properties(decryption_properties);
+    }
+    return parquet::FileMetaData::Make(thriftCopier.GetData(), &length, reader_props);
 }
 
 const DataHeaderV3 *ReadAndParseHeader(const unsigned char *data, size_t data_length,
