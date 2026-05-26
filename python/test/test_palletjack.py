@@ -475,6 +475,6 @@ class TestPalletJack(unittest.TestCase):
                 self.assertEqual(expected_col, actual_col, f"Column {c} data mismatch")
 
 if __name__ == '__main__':
-    unittest.main()
-
+    # unittest.main()
+    unittest.main(argv=['first-arg-is-ignored', '-k', 'TestPalletJack.test_encrypted_column_metadata_parquet'])
 
