@@ -419,6 +419,18 @@ class TestPalletJack(unittest.TestCase):
             dec_config = pe.DecryptionConfiguration(cache_lifetime=300)
             dec_props = crypto_factory.file_decryption_properties(get_kms_connection_config(), dec_config)
 
+            pr = pq.ParquetReader()           
+            # Read actual data using the original file with decryption
+            dec_props_read = crypto_factory.file_decryption_properties(get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
+            pr.open(path, decryption_properties=dec_props_read)
+            org_metadata = pr.metadata
+            pr.close()
+            
+            pr = pq.ParquetReader()
+            pr.open(path, metadata = org_metadata)
+            expected_data = pr.read_row_groups([0])
+            pr.close()
+
             index_data = pj.generate_metadata_index(path)
             self.assertIsNotNone(index_data)
 
@@ -427,25 +439,18 @@ class TestPalletJack(unittest.TestCase):
             self.assertEqual(metadata.num_columns, n_columns)
 
             for r in range(n_row_groups):
-                dec_props_r = crypto_factory.file_decryption_properties(
-                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
-                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r], decryption_properties=dec_props_r)
-                self.assertEqual(metadata_r.num_row_groups, 1)
-                self.assertEqual(metadata_r.num_columns, n_columns)
-
-                # Read actual data using the original file with decryption
-                dec_props_read = crypto_factory.file_decryption_properties(
-                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
+                
                 pr = pq.ParquetReader()
                 pr.open(path, decryption_properties=dec_props_read)
                 expected_data = pr.read_row_groups([r])
                 pr.close()
 
-                # Read actual data using PalletJack metadata
-                dec_props_pj = crypto_factory.file_decryption_properties(
-                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
+                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r], decryption_properties=dec_props_read)
+                self.assertEqual(metadata_r.num_row_groups, 1)
+                self.assertEqual(metadata_r.num_columns, n_columns)
+
                 pr = pq.ParquetReader()
-                pr.open(path, metadata=metadata_r, decryption_properties=dec_props_pj)
+                pr.open(path, metadata=metadata_r)
                 actual_data = pr.read_row_groups([0])
                 pr.close()
 

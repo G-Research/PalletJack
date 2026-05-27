@@ -790,7 +790,39 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
     parquet::ReaderProperties reader_props;
     if (decryption_properties)
     {
-        reader_props.file_decryption_properties(decryption_properties);
+        // Clone decryption properties with footer signature verification disabled.
+        // The reconstructed Thrift from the index has no footer signature, and
+        // filtered metadata would invalidate the original signature anyway.
+        auto builder = parquet::FileDecryptionProperties::Builder();
+        builder.key_retriever(decryption_properties->key_retriever());
+        builder.disable_footer_signature_verification();
+        if (!decryption_properties->aad_prefix().empty())
+            builder.aad_prefix(decryption_properties->aad_prefix());
+        if (decryption_properties->aad_prefix_verifier())
+            builder.aad_prefix_verifier(decryption_properties->aad_prefix_verifier());
+        if (decryption_properties->plaintext_files_allowed())
+            builder.plaintext_files_allowed();
+        auto props = builder.build();
+
+        reader_props.file_decryption_properties(props);
+
+        // Wrap the reconstructed Thrift in a minimal Parquet container so
+        // ParquetFileReader::Open calls ParseMetaData, which creates
+        // InternalFileDecryptor and calls set_file_decryptor on the metadata.
+        // Container layout: [thrift bytes][metadata_len LE32][PAR1 magic]
+        uint32_t metadata_len = length;
+        size_t container_size = metadata_len + 4 + 4;
+        std::shared_ptr<arrow::Buffer> container_buf;
+        PARQUET_ASSIGN_OR_THROW(container_buf, arrow::AllocateBuffer(container_size));
+        auto *dst = const_cast<uint8_t *>(container_buf->data());
+        memcpy(dst, thriftCopier.GetData(), metadata_len);
+        uint32_t le_len = metadata_len;
+        memcpy(dst + metadata_len, &le_len, 4);
+        memcpy(dst + metadata_len + 4, parquet::kParquetMagic, 4);
+
+        auto source = std::make_shared<arrow::io::BufferReader>(container_buf);
+        auto reader = parquet::ParquetFileReader::Open(source, reader_props);
+        return reader->metadata();
     }
     return parquet::FileMetaData::Make(thriftCopier.GetData(), &length, reader_props);
 }
