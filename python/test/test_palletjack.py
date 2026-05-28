@@ -488,8 +488,8 @@ class TestPalletJack(unittest.TestCase):
             self.assertEqual(metadata.num_columns, n_columns)
 
             for r in range(n_row_groups):
-                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r])
-                self.assertEqual(metadata_r.num_row_groups, 1)
+                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r], preserve_indices=True, decryption_properties=dec_props)
+                self.assertEqual(metadata_r.num_row_groups, 5)
                 self.assertEqual(metadata_r.num_columns, n_columns)
 
                 # Read actual data using the original file with decryption
@@ -500,12 +500,9 @@ class TestPalletJack(unittest.TestCase):
                 expected_data = pr.read_row_groups([r])
                 pr.close()
 
-                # Read actual data using PalletJack metadata
-                dec_props_pj = crypto_factory.file_decryption_properties(
-                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
                 pr = pq.ParquetReader()
-                pr.open(path, metadata=metadata_r, decryption_properties=dec_props_pj)
-                actual_data = pr.read_row_groups([0])
+                pr.open(path, metadata=metadata_r, decryption_properties=dec_props)
+                actual_data = pr.read_row_groups([r])
                 pr.close()
 
                 self.assertEqual(expected_data, actual_data, f"Row group {r} data mismatch")
@@ -551,41 +548,34 @@ class TestPalletJack(unittest.TestCase):
                 expected_data = pr.read_row_groups([r])
                 pr.close()
 
-                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r], decryption_properties=dec_props_read)
-                self.assertEqual(metadata_r.num_row_groups, 1)
+                metadata_r = pj.read_metadata(index_data=index_data, row_groups=[r], decryption_properties=dec_props_read, preserve_indices=True)
+                self.assertEqual(metadata_r.num_row_groups, 5)
                 self.assertEqual(metadata_r.num_columns, n_columns)
 
                 pr = pq.ParquetReader()
                 pr.open(path, metadata=metadata_r)
-                actual_data = pr.read_row_groups([0])
+                actual_data = pr.read_row_groups([r])
                 pr.close()
 
                 self.assertEqual(expected_data, actual_data, f"Row group {r} data mismatch")
 
             for c in range(n_columns):
-                dec_props_c = crypto_factory.file_decryption_properties(
-                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
-                metadata_c = pj.read_metadata(index_data=index_data, column_indices=[c], decryption_properties=dec_props_c)
-                self.assertEqual(metadata_c.num_columns, 1)
+                metadata_c = pj.read_metadata(index_data=index_data, column_indices=[c], decryption_properties=dec_props_read, preserve_indices=True)
+                self.assertEqual(metadata_c.num_columns, 7)
 
-                # Read actual column data using PalletJack metadata
-                dec_props_read = crypto_factory.file_decryption_properties(
-                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
                 pr = pq.ParquetReader()
                 pr.open(path, decryption_properties=dec_props_read)
-                expected_col = pr.read_row_groups(list(range(n_row_groups))).select([c])
+                expected_col = pr.read_row_groups(list(range(n_row_groups)), column_indices=[c])
                 pr.close()
-
-                dec_props_pj = crypto_factory.file_decryption_properties(
-                    get_kms_connection_config(), pe.DecryptionConfiguration(cache_lifetime=300))
+                
                 pr = pq.ParquetReader()
-                pr.open(path, metadata=metadata_c, decryption_properties=dec_props_pj)
-                actual_col = pr.read_row_groups(list(range(n_row_groups)))
+                pr.open(path, metadata=metadata_c, decryption_properties=dec_props_read)
+                actual_col = pr.read_row_groups(row_groups=list(range(n_row_groups)), column_indices=[c])
                 pr.close()
 
                 self.assertEqual(expected_col, actual_col, f"Column {c} data mismatch")
 
 if __name__ == '__main__':
     # unittest.main()
-    unittest.main(argv=['first-arg-is-ignored', '-k', 'TestPalletJack.test_preserve_indices_columns'])
+    unittest.main(argv=['first-arg-is-ignored', '-k', 'TestPalletJack.test_encrypted_footer_parquet'])
 
