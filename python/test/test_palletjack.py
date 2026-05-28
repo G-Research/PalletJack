@@ -343,6 +343,112 @@ class TestPalletJack(unittest.TestCase):
             # Compare the actual output to the expected output
             self.assertEqual(index_data1, index_data2)
 
+    def test_preserve_indices_row_groups(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+            pq.write_table(table, path, row_group_size=chunk_size,
+                           use_dictionary=False, write_statistics=False, store_schema=False)
+            index_data = pj.generate_metadata_index(path)
+
+            for r in range(n_row_groups):
+                metadata = pj.read_metadata(index_data=index_data, row_groups=[r], preserve_indices=True)
+                self.assertEqual(metadata.num_row_groups, n_row_groups)
+                self.assertEqual(metadata.num_columns, n_columns)
+                for rg_idx in range(n_row_groups):
+                    rg = metadata.row_group(rg_idx)
+                    if rg_idx == r:
+                        self.assertEqual(rg.num_rows, 1)
+                    else:
+                        self.assertEqual(rg.num_rows, 0)
+
+                pr = pq.ParquetReader()
+                pr.open(path, metadata=metadata)
+                actual = pr.read_row_groups([r])
+                pr.close()
+
+                pr = pq.ParquetReader()
+                pr.open(path)
+                expected = pr.read_row_groups([r])
+                pr.close()
+
+                self.assertEqual(actual, expected, f"row_group={r}")
+
+            # Multiple row groups
+            metadata = pj.read_metadata(index_data=index_data, row_groups=[1, 3], preserve_indices=True)
+            self.assertEqual(metadata.num_row_groups, n_row_groups)
+            self.assertEqual(metadata.row_group(0).num_rows, 0)
+            self.assertEqual(metadata.row_group(1).num_rows, 1)
+            self.assertEqual(metadata.row_group(2).num_rows, 0)
+            self.assertEqual(metadata.row_group(3).num_rows, 1)
+            self.assertEqual(metadata.row_group(4).num_rows, 0)
+
+            pr = pq.ParquetReader()
+            pr.open(path, metadata=metadata)
+            actual = pr.read_row_groups([1, 3])
+            pr.close()
+
+            pr = pq.ParquetReader()
+            pr.open(path)
+            expected = pr.read_row_groups([1, 3])
+            pr.close()
+            self.assertEqual(actual, expected)
+
+    def test_preserve_indices_columns(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+            pq.write_table(table, path, row_group_size=chunk_size,
+                           use_dictionary=False, write_statistics=False, store_schema=False)
+            index_data = pj.generate_metadata_index(path)
+
+            for c in range(n_columns):
+                metadata = pj.read_metadata(index_data=index_data, column_indices=[c], preserve_indices=True)
+                self.assertEqual(metadata.num_row_groups, n_row_groups)
+                self.assertEqual(metadata.num_columns, n_columns)
+
+                pf = pq.ParquetFile(path, metadata=metadata)
+                actual = pf.read_row_groups(list(range(n_row_groups)), columns=[f'column_{c}'])
+
+                pf2 = pq.ParquetFile(path)
+                expected = pf2.read_row_groups(list(range(n_row_groups)), columns=[f'column_{c}'])
+
+                self.assertEqual(actual, expected, f"column={c}")
+
+            # Multiple columns
+            metadata = pj.read_metadata(index_data=index_data, column_indices=[0, 2], preserve_indices=True)
+            self.assertEqual(metadata.num_columns, n_columns)
+
+            pf = pq.ParquetFile(path, metadata=metadata)
+            actual = pf.read_row_groups(list(range(n_row_groups)), columns=['column_0', 'column_2'])
+
+            pf2 = pq.ParquetFile(path)
+            expected = pf2.read_row_groups(list(range(n_row_groups)), columns=['column_0', 'column_2'])
+            self.assertEqual(actual, expected)
+
+    def test_preserve_indices_combined(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "my.parquet")
+            table = get_table()
+            pq.write_table(table, path, row_group_size=chunk_size,
+                           use_dictionary=False, write_statistics=False, store_schema=False)
+            index_data = pj.generate_metadata_index(path)
+
+            for r in range(n_row_groups):
+                for c in range(n_columns):
+                    metadata = pj.read_metadata(index_data=index_data, row_groups=[r],
+                                                column_indices=[c], preserve_indices=True)
+                    self.assertEqual(metadata.num_row_groups, n_row_groups)
+                    self.assertEqual(metadata.num_columns, n_columns)
+
+                    pf = pq.ParquetFile(path, metadata=metadata)
+                    actual = pf.read_row_groups([r], columns=[f'column_{c}'])
+
+                    pf2 = pq.ParquetFile(path)
+                    expected = pf2.read_row_groups([r], columns=[f'column_{c}'])
+
+                    self.assertEqual(actual, expected, f"row_group={r}, column={c}")
+
     def test_encrypted_footer_no_key(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "encrypted_footer.parquet")
@@ -481,5 +587,5 @@ class TestPalletJack(unittest.TestCase):
 
 if __name__ == '__main__':
     # unittest.main()
-    unittest.main(argv=['first-arg-is-ignored', '-k', 'TestPalletJack.test_encrypted_column_metadata_parquet'])
+    unittest.main(argv=['first-arg-is-ignored', '-k', 'TestPalletJack.test_preserve_indices_columns'])
 

@@ -196,19 +196,23 @@ class ThriftCopier
     apache::thrift::protocol::TCompactProtocolFactoryT<ThriftBuffer> tproto_factory;
     std::shared_ptr<apache::thrift::protocol::TProtocol> tproto;
 
+    inline void EnsureCapacity(size_t needed)
+    {
+        if (dst_idx + needed > static_cast<size_t>(dst_buffer->size()))
+        {
+            auto new_size = std::max(static_cast<size_t>(dst_buffer->size()) * 2, dst_idx + needed);
+            PARQUET_THROW_NOT_OK(dst_buffer->Resize(new_size, false));
+        }
+    }
+
+public:
     inline void CopyFrom(const uint8_t *src, size_t to_copy)
     {
-        if (dst_idx + to_copy > static_cast<size_t>(dst_buffer->size()))
-        {
-            auto msg = std::string("No space left in the destination buffer, dst_idx=") + std::to_string(dst_idx) + ", to_copy=" + std::to_string(to_copy) + ", size=" + std::to_string(dst_buffer->size());
-            throw std::logic_error(msg);
-        }
-
+        EnsureCapacity(to_copy);
         memcpy(dst_buffer->mutable_data() + dst_idx, src, to_copy);
         dst_idx += to_copy;
     }
 
-public:
     ThriftCopier(const uint8_t *src, size_t size) : src(src),
                                                     src_end(src + size),
                                                     dst_idx(0),
@@ -256,6 +260,16 @@ public:
     {
         mem_buffer->resetBuffer();
         tproto->writeI64(value);
+        uint8_t *ptr;
+        uint32_t len;
+        mem_buffer->getBuffer(&ptr, &len);
+        CopyFrom(ptr, len);
+    }
+
+    void WriteThrift(const ::apache::thrift::TBase &obj)
+    {
+        mem_buffer->resetBuffer();
+        obj.write(tproto.get());
         uint8_t *ptr;
         uint32_t len;
         mem_buffer->getBuffer(&ptr, &len);
@@ -552,7 +566,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
                                                     const std::vector<uint32_t> &column_indices,
                                                     const std::vector<std::string> &column_names,
                                                     bool schema_only,
-                                                    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties)
+                                                    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties,
+                                                    bool preserve_indices)
 {
 
     if (row_groups.size() > 0)
@@ -631,7 +646,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
         }
     }
 
-    if (columns.size() > 0)
+    if (columns.size() > 0 && !preserve_indices)
     {
         //> 2:required list<SchemaElement> schema;
         auto schema_list = &schema_offsets[0];
@@ -664,6 +679,10 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
         index_src = schema_elements[dataHeader.columns];
     }
 
+    // Build a set of selected row groups for fast lookup in preserve_indices mode
+    std::unordered_set<uint32_t> selected_row_groups(row_groups.begin(), row_groups.end());
+    std::unordered_set<uint32_t> selected_columns(columns.begin(), columns.end());
+
     auto row_group_filtering = row_groups.size() > 0 || schema_only;
     if (row_group_filtering)
     {
@@ -678,11 +697,22 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
         thriftCopier.CopyFrom(index_src, toCopy);
         index_src += toCopy;
 
-        thriftCopier.WriteI64(num_rows);
+        if (preserve_indices)
+        {
+            // Sum all row group rows to keep total consistent
+            int64_t total_rows = 0;
+            for (uint32_t rg = 0; rg < dataHeader.row_groups; rg++)
+                total_rows += row_numbers[rg];
+            thriftCopier.WriteI64(total_rows);
+        }
+        else
+        {
+            thriftCopier.WriteI64(num_rows);
+        }
         index_src = num_row_offsets[1];
     }
 
-    if (row_group_filtering)
+    if (row_group_filtering && !preserve_indices)
     {
         //> 4: required list<RowGroup> row_groups
         auto row_groups_list = &row_groups_offsets[0];
@@ -702,31 +732,47 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
         index_src += toCopy;
     }
 
-    for (auto idx = 0u;; idx++)
+    // Pre-serialize minimal dummy templates for preserve_indices mode.
+    std::vector<uint8_t> dummy_rg_template;
+
+    if (preserve_indices)
     {
-        size_t row_group_idx = 0;
+        auto tmem = std::make_shared<apache::thrift::transport::TMemoryBuffer>();
+        auto tprot = std::make_shared<apache::thrift::protocol::TCompactProtocol>(tmem);
+        uint8_t *ptr; uint32_t len;
 
-        if (row_group_filtering)
+        palletjack::parquet::RowGroup dummy_rg;
+        dummy_rg.num_rows = 0;
+        dummy_rg.total_byte_size = 0;
+        dummy_rg.__set_ordinal(0);
+        dummy_rg.write(tprot.get());
+        tmem->getBuffer(&ptr, &len);
+        dummy_rg_template.assign(ptr, ptr + len);
+    }
+
+    uint32_t rg_loop_count = preserve_indices ? dataHeader.row_groups
+                           : (row_group_filtering ? static_cast<uint32_t>(row_groups.size()) : dataHeader.row_groups);
+
+    for (uint32_t loop_i = 0; loop_i < rg_loop_count; loop_i++)
+    {
+        uint32_t idx = preserve_indices ? loop_i
+                     : (row_group_filtering ? row_groups[loop_i] : loop_i);
+        bool is_selected_rg = !row_group_filtering || selected_row_groups.count(idx);
+
+        if (!is_selected_rg && preserve_indices)
         {
-            if (idx >= row_groups.size())
-                break;
-
-            row_group_idx = row_groups[idx];
-        }
-        else
-        {
-            if (idx >= dataHeader.row_groups)
-                break;
-
-            row_group_idx = idx;
+            thriftCopier.CopyFrom(dummy_rg_template.data(), dummy_rg_template.size());
+            continue;
         }
 
-        auto row_group_offset = row_groups_offsets[1 + row_group_idx];
-        index_src = row_groups_offsets[1 + row_group_idx];
-        if (columns.size() > 0)
+        // Selected row group — copy real data
+        auto row_group_offset = row_groups_offsets[1 + idx];
+        index_src = row_groups_offsets[1 + idx];
+
+        if (columns.size() > 0 && !preserve_indices)
         {
             //> 1: required list<ColumnChunk> columns
-            auto chunks_list = &column_chunks_offsets[(1 + dataHeader.columns + 1) * row_group_idx];
+            auto chunks_list = &column_chunks_offsets[(1 + dataHeader.columns + 1) * idx];
             auto chunks = &chunks_list[1];
             toCopy = row_group_offset + chunks_list[0] - index_src;
             thriftCopier.CopyFrom(index_src, toCopy);
@@ -739,13 +785,53 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
             }
 
             index_src = row_group_offset + chunks[dataHeader.columns];
-            toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
+            toCopy = row_groups_offsets[1 + idx + 1] - index_src;
+            thriftCopier.CopyFrom(index_src, toCopy);
+            index_src += toCopy;
+        }
+        else if (columns.size() > 0 && preserve_indices)
+        {
+            auto chunks_list = &column_chunks_offsets[(1 + dataHeader.columns + 1) * idx];
+            auto chunks = &chunks_list[1];
+            toCopy = row_group_offset + chunks_list[0] - index_src;
+            thriftCopier.CopyFrom(index_src, toCopy);
+            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, dataHeader.columns);
+
+            // Serialize one dummy CC for this row group's num_values, reuse for all non-selected columns.
+            std::vector<uint8_t> dummy_cc_bytes;
+            {
+                auto tmem = std::make_shared<apache::thrift::transport::TMemoryBuffer>();
+                auto tprot = std::make_shared<apache::thrift::protocol::TCompactProtocol>(tmem);
+                palletjack::parquet::ColumnChunk dummy_cc;
+                dummy_cc.__isset.meta_data = true;
+                dummy_cc.meta_data.num_values = row_numbers[idx];
+                dummy_cc.write(tprot.get());
+                uint8_t *ptr; uint32_t len;
+                tmem->getBuffer(&ptr, &len);
+                dummy_cc_bytes.assign(ptr, ptr + len);
+            }
+
+            for (uint32_t c = 0; c < dataHeader.columns; c++)
+            {
+                if (selected_columns.count(c))
+                {
+                    toCopy = chunks[c + 1] - chunks[c];
+                    thriftCopier.CopyFrom(row_group_offset + chunks[c], toCopy);
+                }
+                else
+                {
+                    thriftCopier.CopyFrom(dummy_cc_bytes.data(), dummy_cc_bytes.size());
+                }
+            }
+
+            index_src = row_group_offset + chunks[dataHeader.columns];
+            toCopy = row_groups_offsets[1 + idx + 1] - index_src;
             thriftCopier.CopyFrom(index_src, toCopy);
             index_src += toCopy;
         }
         else
         {
-            toCopy = row_groups_offsets[1 + row_group_idx + 1] - index_src;
+            toCopy = row_groups_offsets[1 + idx + 1] - index_src;
             thriftCopier.CopyFrom(index_src, toCopy);
             index_src += toCopy;
         }
@@ -753,7 +839,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
 
     index_src = row_groups_offsets[1 + dataHeader.row_groups];
 
-    if (columns.size() > 0)
+    if (columns.size() > 0 && !preserve_indices)
     {
         //> 7: optional list<ColumnOrder> column_orders;
         if (column_orders_offsets[0] != 0)
@@ -763,7 +849,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
             thriftCopier.CopyFrom(index_src, toCopy);
             index_src += toCopy;
 
-            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size()); // one extra element for root
+            thriftCopier.WriteListBegin(::apache::thrift::protocol::T_STRUCT, columns.size());
             index_src = column_orders_list[1];
 
             auto column_orders = &column_orders_offsets[1];
@@ -814,6 +900,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
         auto reader = parquet::ParquetFileReader::Open(source, reader_props);
         return reader->metadata();
     }
+
+    // std::cerr << "Make length: " << length << std::endl;
     return parquet::FileMetaData::Make(thriftCopier.GetData(), &length, reader_props);
 }
 
@@ -860,7 +948,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
                                                     const std::vector<uint32_t> &column_indices,
                                                     const std::vector<std::string> &column_names,
                                                     bool schema_only,
-                                                    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties)
+                                                    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties,
+                                                    bool preserve_indices)
 {
     std::shared_ptr<arrow::io::ReadableFile> infile;
     PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(index_file_path)));
@@ -894,7 +983,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const char *index_file_path,
     }
 
     return ReadMetadata(*dataHeader, all_data->data() + header_size, body_size,
-                        row_groups, column_indices, column_names, schema_only, decryption_properties);
+                        row_groups, column_indices, column_names, schema_only, decryption_properties, preserve_indices);
 }
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_data,
@@ -903,7 +992,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
                                                     const std::vector<uint32_t> &column_indices,
                                                     const std::vector<std::string> &column_names,
                                                     bool schema_only,
-                                                    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties)
+                                                    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties,
+                                                    bool preserve_indices)
 {
     size_t header_size = 0;
     DataHeaderV3 pj2_buf;
@@ -917,5 +1007,5 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
     }
 
     return ReadMetadata(*dataHeader, &index_data[header_size], index_data_length - header_size,
-                        row_groups, column_indices, column_names, schema_only, decryption_properties);
+                        row_groups, column_indices, column_names, schema_only, decryption_properties, preserve_indices);
 }

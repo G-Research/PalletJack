@@ -27,7 +27,7 @@ cpdef generate_metadata_index(parquet_path, index_file_path = None, decryption_p
 
     return None
 
-cpdef read_metadata(index_file_path = None, row_groups = [], column_indices = [], column_names = [], index_data = None, decryption_properties = None):
+cpdef read_metadata(index_file_path = None, row_groups = [], column_indices = [], column_names = [], index_data = None, decryption_properties = None, preserve_indices = False):
 
     cdef shared_ptr[CFileMetaData] c_metadata
     cdef string encoded_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
@@ -36,22 +36,23 @@ cpdef read_metadata(index_file_path = None, row_groups = [], column_indices = []
     cdef vector[uint32_t] ccolumn_indices = column_indices
     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
     cdef shared_ptr[cpalletjack.CFileDecryptionProperties] c_decryption_properties
+    cdef bint c_preserve_indices = preserve_indices
     if decryption_properties is not None:
         c_decryption_properties = (<FileDecryptionProperties?>decryption_properties).unwrap()
 
     if index_file_path is None:
         with cython.boundscheck(False):
             with nogil:
-                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names, False, c_decryption_properties)
+                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names, False, c_decryption_properties, c_preserve_indices)
     else:
         with nogil:
-            c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names, False, c_decryption_properties)
+            c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names, False, c_decryption_properties, c_preserve_indices)
 
     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
     m.init(c_metadata)
     return m
 
-cpdef read_schema(index_file_path = None, column_indices = [], column_names = [], index_data = None, decryption_properties = None):
+cpdef read_schema(index_file_path = None, column_indices = [], column_names = [], index_data = None, decryption_properties = None, preserve_indices = False):
 
     cdef shared_ptr[CFileMetaData] c_metadata
     cdef string encoded_path = index_file_path.encode('utf8') if index_file_path is not None else "".encode('utf8')
@@ -60,16 +61,17 @@ cpdef read_schema(index_file_path = None, column_indices = [], column_names = []
     cdef vector[uint32_t] ccolumn_indices = column_indices
     cdef vector[string] ccolumn_names = [c.encode('utf8') for c in column_names]
     cdef shared_ptr[cpalletjack.CFileDecryptionProperties] c_decryption_properties
+    cdef bint c_preserve_indices = preserve_indices
     if decryption_properties is not None:
         c_decryption_properties = (<FileDecryptionProperties?>decryption_properties).unwrap()
 
     if index_file_path is None:
         with cython.boundscheck(False):
             with nogil:
-                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names, True, c_decryption_properties)
+                c_metadata = cpalletjack.ReadMetadata(&mv[0], len(mv), crow_groups, ccolumn_indices, ccolumn_names, True, c_decryption_properties, c_preserve_indices)
     else:
         with nogil:
-            c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names, True, c_decryption_properties)
+            c_metadata = cpalletjack.ReadMetadata(encoded_path.c_str(), crow_groups, ccolumn_indices, ccolumn_names, True, c_decryption_properties, c_preserve_indices)
 
     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
     m.init(c_metadata)

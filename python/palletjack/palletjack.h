@@ -19,7 +19,8 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(
     const std::vector<uint32_t> &column_indices,
     const std::vector<std::string> &column_names,
     bool schema_only,
-    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties);
+    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties,
+    bool preserve_indices = false);
 
 std::shared_ptr<parquet::FileMetaData> ReadMetadata(
     const unsigned char *index_data,
@@ -28,4 +29,5 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(
     const std::vector<uint32_t> &column_indices,
     const std::vector<std::string> &column_names,
     bool schema_only,
-    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties);
+    std::shared_ptr<parquet::FileDecryptionProperties> decryption_properties,
+    bool preserve_indices = false);
