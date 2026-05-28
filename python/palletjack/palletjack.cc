@@ -790,21 +790,11 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
     parquet::ReaderProperties reader_props;
     if (decryption_properties)
     {
-        // Clone decryption properties with footer signature verification disabled.
-        // The reconstructed Thrift from the index has no footer signature, and
-        // filtered metadata would invalidate the original signature anyway.
-        auto builder = parquet::FileDecryptionProperties::Builder();
-        builder.key_retriever(decryption_properties->key_retriever());
-        builder.disable_footer_signature_verification();
-        if (!decryption_properties->aad_prefix().empty())
-            builder.aad_prefix(decryption_properties->aad_prefix());
-        if (decryption_properties->aad_prefix_verifier())
-            builder.aad_prefix_verifier(decryption_properties->aad_prefix_verifier());
-        if (decryption_properties->plaintext_files_allowed())
-            builder.plaintext_files_allowed();
-        auto props = builder.build();
-
-        reader_props.file_decryption_properties(props);
+        auto dec_props_builder = parquet::FileDecryptionProperties::Builder();
+        dec_props_builder.key_retriever(decryption_properties->key_retriever());
+        dec_props_builder.disable_footer_signature_verification();
+        dec_props_builder.plaintext_files_allowed();
+        reader_props.file_decryption_properties(dec_props_builder.build());
 
         // Wrap the reconstructed Thrift in a minimal Parquet container so
         // ParquetFileReader::Open calls ParseMetaData, which creates
