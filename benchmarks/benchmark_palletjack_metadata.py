@@ -1,5 +1,6 @@
 import palletjack as pj
 import pyarrow.parquet as pq
+import pyarrow.parquet.encryption as pe
 import pyarrow as pa
 import numpy as np
 import pyarrow.fs as fs
@@ -8,6 +9,7 @@ import tempfile
 import humanize
 import time
 import os
+import base64
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, EnvSettingsSource, SettingsConfigDict
@@ -43,6 +45,26 @@ class BenchmarkSettings(BaseSettings):
     def index_path(self) -> str:
         return self.parquet_path + '.index'
 
+    @computed_field
+    @property
+    def encrypted_plaintext_footer_path(self) -> str:
+        return self.parquet_path + '.enc_plain_footer.parquet'
+
+    @computed_field
+    @property
+    def encrypted_plaintext_footer_index_path(self) -> str:
+        return self.encrypted_plaintext_footer_path + '.index'
+
+    @computed_field
+    @property
+    def encrypted_footer_path(self) -> str:
+        return self.parquet_path + '.enc_footer.parquet'
+
+    @computed_field
+    @property
+    def encrypted_footer_index_path(self) -> str:
+        return self.encrypted_footer_path + '.index'
+
     @classmethod
     def settings_customise_sources(
         cls,
@@ -61,6 +83,37 @@ class BenchmarkSettings(BaseSettings):
 
 
 cfg = BenchmarkSettings()
+
+
+class InMemoryKmsClient(pe.KmsClient):
+    def __init__(self, config):
+        super().__init__()
+        self.master_keys = config.custom_kms_conf
+
+    def wrap_key(self, key_bytes, master_key_identifier):
+        master = self.master_keys[master_key_identifier].encode()
+        padded = master * (len(key_bytes) // len(master) + 1)
+        return base64.b64encode(bytes(a ^ b for a, b in zip(key_bytes, padded[:len(key_bytes)]))).decode()
+
+    def unwrap_key(self, wrapped_key, master_key_identifier):
+        key_bytes = base64.b64decode(wrapped_key)
+        master = self.master_keys[master_key_identifier].encode()
+        padded = master * (len(key_bytes) // len(master) + 1)
+        return bytes(a ^ b for a, b in zip(key_bytes, padded[:len(key_bytes)]))
+
+
+crypto_factory = pe.CryptoFactory(lambda config: InMemoryKmsClient(config))
+
+
+def get_kms_connection_config():
+    config = pe.KmsConnectionConfig()
+    config.custom_kms_conf = {'footer_key': 'masterkey1234567', 'col_key': 'colmaster1234567'}
+    return config
+
+
+def make_decryption_properties():
+    dec_config = pe.DecryptionConfiguration(cache_lifetime=300)
+    return crypto_factory.file_decryption_properties(get_kms_connection_config(), dec_config)
 
 def worker_arrow_row_group():
 
@@ -89,11 +142,18 @@ def worker_palletjack_column_name_metadata():
 
 def worker_inmemory_palletjack_row_group_column_metadata(index_data):
 
-    pj.read_metadata(index_data = index_data, row_groups = [0], column_indices = [0])
+    pj.read_metadata(index_data = index_data, row_groups = [0], column_indices = [0], preserve_indices=True)
 
 def worker_palletjack_row_group_column_metadata():
 
     pj.read_metadata(cfg.index_path, row_groups = [0], column_indices = [0])
+
+def worker_palletjack_encrypted_plaintext_footer_metadata():
+    pj.read_metadata(cfg.encrypted_plaintext_footer_index_path, row_groups=[0], column_indices=[0])
+
+def worker_palletjack_encrypted_footer_metadata():
+    dec_props = make_decryption_properties()
+    pj.read_metadata(cfg.encrypted_footer_index_path, row_groups=[0], column_indices=[0], decryption_properties=dec_props)
 
 def worker_arrow_metadata():
 
@@ -156,6 +216,79 @@ def generate_data():
     
     print("")
 
+def generate_encrypted_data():
+
+    dtype = pa.from_numpy_dtype(cfg.dtype)
+    schema = pa.schema([pa.field(f'column_{i}', dtype) for i in range(cfg.columns)])
+    data = np.random.rand(cfg.rows, cfg.columns).astype(cfg.dtype)
+    pa_arrays = [pa.array(data[:, i], type=dtype) for i in range(cfg.columns)]
+    table = pa.Table.from_arrays(pa_arrays, schema=schema)
+
+    # Encrypted with plaintext footer (column-level encryption)
+    if not os.path.exists(cfg.encrypted_plaintext_footer_index_path):
+        enc_config = pe.EncryptionConfiguration(
+            footer_key='footer_key',
+            column_keys={'col_key': [f'column_{i}' for i in range(cfg.columns)]},
+            plaintext_footer=True,
+        )
+        enc_props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
+
+        t = time.time()
+        print(f"writing encrypted (plaintext footer) parquet file")
+        pq.write_table(table, cfg.encrypted_plaintext_footer_path,
+                       row_group_size=cfg.chunk_size, use_dictionary=False,
+                       write_statistics=False, compression=None, store_schema=False,
+                       encryption_properties=enc_props)
+        dt = time.time() - t
+        print(f"finished in {dt:.2f} seconds")
+
+        t = time.time()
+        print("Generating metadata index (plaintext footer)")
+        pj.generate_metadata_index(cfg.encrypted_plaintext_footer_path, cfg.encrypted_plaintext_footer_index_path)
+        dt = time.time() - t
+        print(f"Metadata index generated in {dt:.2f} seconds")
+
+        parquet_size = os.stat(cfg.encrypted_plaintext_footer_path).st_size
+        index_size = os.stat(cfg.encrypted_plaintext_footer_index_path).st_size
+        index_size_percentage = 100 * index_size / parquet_size
+        print(f"Parquet size={humanize.naturalsize(parquet_size)}, index size={humanize.naturalsize(index_size)}({index_size_percentage:.2f}%)")
+        print("")
+    else:
+        print(f"Reusing existing encrypted (plaintext footer) index: {cfg.encrypted_plaintext_footer_index_path}")
+
+    # Encrypted with encrypted footer (uniform encryption)
+    if not os.path.exists(cfg.encrypted_footer_index_path):
+        enc_config = pe.EncryptionConfiguration(
+            footer_key='footer_key',
+            uniform_encryption=True,
+            plaintext_footer=False,
+        )
+        enc_props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
+
+        t = time.time()
+        print(f"writing encrypted (encrypted footer) parquet file")
+        pq.write_table(table, cfg.encrypted_footer_path,
+                       row_group_size=cfg.chunk_size, use_dictionary=False,
+                       write_statistics=False, compression=None, store_schema=False,
+                       encryption_properties=enc_props)
+        dt = time.time() - t
+        print(f"finished in {dt:.2f} seconds")
+
+        t = time.time()
+        print("Generating metadata index (encrypted footer)")
+        dec_props = make_decryption_properties()
+        pj.generate_metadata_index(cfg.encrypted_footer_path, cfg.encrypted_footer_index_path, decryption_properties=dec_props)
+        dt = time.time() - t
+        print(f"Metadata index generated in {dt:.2f} seconds")
+
+        parquet_size = os.stat(cfg.encrypted_footer_path).st_size
+        index_size = os.stat(cfg.encrypted_footer_index_path).st_size
+        index_size_percentage = 100 * index_size / parquet_size
+        print(f"Parquet size={humanize.naturalsize(parquet_size)}, index size={humanize.naturalsize(index_size)}({index_size_percentage:.2f}%)")
+        print("")
+    else:
+        print(f"Reusing existing encrypted (encrypted footer) index: {cfg.encrypted_footer_index_path}")
+
 def measure_reading(max_workers, worker):
 
     tt = []
@@ -188,6 +321,7 @@ for name, value in cfg.model_dump().items():
 print(".")
 
 generate_data()
+generate_encrypted_data()
 index_data = fs.LocalFileSystem().open_input_stream(cfg.index_path).readall()
 
 for n_workers in cfg.worker_counts:
@@ -198,6 +332,9 @@ for n_workers in cfg.worker_counts:
     print(f"pj.read_metadata(row_groups[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_row_group_metadata)}")
     print(f"pj.read_metadata(column[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_column_metadata)}")
     print(f"pj.read_metadata(column['column_0']) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_column_name_metadata)}")
+    print(".")
+    print(f"pj.read_metadata(enc_plaintext_footer, row_groups[0]+columns[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_encrypted_plaintext_footer_metadata)}")
+    print(f"pj.read_metadata(enc_footer, row_groups[0]+columns[0]) n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_palletjack_encrypted_footer_metadata)}")
     print(".")
     print(f"pq.ParquetReader.metadata n_workers:{n_workers}, duration:{measure_reading(n_workers, worker_arrow_metadata)}")
     print(".")

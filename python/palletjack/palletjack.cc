@@ -11,6 +11,8 @@
 
 #include "palletjack.h"
 
+#include "internal_file_decryptor.h"
+
 // TCompactProtocol requires some #defines to work right.
 #define SIGNED_RIGHT_SHIFT_IS 1
 #define ARITHMETIC_RIGHT_SHIFT 1
@@ -92,11 +94,13 @@ struct DataHeaderV3
     }
     uint32_t get_body_size() const
     {
-        return get_offsets_size() +
-               column_names_length +
-               metadata_length +
-               encrypted_metadata_length +
-               crypto_metadata_length;
+        uint32_t size = get_offsets_size() + column_names_length +
+                        encrypted_metadata_length + crypto_metadata_length;
+        // For encrypted footer files, metadata_length holds the decrypted size
+        // (used for offset reference) but the decrypted bytes are not stored.
+        if (encrypted_metadata_length == 0)
+            size += metadata_length;
+        return size;
     }
 };
 
@@ -527,7 +531,10 @@ std::shared_ptr<arrow::Buffer> GenerateMetadataIndex(const char *parquet_path,
         throw std::logic_error("Error when writing the index file, data_header.column_names_length != written_column_names_length !");
     }
 
-    PARQUET_THROW_NOT_OK(fs->Write(thrift_buffer->data(), thrift_buffer->size()));
+    if (!is_encrypted_footer)
+    {
+        PARQUET_THROW_NOT_OK(fs->Write(thrift_buffer->data(), thrift_buffer->size()));
+    }
 
     if (encrypted_metadata_buf)
     {
@@ -607,9 +614,53 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
     auto row_groups_offsets = (uint32_t *)&schema_num_children_offsets[dataHeader.get_schema_num_children_offsets_size()];
     auto column_orders_offsets = (uint32_t *)&row_groups_offsets[dataHeader.get_row_groups_offsets_size()];
     auto column_chunks_offsets = (uint32_t *)&column_orders_offsets[dataHeader.get_column_orders_offsets_size()];
-    auto column_names_ptr = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
-    auto src = (uint8_t *)&column_names_ptr[dataHeader.column_names_length];
-    ThriftCopier thriftCopier(src, dataHeader.metadata_length);
+    auto column_names_start = (uint8_t *)&column_chunks_offsets[dataHeader.get_column_chunks_offsets_size()];
+    auto column_names_ptr = column_names_start;
+    std::shared_ptr<arrow::Buffer> decrypted_metadata_buf;
+    uint8_t *metadata_src;
+    uint32_t metadata_src_length;
+    std::shared_ptr<parquet::InternalFileDecryptor> file_decryptor;
+
+    if (dataHeader.encrypted_metadata_length > 0)
+    {
+        if (!decryption_properties)
+        {
+            throw std::logic_error(
+                "Index was generated from an encrypted-footer file. "
+                "Decryption properties must be provided to read_metadata.");
+        }
+
+        auto encrypted_meta_ptr = &column_names_ptr[dataHeader.column_names_length];
+        auto crypto_meta_ptr = &encrypted_meta_ptr[dataHeader.encrypted_metadata_length];
+
+        uint32_t crypto_len = dataHeader.crypto_metadata_length;
+        auto file_crypto_metadata = parquet::FileCryptoMetaData::Make(
+            crypto_meta_ptr, &crypto_len);
+        auto enc_algo = file_crypto_metadata->encryption_algorithm();
+
+        std::string file_aad = enc_algo.aad.aad_prefix + enc_algo.aad.aad_file_unique;
+        file_decryptor = std::make_shared<parquet::InternalFileDecryptor>(
+            decryption_properties, file_aad, enc_algo.algorithm,
+            file_crypto_metadata->key_metadata(), arrow::default_memory_pool());
+
+        auto footer_decryptor = file_decryptor->GetFooterDecryptor();
+        int32_t ciphertext_len = static_cast<int32_t>(dataHeader.encrypted_metadata_length);
+        int32_t plaintext_len = footer_decryptor->PlaintextLength(ciphertext_len);
+        PARQUET_ASSIGN_OR_THROW(decrypted_metadata_buf, arrow::AllocateBuffer(plaintext_len));
+        footer_decryptor->Decrypt(
+            {encrypted_meta_ptr, static_cast<size_t>(ciphertext_len)},
+            {const_cast<uint8_t *>(decrypted_metadata_buf->data()), static_cast<size_t>(plaintext_len)});
+
+        metadata_src = const_cast<uint8_t *>(decrypted_metadata_buf->data());
+        metadata_src_length = static_cast<uint32_t>(plaintext_len);
+    }
+    else
+    {
+        metadata_src = (uint8_t *)&column_names_ptr[dataHeader.column_names_length];
+        metadata_src_length = dataHeader.metadata_length;
+    }
+
+    ThriftCopier thriftCopier(metadata_src, metadata_src_length);
 
     uint32_t index_src = 0;
     size_t toCopy = 0;
@@ -627,7 +678,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
             columns_map[s] = c;
         }
 
-        if (column_names_ptr != src)
+        if (column_names_ptr != column_names_start + dataHeader.column_names_length)
         {
             auto msg = std::string("Internal error, when reading column names!");
             throw std::logic_error(msg);
@@ -863,16 +914,78 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
     }
 
     // Copy leftovers
-    toCopy = dataHeader.metadata_length - index_src;
+    toCopy = metadata_src_length - index_src;
     thriftCopier.CopyFrom(index_src, toCopy);
 
-#ifdef DEBUG
-    std::cerr << " Reading body_size: " << body_size << std::endl;
-    std::cerr << " Reading thrift offset: " << src - &data_body[0] << std::endl;
-    std::cerr << " Reading thrift length: " << dataHeader.metadata_length << std::endl;
-#endif
-
     uint32_t length = thriftCopier.GetDataSize();
+
+    if (dataHeader.encrypted_metadata_length > 0)
+    {
+        // Inject encryption_algorithm and footer_signing_key_metadata into the
+        // filtered Thrift so FileMetaData::Make can initialize column decryptors.
+        auto filtered_metadata = DeserializeFileMetadata(thriftCopier.GetData(), length);
+
+        auto crypto_meta_ptr = &column_names_start[dataHeader.column_names_length +
+                                                    dataHeader.encrypted_metadata_length];
+        uint32_t crypto_len = dataHeader.crypto_metadata_length;
+        auto file_crypto_metadata = parquet::FileCryptoMetaData::Make(
+            crypto_meta_ptr, &crypto_len);
+        auto enc_algo_full = file_crypto_metadata->encryption_algorithm();
+
+        filtered_metadata.__isset.encryption_algorithm = true;
+        if (enc_algo_full.algorithm == parquet::ParquetCipher::AES_GCM_V1)
+        {
+            filtered_metadata.encryption_algorithm.__isset.AES_GCM_V1 = true;
+            filtered_metadata.encryption_algorithm.AES_GCM_V1.__isset.aad_prefix = !enc_algo_full.aad.aad_prefix.empty();
+            filtered_metadata.encryption_algorithm.AES_GCM_V1.aad_prefix = enc_algo_full.aad.aad_prefix;
+            filtered_metadata.encryption_algorithm.AES_GCM_V1.__isset.aad_file_unique = !enc_algo_full.aad.aad_file_unique.empty();
+            filtered_metadata.encryption_algorithm.AES_GCM_V1.aad_file_unique = enc_algo_full.aad.aad_file_unique;
+            filtered_metadata.encryption_algorithm.AES_GCM_V1.__isset.supply_aad_prefix = enc_algo_full.aad.supply_aad_prefix;
+            filtered_metadata.encryption_algorithm.AES_GCM_V1.supply_aad_prefix = enc_algo_full.aad.supply_aad_prefix;
+        }
+        else
+        {
+            filtered_metadata.encryption_algorithm.__isset.AES_GCM_CTR_V1 = true;
+            filtered_metadata.encryption_algorithm.AES_GCM_CTR_V1.__isset.aad_prefix = !enc_algo_full.aad.aad_prefix.empty();
+            filtered_metadata.encryption_algorithm.AES_GCM_CTR_V1.aad_prefix = enc_algo_full.aad.aad_prefix;
+            filtered_metadata.encryption_algorithm.AES_GCM_CTR_V1.__isset.aad_file_unique = !enc_algo_full.aad.aad_file_unique.empty();
+            filtered_metadata.encryption_algorithm.AES_GCM_CTR_V1.aad_file_unique = enc_algo_full.aad.aad_file_unique;
+            filtered_metadata.encryption_algorithm.AES_GCM_CTR_V1.__isset.supply_aad_prefix = enc_algo_full.aad.supply_aad_prefix;
+            filtered_metadata.encryption_algorithm.AES_GCM_CTR_V1.supply_aad_prefix = enc_algo_full.aad.supply_aad_prefix;
+        }
+        filtered_metadata.__isset.footer_signing_key_metadata = true;
+        filtered_metadata.footer_signing_key_metadata = file_crypto_metadata->key_metadata();
+
+        auto tmem = std::make_shared<apache::thrift::transport::TMemoryBuffer>();
+        auto tprot = std::make_shared<apache::thrift::protocol::TCompactProtocol>(tmem);
+        filtered_metadata.write(tprot.get());
+        uint8_t *ptr; uint32_t len;
+        tmem->getBuffer(&ptr, &len);
+
+        // Build PAR1 container with injected encryption fields.
+        // ParquetFileReader::Open on a plaintext footer with encryption_algorithm set
+        // will create the InternalFileDecryptor for column decryption.
+        parquet::ReaderProperties reader_props;
+        auto dec_props_builder = parquet::FileDecryptionProperties::Builder();
+        dec_props_builder.key_retriever(decryption_properties->key_retriever());
+        dec_props_builder.disable_footer_signature_verification();
+        dec_props_builder.plaintext_files_allowed();
+        reader_props.file_decryption_properties(dec_props_builder.build());
+
+        size_t container_size = len + 4 + 4;
+        std::shared_ptr<arrow::Buffer> container_buf;
+        PARQUET_ASSIGN_OR_THROW(container_buf, arrow::AllocateBuffer(container_size));
+        auto *cdst = const_cast<uint8_t *>(container_buf->data());
+        memcpy(cdst, ptr, len);
+        uint32_t le_len = len;
+        memcpy(cdst + len, &le_len, 4);
+        memcpy(cdst + len + 4, parquet::kParquetMagic, 4);
+
+        auto source = std::make_shared<arrow::io::BufferReader>(container_buf);
+        auto reader = parquet::ParquetFileReader::Open(source, reader_props);
+        return reader->metadata();
+    }
+
     parquet::ReaderProperties reader_props;
     if (decryption_properties)
     {
@@ -882,10 +995,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
         dec_props_builder.plaintext_files_allowed();
         reader_props.file_decryption_properties(dec_props_builder.build());
 
-        // Wrap the reconstructed Thrift in a minimal Parquet container so
-        // ParquetFileReader::Open calls ParseMetaData, which creates
-        // InternalFileDecryptor and calls set_file_decryptor on the metadata.
-        // Container layout: [thrift bytes][metadata_len LE32][PAR1 magic]
         uint32_t metadata_len = length;
         size_t container_size = metadata_len + 4 + 4;
         std::shared_ptr<arrow::Buffer> container_buf;
@@ -901,7 +1010,6 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const DataHeaderV3 &dataHead
         return reader->metadata();
     }
 
-    // std::cerr << "Make length: " << length << std::endl;
     return parquet::FileMetaData::Make(thriftCopier.GetData(), &length, reader_props);
 }
 
