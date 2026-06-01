@@ -142,14 +142,14 @@ def worker_palletjack_column_name_metadata():
 
 def worker_inmemory_palletjack_row_group_column_metadata(index_data):
 
-    pj.read_metadata(index_data = index_data, row_groups = [0], column_indices = [0], preserve_indices=True)
+    pj.read_metadata(index_data = index_data, row_groups = [0], column_indices = [0])
 
 def worker_palletjack_row_group_column_metadata():
 
     pj.read_metadata(cfg.index_path, row_groups = [0], column_indices = [0])
 
 def worker_palletjack_encrypted_plaintext_footer_metadata():
-    pj.read_metadata(cfg.encrypted_plaintext_footer_index_path, row_groups=[0], column_indices=[0])
+    pj.read_metadata(cfg.encrypted_plaintext_footer_index_path, row_groups=[0], column_indices=[0], preserve_indices=True)
 
 def worker_palletjack_encrypted_footer_metadata():
     dec_props = make_decryption_properties()
