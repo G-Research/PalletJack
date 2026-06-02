@@ -41,7 +41,7 @@ print ("library_dirs=", library_dirs)
 
 extra_compile_args = []
 extra_link_args = []
-debug = False,
+debug = False
 
 if os.getenv('DEBUG', '') == 'ON':
     print("Building with DEBUG information!")
