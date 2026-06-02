@@ -98,11 +98,11 @@ class TestPalletJack(unittest.TestCase):
             index_path = path + '.index'
             pj.generate_metadata_index(path, index_path)
 
-            all_columns = list(range(n_columns))
-            all_row_groups = list(range(n_row_groups))
-            for r in range(3):
+            all_columns = list(range(0, n_columns))
+            all_row_groups = list(range(0, n_row_groups))
+            for r in range(0, 4):
                 for rp in it.permutations(all_row_groups, r):
-                    for c in range(3):
+                    for c in range(0, 4):
                         for cp in it.permutations(all_columns, c):
                             validate_reading(path, index_path, row_groups = rp, column_indices = cp)
 
@@ -365,5 +365,3 @@ class TestPalletJack(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    # unittest.main(argv=['first-arg-is-ignored', '-k', 'TestPalletJack.test_encrypted_footer_parquet'])
-
