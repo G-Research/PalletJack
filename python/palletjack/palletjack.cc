@@ -214,6 +214,12 @@ std::shared_ptr<arrow::Buffer> GenerateMetadataIndex(const char *parquet_path)
         PARQUET_ASSIGN_OR_THROW(infile, arrow::io::ReadableFile::Open(std::string(parquet_path)));
         auto metadata = parquet::ReadMetaData(infile);
 
+        if (metadata->is_encryption_algorithm_set())
+        {
+            throw parquet::ParquetException(
+                "Encrypted column metadata is not supported: '" + std::string(parquet_path) + "'.");
+        }
+
         std::shared_ptr<arrow::io::BufferOutputStream> metadata_stream;
         PARQUET_ASSIGN_OR_THROW(metadata_stream, arrow::io::BufferOutputStream::Create(1024, arrow::default_memory_pool()));
         metadata.get()->WriteTo(metadata_stream.get());
