@@ -75,9 +75,9 @@ class TestPalletJack(unittest.TestCase):
 
             all_columns = list(range(n_columns))
             all_row_groups = list(range(n_row_groups))
-            for r in range(3):
+            for r in range(4):
                 for rp in it.permutations(all_row_groups, r):
-                    for c in range(3):
+                    for c in range(4):
                         for cp in it.permutations(all_columns, c):
                             validate_reading(path, index_path, row_groups = rp, column_indices = cp)
 
