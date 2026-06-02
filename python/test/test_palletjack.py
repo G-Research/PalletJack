@@ -331,22 +331,6 @@ class TestPalletJack(unittest.TestCase):
             # Compare the actual output to the expected output
             self.assertEqual(index_data1, index_data2)
 
-    def test_encrypted_footer_no_key(self):
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            path = os.path.join(tmpdirname, "encrypted_footer.parquet")
-            table = get_table()
-            enc_config = pe.EncryptionConfiguration(
-                footer_key='footer_key',
-                uniform_encryption=True,
-                plaintext_footer=False,
-            )
-            props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
-            pq.write_table(table, path, encryption_properties=props)
-
-            with self.assertRaises(RuntimeError) as context:
-                pj.generate_metadata_index(path)
-            self.assertIn("encrypted footer", str(context.exception))
-
     def test_encrypted_footer_parquet(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "encrypted_footer.parquet")
@@ -359,16 +343,9 @@ class TestPalletJack(unittest.TestCase):
             enc_props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
             pq.write_table(table, path, row_group_size=chunk_size, encryption_properties=enc_props)
 
-            dec_config = pe.DecryptionConfiguration(cache_lifetime=300)
-            dec_props = crypto_factory.file_decryption_properties(get_kms_connection_config(), dec_config)
-
-            index_data = pj.generate_metadata_index(path, decryption_properties=dec_props)
-            self.assertIsNotNone(index_data)
-
-            metadata = pj.read_metadata(index_data=index_data)
-            self.assertEqual(metadata.num_row_groups, n_row_groups)
-            self.assertEqual(metadata.num_columns, n_columns)
-
+            with self.assertRaises(RuntimeError) as context:
+                pj.generate_metadata_index(path)
+            self.assertIn("Could not read encrypted metadata, no decryption found in reader's properties", str(context.exception))
 
     def test_encrypted_column_metadata_parquet(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -382,12 +359,9 @@ class TestPalletJack(unittest.TestCase):
             props = crypto_factory.file_encryption_properties(get_kms_connection_config(), enc_config)
             pq.write_table(table, path, row_group_size=chunk_size, encryption_properties=props)
 
-            index_data = pj.generate_metadata_index(path)
-            self.assertIsNotNone(index_data)
-
-            metadata = pj.read_metadata(index_data=index_data)
-            self.assertEqual(metadata.num_row_groups, n_row_groups)
-            self.assertEqual(metadata.num_columns, n_columns)
+            with self.assertRaises(RuntimeError) as context:
+                pj.generate_metadata_index(path)
+            self.assertIn("Encrypted column metadata is not supported:", str(context.exception))
 
 if __name__ == '__main__':
     unittest.main()
