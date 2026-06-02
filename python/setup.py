@@ -44,9 +44,10 @@ extra_link_args = []
 debug = False,
 
 if os.getenv('DEBUG', '') == 'ON':
-    extra_compile_args = ["-Og", '-DDEBUG']
-    extra_link_args = ["-debug:full"]
-    debug = True,
+    print("Building with DEBUG information!")
+    extra_compile_args.extend(["-O0", "-DDEBUG"])
+    extra_link_args.extend(["-debug:full"])
+    debug = True
 
 # Define your extension
 extensions = [
