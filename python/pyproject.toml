@@ -41,6 +41,8 @@ skip = [
  "*-musllinux_*",
  "*win32",
  "cp39-*",
+ "cp315-*",
+ "cp315t-*",
 ]
 
 # We use manylinux_2_28 for ABI compatibility with pyarrow
