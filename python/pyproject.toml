@@ -3,7 +3,7 @@ requires = [
   "setuptools>=55.0",
   "Cython>=3",
   "numpy>=1.16.6",
-  "pyarrow~=24.0.0",
+  "pyarrow~=25.0.0",
 ]
 
 build-backend = "setuptools.build_meta"
@@ -20,7 +20,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyarrow~=24.0.0",
+  "pyarrow~=25.0.0",
 ]
 
 
@@ -58,7 +58,7 @@ before-build = [
 ]
 
 repair-wheel-command = [
- "auditwheel repair --exclude libarrow.so.2400 --exclude libparquet.so.2400 -w {dest_dir} {wheel}",
+ "auditwheel repair --exclude libarrow.so.2500 --exclude libparquet.so.2500 -w {dest_dir} {wheel}",
 ]
 
 # Run multiple commands using an array
