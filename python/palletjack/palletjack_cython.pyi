@@ -76,3 +76,8 @@ def read_schema(
         A :class:`pyarrow.Schema` instance.
     """
     ...
+
+_read_metadata_capi: object
+"""PyCapsule named ``palletjack.ReadMetadata`` holding a pointer to the index-data overload of the C++
+``ReadMetadata``, for extension modules that decode metadata without holding the GIL. See ``palletjack.h`` for the
+exact function type."""

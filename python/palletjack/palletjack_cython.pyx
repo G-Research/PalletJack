@@ -3,6 +3,7 @@
 import cython
 import pyarrow as pa
 import pyarrow.parquet as pq
+from cpython.pycapsule cimport PyCapsule_New
 from cython.cimports.palletjack import cpalletjack
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr
@@ -65,3 +66,8 @@ cpdef read_schema(index_file_path = None, column_indices = [], column_names = []
     cdef FileMetaData m = FileMetaData.__new__(FileMetaData)
     m.init(c_metadata)
     return m.schema.to_arrow_schema()
+
+cdef cpalletjack.PalletJackReadMetadataFunc _read_metadata_func = cpalletjack.GetReadMetadataFunc()
+
+# The index-data overload of ReadMetadata, for extension modules decoding metadata without the GIL, see palletjack.h
+_read_metadata_capi = PyCapsule_New(<void*>_read_metadata_func, cpalletjack.PALLETJACK_READ_METADATA_CAPSULE_NAME, NULL)

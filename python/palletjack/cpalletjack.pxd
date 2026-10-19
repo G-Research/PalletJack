@@ -14,3 +14,6 @@ cdef extern from "palletjack.h":
     cdef void GenerateMetadataIndex(const char *parquet_path, const char *index_file_path) except + nogil
     cdef shared_ptr[CFileMetaData] ReadMetadata(const char *index_file_path, const vector[uint32_t] row_groups, const vector[uint32_t] column_indices, const vector[string] column_names, bint schema_only) except + nogil
     cdef shared_ptr[CFileMetaData] ReadMetadata(const unsigned char *index_data, size_t index_data_length, const vector[uint32_t] row_groups, const vector[uint32_t] column_indices, const vector[string] column_names, bint schema_only) except + nogil
+    ctypedef shared_ptr[CFileMetaData] (*PalletJackReadMetadataFunc)(const unsigned char *index_data, size_t index_data_length, const vector[uint32_t] &row_groups, const vector[uint32_t] &column_indices, const vector[string] &column_names, bint schema_only)
+    cdef PalletJackReadMetadataFunc GetReadMetadataFunc()
+    cdef const char* PALLETJACK_READ_METADATA_CAPSULE_NAME

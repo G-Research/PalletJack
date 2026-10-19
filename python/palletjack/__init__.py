@@ -9,6 +9,7 @@ from .package_metadata import (
 
 try:
     from .palletjack_cython import *
+    from .palletjack_cython import _read_metadata_capi
 except ImportError as e:
     if any(x in str(e) for x in ['arrow', 'parquet']):
         pyarrow_req = next((r for r in __dependencies__ if r.startswith('pyarrow')), '')
