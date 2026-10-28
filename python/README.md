@@ -116,3 +116,31 @@ schema = pj.read_schema(index_path)
 schema = pj.read_schema(index_path, column_indices = [1, 3])
 schema = pj.read_schema(index_path, column_names = ['column_1', 'column_3'])
 ```
+
+## C API
+
+Other extension modules can call PalletJack's C++ functions without the GIL through the PyCapsule `palletjack.palletjack_capi`. It points to the `PalletJackCAPI` table declared in `palletjack_capi.h`, which is installed in the palletjack package directory (`os.path.dirname(palletjack.__file__)`). The caller must be built against the same Arrow version as PalletJack, with a compatible C++ compiler and standard library.
+
+### Getting the table and reading metadata from an in-memory index:
+```
+#include <Python.h>
+#include "palletjack_capi.h"
+
+// Call with the GIL held
+const PalletJackCAPI *GetPalletJackCAPI()
+{
+    const auto *capi = static_cast<const PalletJackCAPI *>(PyCapsule_Import(PALLETJACK_CAPI_CAPSULE_NAME, 0));
+    if (capi != nullptr && capi->version < 1)
+    {
+        PyErr_SetString(PyExc_ImportError, "palletjack C API version 1 is required");
+        return nullptr;
+    }
+    return capi; // nullptr with a Python exception set on error
+}
+
+// Does not need the GIL
+std::shared_ptr<parquet::FileMetaData> ReadRowGroups5And7(const PalletJackCAPI *capi, const unsigned char *index_data, size_t index_data_length)
+{
+    return capi->ReadMetadataFromBufferV1(index_data, index_data_length, {5, 7}, {}, {}, false);
+}
+```

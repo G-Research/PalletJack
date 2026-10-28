@@ -678,7 +678,7 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
     return ReadMetadata(*p_data_header, &index_data[sizeof(DataHeader)], index_data_length - sizeof(DataHeader), row_groups, column_indices, column_names, schema_only);
 }
 
-const PalletJackCAPI *GetCAPI()
+const void *PalletJackGetCAPI()
 {
     static const PalletJackCAPI capi = {
         .version = PALLETJACK_CAPI_VERSION,

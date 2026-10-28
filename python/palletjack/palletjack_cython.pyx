@@ -67,5 +67,11 @@ cpdef read_schema(index_file_path = None, column_indices = [], column_names = []
     m.init(c_metadata)
     return m.schema.to_arrow_schema()
 
+cdef extern from "palletjack_capi.h":
+    cdef const char* PALLETJACK_CAPI_CAPSULE_NAME
+
+cdef extern from "palletjack.h":
+    const void* PalletJackGetCAPI()
+
 # C API for extension modules calling palletjack without the GIL, see palletjack_capi.h
-palletjack_capi = PyCapsule_New(<void*>cpalletjack.GetCAPI(), cpalletjack.PALLETJACK_CAPI_CAPSULE_NAME, NULL)
+palletjack_capi = PyCapsule_New(<void*>PalletJackGetCAPI(), PALLETJACK_CAPI_CAPSULE_NAME, NULL)

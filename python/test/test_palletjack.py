@@ -334,11 +334,9 @@ class TestPalletJack(unittest.TestCase):
 
     def test_c_api_capsule(self):
         name = b"palletjack.palletjack_capi"
-        is_valid = ctypes.pythonapi.PyCapsule_IsValid
-        is_valid.argtypes = [ctypes.py_object, ctypes.c_char_p]
-        capsule_import = ctypes.pythonapi.PyCapsule_Import
-        capsule_import.argtypes = [ctypes.c_char_p, ctypes.c_int]
-        capsule_import.restype = ctypes.c_void_p
+        # Local prototypes, setting argtypes on ctypes.pythonapi functions would change them for the whole process
+        is_valid = ctypes.PYFUNCTYPE(ctypes.c_int, ctypes.py_object, ctypes.c_char_p)(("PyCapsule_IsValid", ctypes.pythonapi))
+        capsule_import = ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int)(("PyCapsule_Import", ctypes.pythonapi))
 
         self.assertTrue(is_valid(pj.palletjack_capi, name))
         # PyCapsule_Import resolves the name as an attribute path, so this also checks the name matches the location

@@ -56,6 +56,3 @@ struct PalletJackCAPI
     PalletJackReadMetadataFromBufferV1Func ReadMetadataFromBufferV1;
     PalletJackReadMetadataFromFileV1Func ReadMetadataFromFileV1;
 };
-
-// Implemented in palletjack.cc, returns the table the capsule points to.
-const PalletJackCAPI *GetCAPI();
