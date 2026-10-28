@@ -7,6 +7,7 @@
 #include "parquet/arrow/schema.h"
 
 #include "palletjack.h"
+#include "palletjack_capi.h"
 
 // TCompactProtocol requires some #defines to work right.
 #define SIGNED_RIGHT_SHIFT_IS 1
@@ -676,7 +677,15 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
 
     return ReadMetadata(*p_data_header, &index_data[sizeof(DataHeader)], index_data_length - sizeof(DataHeader), row_groups, column_indices, column_names, schema_only);
 }
-PalletJackReadMetadataFunc GetReadMetadataFunc()
+
+const PalletJackCAPI *GetCAPI()
 {
-    return &ReadMetadata;
+    static const PalletJackCAPI capi = {
+        .version = PALLETJACK_CAPI_VERSION,
+        .GenerateMetadataIndexToBufferV1 = &GenerateMetadataIndex,
+        .GenerateMetadataIndexToFileV1 = &GenerateMetadataIndex,
+        .ReadMetadataFromBufferV1 = &ReadMetadata,
+        .ReadMetadataFromFileV1 = &ReadMetadata,
+    };
+    return &capi;
 }

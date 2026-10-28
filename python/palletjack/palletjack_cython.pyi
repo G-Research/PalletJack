@@ -77,7 +77,7 @@ def read_schema(
     """
     ...
 
-_read_metadata_capi: object
-"""PyCapsule named ``palletjack.ReadMetadata`` holding a pointer to the index-data overload of the C++
-``ReadMetadata``, for extension modules that decode metadata without holding the GIL. See ``palletjack.h`` for the
-exact function type."""
+palletjack_capi: object
+"""PyCapsule named ``palletjack.palletjack_capi`` holding a pointer to the C++ ``PalletJackCAPI`` table, for
+extension modules that call palletjack without holding the GIL. See ``palletjack_capi.h`` for the table layout and
+the version check a caller must do."""

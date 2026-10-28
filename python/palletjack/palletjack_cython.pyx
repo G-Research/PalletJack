@@ -67,7 +67,5 @@ cpdef read_schema(index_file_path = None, column_indices = [], column_names = []
     m.init(c_metadata)
     return m.schema.to_arrow_schema()
 
-cdef cpalletjack.PalletJackReadMetadataFunc _read_metadata_func = cpalletjack.GetReadMetadataFunc()
-
-# The index-data overload of ReadMetadata, for extension modules decoding metadata without the GIL, see palletjack.h
-_read_metadata_capi = PyCapsule_New(<void*>_read_metadata_func, cpalletjack.PALLETJACK_READ_METADATA_CAPSULE_NAME, NULL)
+# C API for extension modules calling palletjack without the GIL, see palletjack_capi.h
+palletjack_capi = PyCapsule_New(<void*>cpalletjack.GetCAPI(), cpalletjack.PALLETJACK_CAPI_CAPSULE_NAME, NULL)
