@@ -76,3 +76,8 @@ def read_schema(
         A :class:`pyarrow.Schema` instance.
     """
     ...
+
+palletjack_capi: object
+"""PyCapsule named ``palletjack.palletjack_capi`` holding a pointer to the C++ ``PalletJackCAPI`` table, for
+extension modules that call palletjack without holding the GIL. See ``palletjack_capi.h`` for the table layout and
+the version check a caller must do."""

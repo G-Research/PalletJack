@@ -1,3 +1,5 @@
+#pragma once
+
 #include "arrow/buffer.h"
 #include "parquet/arrow/reader.h"
 #include "parquet/arrow/writer.h"
@@ -17,3 +19,5 @@ std::shared_ptr<parquet::FileMetaData> ReadMetadata(const unsigned char *index_d
                                                     const std::vector<uint32_t> &column_indices,
                                                     const std::vector<std::string> &column_names,
                                                     bool schema_only = false);
+
+const void *PalletJackGetCAPI();

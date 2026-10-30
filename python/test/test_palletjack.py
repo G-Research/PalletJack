@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import base64
+import ctypes
 
 import palletjack as pj
 import pyarrow.parquet as pq
@@ -330,6 +331,27 @@ class TestPalletJack(unittest.TestCase):
             index_data2 = fs.LocalFileSystem().open_input_stream(index_path).readall()
             # Compare the actual output to the expected output
             self.assertEqual(index_data1, index_data2)
+
+    def test_c_api_capsule(self):
+        name = b"palletjack.palletjack_capi"
+        # Local prototypes, setting argtypes on ctypes.pythonapi functions would change them for the whole process
+        is_valid = ctypes.PYFUNCTYPE(ctypes.c_int, ctypes.py_object, ctypes.c_char_p)(("PyCapsule_IsValid", ctypes.pythonapi))
+        capsule_import = ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int)(("PyCapsule_Import", ctypes.pythonapi))
+
+        self.assertTrue(is_valid(pj.palletjack_capi, name))
+        # PyCapsule_Import resolves the name as an attribute path, so this also checks the name matches the location
+        capi = capsule_import(name, 0)
+        self.assertIsNotNone(capi)
+
+        class PalletJackCAPI(ctypes.Structure):
+            _fields_ = [("version", ctypes.c_int)] + [
+                (f, ctypes.c_void_p) for f in ["GenerateMetadataIndexToBufferV1", "GenerateMetadataIndexToFileV1", "ReadMetadataFromBufferV1", "ReadMetadataFromFileV1"]]
+
+        table = PalletJackCAPI.from_address(capi)
+        self.assertEqual(table.version, 1)
+        functions = [getattr(table, f) for f, _ in PalletJackCAPI._fields_[1:]]
+        self.assertTrue(all(functions))
+        self.assertEqual(len(set(functions)), len(functions))
 
     def test_encrypted_footer_parquet(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
