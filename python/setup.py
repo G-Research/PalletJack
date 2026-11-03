@@ -54,9 +54,7 @@ extensions = [
     Extension( "palletjack.palletjack_cython", ["palletjack/palletjack_cython.pyx", "palletjack/palletjack.cc", "palletjack/parquet_types_palletjack.cpp"],
         include_dirs = include_dirs,  
         library_dirs = library_dirs,
-        # thrift must come first: libparquet exports symbols of its bundled thrift (e.g. the TMemoryBuffer vtable),
-        # and on Linux the first library in DT_NEEDED order that defines a symbol wins.
-        libraries=["thriftmd" if sys.platform.startswith('win') else "thrift", "arrow", "parquet"],
+        libraries=["arrow", "parquet", "thriftmd" if sys.platform.startswith('win') else "thrift"], 
         language = "c++",
         extra_compile_args = extra_compile_args + (['/std:c++20'] if sys.platform.startswith('win') else ['-std=c++20']),
         extra_link_args = extra_link_args,
