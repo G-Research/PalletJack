@@ -3,24 +3,24 @@ requires = [
   "setuptools>=55.0",
   "Cython>=3",
   "numpy>=1.16.6",
-  "pyarrow~=25.0.0",
+  "pyarrow~=26.0.0",
 ]
 
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "palletjack"
-version = "2.14.0"
+version = "2.15.0"
 description = "Faster parquet metadata reading"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyarrow~=25.0.0",
+  "pyarrow~=26.0.0",
 ]
 
 
@@ -41,8 +41,7 @@ skip = [
  "*-musllinux_*",
  "*win32",
  "cp39-*",
- "cp315-*",
- "cp315t-*",
+ "cp310-*",
 ]
 
 # We use manylinux_2_28 for ABI compatibility with pyarrow
@@ -60,7 +59,7 @@ before-build = [
 ]
 
 repair-wheel-command = [
- "auditwheel repair --exclude libarrow.so.2500 --exclude libparquet.so.2500 -w {dest_dir} {wheel}",
+ "auditwheel repair --exclude libarrow.so.2600 --exclude libparquet.so.2600 -w {dest_dir} {wheel}",
 ]
 
 # Run multiple commands using an array
