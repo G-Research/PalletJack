@@ -68,6 +68,20 @@ jobs:
     - name: Setup vcpkg caching
       uses: G-Research/vcpkg-cache-action@b3c4717d2ae112029977d05c4392c7ad8e84d639
 
+    # The runner image's vcpkg clone can be older than builtin-baseline in python/vcpkg.json
+    - name: Update vcpkg registry
+      shell: bash
+      run: |
+        git -C "$VCPKG_INSTALLATION_ROOT" fetch origin
+        git -C "$VCPKG_INSTALLATION_ROOT" reset --hard origin/master
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          "$VCPKG_INSTALLATION_ROOT/bootstrap-vcpkg.bat" -disableMetrics
+        else
+          "$VCPKG_INSTALLATION_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+        fi
+        # Export the vcpkg root to the env context; the log upload step's path input is not shell-expanded
+        echo "VCPKG_ROOT_DIR=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+        
     # Install vcpkg dependencies
     - name: Install vcpkg build dependencies (macOS)
       if: runner.os == 'macOS'
@@ -91,6 +105,14 @@ jobs:
         CIBW_BUILD_VERBOSITY: 1
         CIBW_ENVIRONMENT_PASS_LINUX: "VCPKG_BINARY_SOURCES VCPKG_INSTALLATION_ROOT VCPKG_FORCE_SYSTEM_BINARIES"
         VCPKG_FORCE_SYSTEM_BINARIES: "1"
+
+    - name: Upload vcpkg build logs
+      if: failure()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: vcpkg-logs-${{ matrix.runner }}
+        path: ${{ env.VCPKG_ROOT_DIR }}/buildtrees/*/*.log
+        if-no-files-found: ignore
 
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
       with:

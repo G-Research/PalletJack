@@ -4,5 +4,13 @@
   "dependencies": [
     "thrift"
   ],
-  "builtin-baseline": "1de2026f28ead93ff1773e6e680387643e914ea1"
+  "builtin-baseline": "277978ad2eddc3b05ecf288dcd33071968cd2f79",
+  "overrides": [
+    {
+      "$comment": "Temporary: thrift >= 0.23.0 passes --file-prefix-map to bison, which bison 3.0.4 in manylinux_2_28 does not support.",
+      "name": "thrift",
+      "version": "0.22.0",
+      "port-version": 2
+    }
+  ]
 }
